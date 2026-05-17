@@ -174,12 +174,12 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/bennetglinder1/docs",
+          "href": "https://github.com/bennetglinder1/proply-crm",
           "icon": "github"
         },
         {
           "anchor": "Discord",
-          "href": "https://discord.com",
+          "href": "https://discord.gg/npa59RTgs",
           "icon": "discord"
         },
         {
@@ -198,7 +198,7 @@
     "links": [
       {
         "label": "Discord",
-        "href": "https://discord.com"
+        "href": "https://discord.gg/npa59RTgs"
       }
     ],
     "primary": {
@@ -222,7 +222,7 @@
   "footer": {
     "socials": {
       "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
+      "github": "https://github.com/bennetglinder1/proply-crm",
       "linkedin": "https://linkedin.com/company/mintlify"
     }
   }
