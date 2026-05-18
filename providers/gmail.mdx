@@ -1,6 +1,6 @@
 ---
-title: Gmail & Google Calendar
-description: Sync emails and calendar events automatically via Google OAuth.
+title: "Gmail & Google Calendar"
+description: "Sync emails and calendar events automatically via Google OAuth."
 ---
 
 <Note>
@@ -12,42 +12,50 @@ description: Sync emails and calendar events automatically via Google OAuth.
 <Steps>
   <Step title="Create a Google Cloud project">
     Go to [console.cloud.google.com](https://console.cloud.google.com) and create a new project (or use an existing one).
-
   </Step>
-
   <Step title="Enable Gmail API and Google Calendar API">
     In the sidebar go to **APIs & Services → Library**. Search for and enable both:
+
     - **Gmail API**
     - **Google Calendar API**
 
+    <Frame>
+      <img
+        src="/images/Screenshot-2026-05-18-at-11.07.39-AM.png"
+        alt="Screenshot 2026 05 18 At 11 07 39 AM"
+        title="Screenshot 2026 05 18 At 11 07 39 AM"
+        style={{ width:"40%" }}
+      />
+    </Frame>
   </Step>
-
   <Step title="Configure the OAuth consent screen">
     Go to **APIs & Services → OAuth consent screen**. Choose **External**, fill in the app name and your email, then add these scopes:
 
-    ```
+    ```text
     https://www.googleapis.com/auth/gmail.readonly
     https://www.googleapis.com/auth/calendar.readonly
     ```
 
     Add your own email as a test user while in development.
-
   </Step>
-
   <Step title="Create OAuth credentials">
     Go to **APIs & Services → Credentials → Create Credentials → OAuth client ID**. Choose **Web application** and add your redirect URI:
 
-    ```
+    <Frame>
+      ![Screenshot 2026 05 18 At 11 10 20 AM](/images/Screenshot-2026-05-18-at-11.10.20-AM.png)
+    </Frame>
+
+    ```text
     https://api.yourdomain.com/api/oauth/google/callback
     ```
 
+    <Frame>
+      ![Screenshot 2026 05 18 At 11 11 57 AM](/images/Screenshot-2026-05-18-at-11.11.57-AM.png)
+    </Frame>
   </Step>
-
   <Step title="Copy your Client ID and Secret">
     After creating, copy the **Client ID** and **Client Secret**.
-
   </Step>
-
   <Step title="Add to proply.env">
     ```bash
     GOOGLE_CLIENT_ID=your-client-id
@@ -64,13 +72,12 @@ description: Sync emails and calendar events automatically via Google OAuth.
 Once the server is configured, each workspace connects their own Google account:
 
 1. Go to **Settings → Integrations**
-2. Click **+ Add Integration → Google Calendar / Gmail**
+2. Click **\+ Add Integration → Google Calendar / Gmail**
 3. Complete the OAuth flow in the popup
-
 
 ## What gets synced
 
 | Data | How | Frequency |
-|---|---|---|
+| --- | --- | --- |
 | Sent & received emails | Gmail API | Every 30 min |
-| Calendar events + attendees | Calendar API | Every 10 min |
+| Calendar events \+ attendees | Calendar API | Every 10 min |
