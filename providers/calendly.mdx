@@ -1,6 +1,6 @@
 ---
 title: Calendly
-description: Log meeting bookings on contact timelines when someone schedules with you.
+description: Log meeting bookings and cancellations on contact timelines when someone schedules with you.
 ---
 
 ## Connect via Personal Access Token
@@ -8,32 +8,41 @@ description: Log meeting bookings on contact timelines when someone schedules wi
 <Steps>
   <Step title="Open API & Webhooks in Calendly">
     In Calendly go to **Integrations & apps → API & Webhooks**.
-
   </Step>
 
   <Step title="Create a Personal Access Token">
     Under **Personal Access Tokens** click **Generate new token**, give it a name, and copy the token shown.
-
   </Step>
 
   <Step title="Connect in Proply">
-    Go to **Settings → Integrations → + Add Integration → Calendly**, paste the token, and click **Connect**.
-
+    Go to **Settings → Integrations → + Add Integration → Calendly**, paste the token, click **Test connection**, then **Save**.
   </Step>
 </Steps>
 
-## Set up the Webhook (recommended)
+That's it. There's no webhook URL to copy — Proply registers the subscription with Calendly automatically when you save the connection. A small **Webhook ✓** badge appears on the Calendly card once it's live.
 
-<Steps>
-  <Step title="Copy your webhook URL from Proply">
-    Go to **Settings → Integrations → Webhooks → Calendly** and copy the URL.
+## What you get on each plan
 
-  </Step>
+Calendly gates the webhook subscription API to paid tiers, so what works depends on your Calendly plan.
 
-  <Step title="Create a webhook subscription in Calendly">
-    In Calendly go to **Integrations & apps → API & Webhooks → Webhook Subscriptions → New Webhook**. Paste the URL and select **invitee.created**.
+| Capability | Free | Standard+ |
+|---|---|---|
+| Connect with API key + test | ✅ | ✅ |
+| Past meetings backfilled on CSV import (`scanCalendly`) | ✅ | ✅ |
+| Realtime notifications on new bookings (webhook) | ❌ | ✅ |
+| Realtime notifications on cancellations (webhook) | ❌ | ✅ |
 
-  </Step>
-</Steps>
+<Note>
+  On the **Free** plan Calendly returns `403 "Please upgrade your Calendly account to Standard"` when Proply tries to register the webhook. Proply still saves the connection so backfill keeps working — you just won't see new bookings land in real time. Hit **Save** again after upgrading and the webhook will auto-register.
+</Note>
 
-See the [Calendly webhook reference](/webhooks/calendly) for payload details.
+## What gets logged
+
+| Calendly event | Activity on contact |
+|---|---|
+| `invitee.created` | `meeting_scheduled` |
+| `invitee.canceled` | `meeting_cancelled` |
+
+New invitees that aren't yet contacts in Proply are **created automatically** on `invitee.created` — a booking is a strong enough intent signal to bootstrap the contact.
+
+See the [Calendly webhook reference](/webhooks/calendly) for payload details and signature verification.

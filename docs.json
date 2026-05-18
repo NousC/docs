@@ -57,6 +57,7 @@
                 "pages": [
                   "providers/google-calendar",
                   "providers/calendly",
+                  "providers/cal-com",
                   "providers/fireflies",
                   "providers/fathom"
                 ]
@@ -91,6 +92,7 @@
                   "webhooks/fathom",
                   "webhooks/rb2b",
                   "webhooks/calendly",
+                  "webhooks/cal-com",
                   "webhooks/custom"
                 ]
               }

@@ -1,0 +1,73 @@
+---
+title: Cal.com Webhook
+description: Log meeting bookings, cancellations, and reschedules from Cal.com on contact timelines.
+---
+
+## Endpoint
+
+```
+POST https://api.yourdomain.com/inbound/cal_com/:workspaceId
+```
+
+You don't need to copy this URL. When you connect Cal.com in **Settings → Integrations**, Proply calls `POST https://api.cal.com/v2/webhooks` with this URL, a freshly generated signing secret, and the three booking triggers.
+
+## Auth
+
+Each Cal.com connection stores its own signing key (encrypted) in `workflow_provider_connections.encrypted_credentials.webhook_signing_key`. Cal.com signs every delivery with that key and Proply verifies before processing.
+
+| Header | Format |
+|---|---|
+| `x-cal-signature-256` | hex HMAC-SHA256 of the raw request body |
+
+Verification:
+
+```
+HMAC-SHA256(  message = rawBody,
+  key     = signing_key
+) === header_value
+```
+
+Comparison is timing-safe. Proply also accepts a leading `sha256=` prefix on the header value in case Cal.com adds one later.
+
+## Supported events
+
+| Cal.com trigger | Activity logged |
+|---|---|
+| `BOOKING_CREATED` | `meeting_scheduled` |
+| `BOOKING_CANCELLED` | `meeting_cancelled` |
+| `BOOKING_RESCHEDULED` | `meeting_scheduled` (new time) |
+
+The activity's `external_id` is keyed on the booking `uid` so the same booking discovered via webhook and via CSV-import backfill (`scanCalCom`) dedupes cleanly.
+
+## Payload
+
+```json
+{
+  "triggerEvent": "BOOKING_CREATED",
+  "payload": {
+    "uid": "BOOKING_UID",
+    "title": "30 Min Discovery Call",
+    "startTime": "2026-05-20T14:00:00Z",
+    "endTime": "2026-05-20T14:30:00Z",
+    "attendees": [
+      {
+        "email": "prospect@company.com",
+        "name": "Jane Smith",
+        "timeZone": "America/New_York"
+      }
+    ],
+    "organizer": {
+      "email": "you@yourcompany.com",
+      "name": "You"
+    },
+    "eventType": {
+      "id": 12345,
+      "slug": "30min"
+    }
+  }
+}
+```
+
+<Note>
+  Cal.com **creates new contacts** on `BOOKING_CREATED` — a booking is a strong enough intent signal to bootstrap the contact. `BOOKING_CANCELLED` only updates existing contacts; it never creates one.
+</Note>

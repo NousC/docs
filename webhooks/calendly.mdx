@@ -9,13 +9,29 @@ description: Log meeting bookings and cancellations from Calendly on contact tim
 POST https://api.yourdomain.com/inbound/calendly/:workspaceId
 ```
 
+You don't need to copy this URL anywhere. When you connect Calendly in **Settings → Integrations**, Proply calls Calendly's `POST /webhook_subscriptions` for you, pointing at this URL with a freshly generated signing key.
+
+<Note>
+  Calendly's webhook subscription API requires a **Standard plan or higher**. On the Free plan the subscribe call returns `403 "Please upgrade your Calendly account to Standard"` and Proply will log the connection without a live webhook. See the [Calendly provider page](/providers/calendly) for the full plan matrix.
+</Note>
+
 ## Auth
 
-Set `CALENDLY_WEBHOOK_SECRET` in `proply.env`. Proply checks `x-proply-signature`.
+Each Calendly connection stores its own signing key (encrypted) in `workflow_provider_connections.encrypted_credentials.webhook_signing_key`. Calendly signs every delivery with that key and Proply verifies before processing.
 
-## Setup in Calendly
+| Header | Format |
+|---|---|
+| `Calendly-Webhook-Signature` | `t=<unix_ts>,v1=<hex_hmac_sha256>` |
 
-See [Calendly provider setup](/providers/calendly) for full webhook configuration steps.
+Verification:
+
+```
+HMAC-SHA256(  message = `${t}.${rawBody}`,
+  key     = signing_key
+) === v1
+```
+
+Proply enforces a **5-minute replay window** — deliveries with a `t` older than 5 minutes are rejected. Comparison is timing-safe.
 
 ## Supported events
 
@@ -23,6 +39,8 @@ See [Calendly provider setup](/providers/calendly) for full webhook configuratio
 |---|---|
 | `invitee.created` | `meeting_scheduled` |
 | `invitee.canceled` | `meeting_cancelled` |
+
+The activity's `external_id` is keyed on the Calendly **event UUID** so the same booking discovered via webhook and via CSV-import backfill dedupes cleanly.
 
 ## Payload
 
@@ -32,18 +50,21 @@ See [Calendly provider setup](/providers/calendly) for full webhook configuratio
   "payload": {
     "invitee": {
       "email": "prospect@company.com",
-      "name": "Jane Smith"
+      "name": "Jane Smith",
+      "uri": "https://api.calendly.com/scheduled_events/EVENT_UUID/invitees/INVITEE_UUID"
     },
     "event_type": {
       "name": "30 Min Discovery Call"
     },
     "scheduled_event": {
-      "start_time": "2026-05-20T14:00:00Z"
+      "uri": "https://api.calendly.com/scheduled_events/EVENT_UUID",
+      "start_time": "2026-05-20T14:00:00Z",
+      "end_time": "2026-05-20T14:30:00Z"
     }
   }
 }
 ```
 
 <Note>
-  Calendly **creates new contacts** on `invitee.created` — a booking is a strong enough intent signal to bootstrap the contact.
+  Calendly **creates new contacts** on `invitee.created` — a booking is a strong enough intent signal to bootstrap the contact. `invitee.canceled` only updates existing contacts; it never creates one.
 </Note>

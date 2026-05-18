@@ -1,0 +1,51 @@
+---
+title: Cal.com
+description: Log meeting bookings, cancellations, and reschedules on contact timelines when someone schedules with you on Cal.com.
+---
+
+## Connect via API Key
+
+<Steps>
+  <Step title="Open Developer Settings in Cal.com">
+    Sign in at [app.cal.com](https://app.cal.com) and go to **Settings → Developer → API Keys**.
+  </Step>
+
+  <Step title="Create an API key">
+    Click **Add**, give the key a name (e.g. *Proply*), choose a never-expiring or long-lived expiration, and copy the `cal_live_…` token shown.
+  </Step>
+
+  <Step title="Connect in Proply">
+    Go to **Settings → Integrations → + Add Integration → Cal.com**, paste the key, click **Test connection**, then **Save**.
+  </Step>
+</Steps>
+
+There's no webhook URL to copy. When you save the connection, Proply calls `POST https://api.cal.com/v2/webhooks` and registers the subscription for you. A **Webhook ✓** badge appears on the Cal.com card once it's live.
+
+## What gets logged
+
+Proply subscribes to three Cal.com triggers:
+
+| Cal.com trigger | Activity on contact |
+|---|---|
+| `BOOKING_CREATED` | `meeting_scheduled` |
+| `BOOKING_CANCELLED` | `meeting_cancelled` |
+| `BOOKING_RESCHEDULED` | `meeting_scheduled` (new time) |
+
+New attendees that aren't yet contacts in Proply are **created automatically** on `BOOKING_CREATED`.
+
+## Backfill on CSV import
+
+When you import contacts via CSV, Proply automatically queries Cal.com for each contact's past bookings:
+
+```
+GET https://api.cal.com/v2/bookings?attendeeEmail=<email>&limit=100
+cal-api-version: 2026-05-01
+```
+
+Every result is logged as `meeting_scheduled` (or `meeting_cancelled` if cancelled) on the contact's timeline. Backfilled events share the same `external_id` format as webhook events, so a meeting that already exists in the activity log won't be duplicated when the webhook later fires for it.
+
+## Disconnect
+
+Removing the connection in **Settings → Integrations → Cal.com → Remove** also deletes the webhook subscription on Cal.com (`DELETE /v2/webhooks/<id>`), so you won't have a zombie subscription on Cal.com's side.
+
+See the [Cal.com webhook reference](/webhooks/cal-com) for payload details and signature verification.
