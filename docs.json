@@ -38,19 +38,60 @@
               "providers/overview",
               "providers/add-new-provider",
               {
-                "group": "Social Platforms",
+                "group": "Communication",
                 "pages": [
-                  "providers/x-twitter",
+                  "providers/gmail",
+                  "providers/smtp",
                   "providers/linkedin",
-                  "providers/facebook",
-                  "providers/instagram",
-                  "providers/youtube",
-                  "providers/tiktok",
-                  "providers/threads",
-                  "providers/bluesky",
-                  "providers/mastodon",
-                  "providers/reddit",
-                  "providers/pinterest"
+                  "providers/slack"
+                ]
+              },
+              {
+                "group": "Outbound",
+                "pages": [
+                  "providers/instantly"
+                ]
+              },
+              {
+                "group": "Meetings",
+                "pages": [
+                  "providers/google-calendar",
+                  "providers/calendly",
+                  "providers/fireflies",
+                  "providers/fathom"
+                ]
+              },
+              {
+                "group": "Intent Signals",
+                "pages": [
+                  "providers/rb2b"
+                ]
+              },
+              {
+                "group": "CRM",
+                "pages": [
+                  "providers/hubspot",
+                  "providers/pipedrive",
+                  "providers/attio"
+                ]
+              },
+              {
+                "group": "Enrichment",
+                "pages": [
+                  "providers/prospeo",
+                  "providers/apollo"
+                ]
+              },
+              {
+                "group": "Webhooks",
+                "pages": [
+                  "webhooks/overview",
+                  "webhooks/instantly",
+                  "webhooks/fireflies",
+                  "webhooks/fathom",
+                  "webhooks/rb2b",
+                  "webhooks/calendly",
+                  "webhooks/custom"
                 ]
               }
             ]
