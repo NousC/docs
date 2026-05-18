@@ -71,6 +71,7 @@
                 "group": "CRM",
                 "pages": [
                   "providers/hubspot",
+                  "providers/salesforce",
                   "providers/pipedrive",
                   "providers/attio"
                 ]
