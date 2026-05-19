@@ -1,11 +1,11 @@
 ---
 title: "Webhook Overview"
-description: "Every inbound webhook endpoint Proply exposes — URLs, payloads, and HMAC secrets."
+description: "Every inbound webhook endpoint Nous exposes — URLs, payloads, and HMAC secrets."
 ---
 
 ## How webhooks work
 
-Proply's worker exposes a webhook server at `https://api.yourdomain.com/inbound/`. Each source gets its own path with your workspace ID embedded in the URL.
+Nous's worker exposes a webhook server at `https://api.yourdomain.com/inbound/`. Each source gets its own path with your workspace ID embedded in the URL.
 
 ```text
 https://api.yourdomain.com/inbound/<source>/<workspaceId>
@@ -30,7 +30,7 @@ All handlers return `{ "ok": true }` immediately — retries won't cause duplica
 
 ## HMAC verification
 
-Set a shared secret for each source in `proply.env`. Proply validates the signature header using `HMAC-SHA256`.
+Set a shared secret for each source in `nous.env`. Nous validates the signature header using `HMAC-SHA256`.
 
 ```bash
 INSTANTLY_WEBHOOK_SECRET=your-secret
@@ -41,7 +41,7 @@ RB2B_WEBHOOK_SECRET=your-secret
 ```
 
 <Note>
-  Fathom uses svix-based signing (`webhook-signature` header) with timestamp tolerance. All other sources use standard `x-proply-signature: sha256=hmac`.
+  Fathom uses svix-based signing (`webhook-signature` header) with timestamp tolerance. All other sources use standard `x-nous-signature: sha256=hmac`.
 </Note>
 
 If a secret is **not set**, the signature check is skipped — fine for local dev, set secrets in production.

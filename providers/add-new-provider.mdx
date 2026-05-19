@@ -3,7 +3,7 @@ title: "Add a new provider"
 description: "How to connect a new integration to your workspace"
 ---
 
-All providers are connected through **Settings → Integrations** in the Proply app. You do not need to edit config files for integrations — they are stored per workspace in the database and encrypted at rest.
+All providers are connected through **Settings → Integrations** in the Nous app. You do not need to edit config files for integrations — they are stored per workspace in the database and encrypted at rest.
 
 ## OAuth providers (LinkedIn, Google Calendar)
 
@@ -24,7 +24,7 @@ All providers are connected through **Settings → Integrations** in the Proply 
 1. Open **Settings → Integrations → Webhooks**
 2. Copy your workspace webhook URL — format: `https://api.yourdomain.com/inbound/<provider>?workspace_id=<id>`
 3. Paste this URL into the provider's dashboard as the webhook destination
-4. Proply verifies the payload and maps the contact automatically
+4. Nous verifies the payload and maps the contact automatically
 
 ---
 

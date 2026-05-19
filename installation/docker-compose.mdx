@@ -1,9 +1,9 @@
 ---
 title: "Docker Compose"
-description: "Deploy Proply on your own server with Docker Compose"
+description: "Deploy Nous on your own server with Docker Compose"
 ---
 
-The recommended way to self-host Proply. Tested on Ubuntu 24.04 with 2GB RAM and 2 vCPUs.
+The recommended way to self-host Nous. Tested on Ubuntu 24.04 with 2GB RAM and 2 vCPUs.
 
 <Note>
   You will need a [Supabase](https://supabase.com) project before starting. The free tier is enough to get going.
@@ -24,17 +24,17 @@ Docker Compose brings up 5 containers:
 Clone the repo or download just the production files:
 
 ```bash
-git clone https://github.com/bennetglinder1/proply-crm.git
-cd proply-crm
+git clone https://github.com/bennetglinder1/nous.git
+cd nous
 ```
 
 ## Step 2: Configure environment
 
 ```bash
-cp proply.env.example proply.env
+cp nous.env.example nous.env
 ```
 
-Open `proply.env` and fill in:
+Open `nous.env` and fill in:
 
 ```bash
 # ── Domains ────────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ ENCRYPTION_KEY=
   Required before first boot. Skip this and the app will start but nothing will work.
 </Warning>
 
-Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/bennetglinder1/proply-crm/blob/main/supabase/schema.sql).
+Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/bennetglinder1/nous/blob/main/supabase/schema.sql).
 
 This creates all tables, RLS policies, indexes, and enables `vector` and `uuid-ossp`.
 

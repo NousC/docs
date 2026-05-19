@@ -1,6 +1,6 @@
 ---
 title: "Quickstart"
-description: "Get Proply running locally and connect your first integration in under 15 minutes"
+description: "Get Nous running locally and connect your first integration in under 15 minutes"
 ---
 
 <Note>
@@ -19,8 +19,8 @@ description: "Get Proply running locally and connect your first integration in u
 ## Step 1: Clone and install
 
 ```bash
-git clone https://github.com/bennetglinder1/proply-crm.git
-cd proply-crm
+git clone https://github.com/bennetglinder1/nous.git
+cd nous
 pnpm install
 ```
 
@@ -54,7 +54,7 @@ API_SECRET=
   Required on first setup. Skip this and the app will start but nothing will work.
 </Warning>
 
-Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/bennetglinder1/proply-crm/blob/main/supabase/schema.sql).
+Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/bennetglinder1/nous/blob/main/supabase/schema.sql).
 
 ## Step 4: Start Redis
 
@@ -100,17 +100,17 @@ Open `http://localhost:5173` → **Settings → Integrations** and connect at le
 
 ## Step 7: Connect your AI agent via MCP
 
-Add Proply to your `mcp.json` (Claude Desktop, Cursor, or any MCP host):
+Add Nous to your `mcp.json` (Claude Desktop, Cursor, or any MCP host):
 
 ```json
 {
   "mcpServers": {
-    "proply": {
+    "nous": {
       "command": "npx",
-      "args": ["-y", "@goproply/mcp"],
+      "args": ["-y", "@opennous/mcp"],
       "env": {
-        "PROPLY_API_KEY": "your-api-key",
-        "PROPLY_API_URL": "http://localhost:3000"
+        "NOUS_API_KEY": "your-api-key",
+        "NOUS_API_URL": "http://localhost:3000"
       }
     }
   }

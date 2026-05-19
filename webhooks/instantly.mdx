@@ -15,12 +15,12 @@ Copy it directly from the UI — your workspace ID is already embedded.
 
 ## Auth
 
-Set `INSTANTLY_WEBHOOK_SECRET` in `proply.env`. Proply validates the `x-proply-signature` header on every inbound request.
+Set `INSTANTLY_WEBHOOK_SECRET` in `nous.env`. Nous validates the `x-nous-signature` header on every inbound request.
 
 ## Setup in Instantly
 
 1. In Instantly, go to **Settings → Integrations → Webhooks**.
-2. Click **Add Webhook** and paste your URL from Proply.
+2. Click **Add Webhook** and paste your URL from Nous.
 3. Select the events you want (see table below).
 
 ## Supported events
@@ -38,7 +38,7 @@ Replies create a new contact if one doesn't exist yet — a reply to a cold emai
 
 ## Payload
 
-Proply reads these fields from the Instantly payload:
+Nous reads these fields from the Instantly payload:
 
 ```json
 {

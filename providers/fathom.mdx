@@ -11,7 +11,7 @@ description: Log meeting recordings and summaries on contact timelines.
 
   </Step>
 
-  <Step title="Connect in Proply">
+  <Step title="Connect in Nous">
     Go to **Settings → Integrations → + Add Integration → Fathom**, paste the key, and click **Connect**.
 
   </Step>
@@ -20,7 +20,7 @@ description: Log meeting recordings and summaries on contact timelines.
 ## Set up the Webhook (recommended)
 
 <Steps>
-  <Step title="Copy your webhook URL from Proply">
+  <Step title="Copy your webhook URL from Nous">
     Go to **Settings → Integrations → Webhooks → Fathom** and copy the URL.
 
   </Step>
@@ -28,7 +28,7 @@ description: Log meeting recordings and summaries on contact timelines.
   <Step title="Add the webhook in Fathom">
     In Fathom go to **Settings → Webhooks → Add Webhook**, paste the URL.
 
-    Fathom uses `whsec_`-prefixed signing secrets. Copy the signing secret and add it to `proply.env`:
+    Fathom uses `whsec_`-prefixed signing secrets. Copy the signing secret and add it to `nous.env`:
     ```bash
     FATHOM_WEBHOOK_SECRET=whsec_your-secret-here
     ```

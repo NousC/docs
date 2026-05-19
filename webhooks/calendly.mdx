@@ -9,15 +9,15 @@ description: Log meeting bookings and cancellations from Calendly on contact tim
 POST https://api.yourdomain.com/inbound/calendly/:workspaceId
 ```
 
-You don't need to copy this URL anywhere. When you connect Calendly in **Settings → Integrations**, Proply calls Calendly's `POST /webhook_subscriptions` for you, pointing at this URL with a freshly generated signing key.
+You don't need to copy this URL anywhere. When you connect Calendly in **Settings → Integrations**, Nous calls Calendly's `POST /webhook_subscriptions` for you, pointing at this URL with a freshly generated signing key.
 
 <Note>
-  Calendly's webhook subscription API requires a **Standard plan or higher**. On the Free plan the subscribe call returns `403 "Please upgrade your Calendly account to Standard"` and Proply will log the connection without a live webhook. See the [Calendly provider page](/providers/calendly) for the full plan matrix.
+  Calendly's webhook subscription API requires a **Standard plan or higher**. On the Free plan the subscribe call returns `403 "Please upgrade your Calendly account to Standard"` and Nous will log the connection without a live webhook. See the [Calendly provider page](/providers/calendly) for the full plan matrix.
 </Note>
 
 ## Auth
 
-Each Calendly connection stores its own signing key (encrypted) in `workflow_provider_connections.encrypted_credentials.webhook_signing_key`. Calendly signs every delivery with that key and Proply verifies before processing.
+Each Calendly connection stores its own signing key (encrypted) in `workflow_provider_connections.encrypted_credentials.webhook_signing_key`. Calendly signs every delivery with that key and Nous verifies before processing.
 
 | Header | Format |
 |---|---|
@@ -31,7 +31,7 @@ HMAC-SHA256(  message = `${t}.${rawBody}`,
 ) === v1
 ```
 
-Proply enforces a **5-minute replay window** — deliveries with a `t` older than 5 minutes are rejected. Comparison is timing-safe.
+Nous enforces a **5-minute replay window** — deliveries with a `t` older than 5 minutes are rejected. Comparison is timing-safe.
 
 ## Supported events
 

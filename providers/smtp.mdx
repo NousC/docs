@@ -5,7 +5,7 @@ description: Connect your own email server to sync sent and received emails as a
 
 ## Overview
 
-Proply connects to your SMTP/IMAP server and syncs your inbox and sent folder every 15 minutes — the same way Gmail works, but for any email provider (Hostinger, Outlook 365, Zoho, custom self-hosted mail, etc.).
+Nous connects to your SMTP/IMAP server and syncs your inbox and sent folder every 15 minutes — the same way Gmail works, but for any email provider (Hostinger, Outlook 365, Zoho, custom self-hosted mail, etc.).
 
 - **Inbound emails** from contacts are logged as `email_received`
 - **Outbound emails** to contacts are logged as `email_sent`
@@ -13,7 +13,7 @@ Proply connects to your SMTP/IMAP server and syncs your inbox and sent folder ev
 
 ## Setup
 
-### 1. Connect in Proply
+### 1. Connect in Nous
 
 Go to **Settings → Integrations → SMTP / IMAP** and enter your credentials:
 
@@ -23,12 +23,12 @@ Go to **Settings → Integrations → SMTP / IMAP** and enter your credentials:
 | **Port** | Usually `587` (STARTTLS) or `465` (SSL) |
 | **Username** | Your email address or SMTP username |
 | **Password** | Your email password or app password |
-| **IMAP host** *(optional)* | Override IMAP hostname if different from SMTP. Proply auto-derives it by replacing `smtp.` → `imap.` if not set. |
+| **IMAP host** *(optional)* | Override IMAP hostname if different from SMTP. Nous auto-derives it by replacing `smtp.` → `imap.` if not set. |
 | **IMAP port** *(optional)* | Defaults to `993` |
 
 ### 2. Test the connection
 
-Click **Test connection** — Proply will verify your SMTP credentials using a live connection check.
+Click **Test connection** — Nous will verify your SMTP credentials using a live connection check.
 
 <Note>
   For Gmail accounts, use [Google OAuth](/providers/google-calendar) instead of SMTP. Google blocks basic auth for Gmail.
@@ -40,11 +40,11 @@ Click **Test connection** — Proply will verify your SMTP credentials using a l
 
 ### 3. Done
 
-Proply starts syncing on the next 15-minute cycle. The first sync pulls the last 30 days of email.
+Nous starts syncing on the next 15-minute cycle. The first sync pulls the last 30 days of email.
 
 ## How IMAP sync works
 
-Every 15 minutes, Proply:
+Every 15 minutes, Nous:
 
 1. Connects to your IMAP server and opens `INBOX` and `Sent` (auto-detected via IMAP folder flags — works across all providers)
 2. Fetches messages newer than the last sync timestamp
@@ -53,7 +53,7 @@ Every 15 minutes, Proply:
 5. Deduplicates by message ID — replaying the same email is safe
 6. Saves the sync timestamp so the next run only fetches new messages
 
-Proply **never creates new contacts** from SMTP/IMAP — it only logs activity on contacts that already exist in your workspace.
+Nous **never creates new contacts** from SMTP/IMAP — it only logs activity on contacts that already exist in your workspace.
 
 ## Provider-specific notes
 

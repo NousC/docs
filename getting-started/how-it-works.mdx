@@ -1,11 +1,11 @@
 ---
 title: "How it works"
-description: "Learn the architecture of Proply"
+description: "Learn the architecture of Nous"
 ---
 
 ## Architecture
 
-Proply is composed of 3 main services and 5 external signal sources — all 3 main services run within a **single Docker container** and talk to each other directly. Signal sources push data in through OAuth and webhooks; the unified record is exposed to agents via MCP.
+Nous is composed of 3 main services and 5 external signal sources — all 3 main services run within a **single Docker container** and talk to each other directly. Signal sources push data in through OAuth and webhooks; the unified record is exposed to agents via MCP.
 
 ```mermaid theme={null}
 flowchart LR
@@ -54,7 +54,7 @@ flowchart LR
 
 * [Unified Record](#unified-record) - The single source of truth per contact. Holds the full activity timeline, AI-synthesized memory, ICP score, and pipeline state.
 
-* [Live Sync](#live-sync) - Propagates changes back to connected tools. Update a stage in Proply, it updates in Salesforce.
+* [Live Sync](#live-sync) - Propagates changes back to connected tools. Update a stage in Nous, it updates in Salesforce.
 
 * [MCP Connector](#mcp-connector) - Exposes the unified record to AI agents. One call returns everything: context, timeline, memory, deal stage.
 
@@ -64,7 +64,7 @@ flowchart LR
 
 ### Signal Ingestion
 
-Signal ingestion is how Proply learns about your relationships. It connects to:
+Signal ingestion is how Nous learns about your relationships. It connects to:
 
 * Apollo, Salesforce, HubSpot, Pipedrive — CRM and prospecting data
 * Smartlead, Instantly — outbound sequence events
@@ -75,7 +75,7 @@ Signal ingestion is how Proply learns about your relationships. It connects to:
 
 ### Identity Resolution
 
-Identity resolution is what makes Proply a unified layer rather than just another data store. Every inbound signal is matched to a single contact record using:
+Identity resolution is what makes Nous a unified layer rather than just another data store. Every inbound signal is matched to a single contact record using:
 
 * Email address
 * LinkedIn profile URL
@@ -96,7 +96,7 @@ Each resolved contact has:
 
 ### Live Sync
 
-Changes in Proply propagate back to connected tools automatically:
+Changes in Nous propagate back to connected tools automatically:
 
 * Update a pipeline stage → syncs to Salesforce or HubSpot
 * Enrich a contact → updates Apollo and your CRM
@@ -104,7 +104,7 @@ Changes in Proply propagate back to connected tools automatically:
 
 ### MCP Connector
 
-The MCP connector is how AI agents read and write to Proply without a UI. Add it to your `mcp.json` and your agent can call tools like `get_contact`, `log_activity`, and `update_pipeline_stage` directly.
+The MCP connector is how AI agents read and write to Nous without a UI. Add it to your `mcp.json` and your agent can call tools like `get_contact`, `log_activity`, and `update_pipeline_stage` directly.
 
 ### REST API
 

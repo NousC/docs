@@ -9,7 +9,7 @@ description: Log meetings from Google Calendar as activity signals on your conta
 
 ## How it works
 
-Proply polls your Google Calendar every 10 minutes, looking at a rolling window of **7 days back → 30 days forward**. For each event, it resolves attendees to contacts using a 6-step identity waterfall — email match, LinkedIn URL, phone, name+company — then logs a `meeting` activity on the matched contact's timeline.
+Nous polls your Google Calendar every 10 minutes, looking at a rolling window of **7 days back → 30 days forward**. For each event, it resolves attendees to contacts using a 6-step identity waterfall — email match, LinkedIn URL, phone, name+company — then logs a `meeting` activity on the matched contact's timeline.
 
 Events are deduplicated by Google event ID so replays are safe.
 
@@ -17,7 +17,7 @@ Events are deduplicated by Google event ID so replays are safe.
 
 ### 1. Connect Gmail / Google OAuth
 
-In your Proply dashboard, go to **Settings → Integrations** and connect your Google account. Make sure to grant both Gmail and Calendar permissions when prompted.
+In your Nous dashboard, go to **Settings → Integrations** and connect your Google account. Make sure to grant both Gmail and Calendar permissions when prompted.
 
 <Warning>
   If you connected Gmail but only granted email scope (not calendar), you'll need to disconnect and reconnect, accepting the calendar permission.
@@ -25,7 +25,7 @@ In your Proply dashboard, go to **Settings → Integrations** and connect your G
 
 ### 2. Done
 
-No further configuration needed. Proply starts polling immediately after the OAuth connection is verified.
+No further configuration needed. Nous starts polling immediately after the OAuth connection is verified.
 
 ## What gets logged
 
@@ -47,7 +47,7 @@ These are set at the server level — you do not configure them per-workspace.
 
 ## Identity resolution
 
-Proply resolves each external attendee email against your contacts in this order:
+Nous resolves each external attendee email against your contacts in this order:
 
 1. Exact email match
 2. LinkedIn URL match

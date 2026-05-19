@@ -14,12 +14,12 @@ description: Log meeting bookings and cancellations on contact timelines when so
     Under **Personal Access Tokens** click **Generate new token**, give it a name, and copy the token shown.
   </Step>
 
-  <Step title="Connect in Proply">
+  <Step title="Connect in Nous">
     Go to **Settings → Integrations → + Add Integration → Calendly**, paste the token, click **Test connection**, then **Save**.
   </Step>
 </Steps>
 
-That's it. There's no webhook URL to copy — Proply registers the subscription with Calendly automatically when you save the connection. A small **Webhook ✓** badge appears on the Calendly card once it's live.
+That's it. There's no webhook URL to copy — Nous registers the subscription with Calendly automatically when you save the connection. A small **Webhook ✓** badge appears on the Calendly card once it's live.
 
 ## What you get on each plan
 
@@ -33,7 +33,7 @@ Calendly gates the webhook subscription API to paid tiers, so what works depends
 | Realtime notifications on cancellations (webhook) | ❌ | ✅ |
 
 <Note>
-  On the **Free** plan Calendly returns `403 "Please upgrade your Calendly account to Standard"` when Proply tries to register the webhook. Proply still saves the connection so backfill keeps working — you just won't see new bookings land in real time. Hit **Save** again after upgrading and the webhook will auto-register.
+  On the **Free** plan Calendly returns `403 "Please upgrade your Calendly account to Standard"` when Nous tries to register the webhook. Nous still saves the connection so backfill keeps working — you just won't see new bookings land in real time. Hit **Save** again after upgrading and the webhook will auto-register.
 </Note>
 
 ## What gets logged
@@ -43,6 +43,6 @@ Calendly gates the webhook subscription API to paid tiers, so what works depends
 | `invitee.created` | `meeting_scheduled` |
 | `invitee.canceled` | `meeting_cancelled` |
 
-New invitees that aren't yet contacts in Proply are **created automatically** on `invitee.created` — a booking is a strong enough intent signal to bootstrap the contact.
+New invitees that aren't yet contacts in Nous are **created automatically** on `invitee.created` — a booking is a strong enough intent signal to bootstrap the contact.
 
 See the [Calendly webhook reference](/webhooks/calendly) for payload details and signature verification.

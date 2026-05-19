@@ -1,11 +1,11 @@
 ---
 title: Prospeo
-description: Proply's default enrichment provider — looks up email, phone, LinkedIn, and company data for your contacts.
+description: Nous's default enrichment provider — looks up email, phone, LinkedIn, and company data for your contacts.
 ---
 
 ## Overview
 
-Prospeo is Proply's **default enrichment provider**. When a contact is created or updated with incomplete data, Proply automatically enriches it via Prospeo — no configuration required if you want to use Proply's built-in key.
+Prospeo is Nous's **default enrichment provider**. When a contact is created or updated with incomplete data, Nous automatically enriches it via Prospeo — no configuration required if you want to use Nous's built-in key.
 
 To use your own Prospeo account (for higher rate limits or BYOK billing), connect a personal API key.
 
@@ -15,12 +15,12 @@ Enrichment runs in this priority order:
 
 1. **Apollo BYOK** — if you've connected Apollo and toggled on enrichment (see [Apollo](/providers/apollo))
 2. **Prospeo BYOK** — if you've connected your own Prospeo key
-3. **Proply's built-in Prospeo key** — used as the fallback for all workspaces
+3. **Nous's built-in Prospeo key** — used as the fallback for all workspaces
 
 ## Connect your own Prospeo key
 
 1. Go to [prospeo.io](https://prospeo.io) and copy your API key from the dashboard.
-2. In Proply, go to **Settings → Integrations → Prospeo**.
+2. In Nous, go to **Settings → Integrations → Prospeo**.
 3. Paste your API key and click **Save**.
 
 ## What gets enriched
@@ -37,4 +37,4 @@ Enrichment runs in this priority order:
 
 | Variable | Description |
 |---|---|
-| `PROSPERO_API_KEY` | Proply's built-in Prospeo key — used when no workspace BYOK is configured |
+| `PROSPERO_API_KEY` | Nous's built-in Prospeo key — used when no workspace BYOK is configured |

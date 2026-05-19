@@ -3,7 +3,7 @@ title: "RB2B"
 description: "De-anonymise website visitors and match them to contacts"
 ---
 
-RB2B identifies who is visiting your website and sends their LinkedIn profile and email to Proply. Proply matches the visitor to an existing contact or creates a new one, then logs a `website_visit` signal.
+RB2B identifies who is visiting your website and sends their LinkedIn profile and email to Nous. Nous matches the visitor to an existing contact or creates a new one, then logs a `website_visit` signal.
 
 ## What gets ingested
 
@@ -17,7 +17,7 @@ Sign up at [rb2b.com](https://rb2b.com). Install the RB2B pixel on your website.
 
 ## Step 2: Get your webhook URL
 
-Open Proply → **Settings → Integrations → RB2B** → copy your webhook URL.
+Open Nous → **Settings → Integrations → RB2B** → copy your webhook URL.
 
 Format: `https://api.yourdomain.com/inbound/rb2b?workspace_id=<your-id>`
 
@@ -25,12 +25,12 @@ Format: `https://api.yourdomain.com/inbound/rb2b?workspace_id=<your-id>`
 
 1. Go to the RB2B dashboard → **Integrations → Webhooks**
 2. Click **Add Webhook**
-3. Paste your Proply webhook URL
+3. Paste your Nous webhook URL
 4. Save
 
 ## Step 4: Verify
 
-Visit your own website. Within 1–2 minutes, a `website_visit` activity should appear on your contact record in Proply.
+Visit your own website. Within 1–2 minutes, a `website_visit` activity should appear on your contact record in Nous.
 
 <Note>
   RB2B only identifies visitors who have a LinkedIn profile and have consented to identification. Anonymous visitors are not sent.

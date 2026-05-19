@@ -1,28 +1,28 @@
 ---
 title: "MCP Server"
-description: "Connect any MCP-compatible AI agent to Proply's contact intelligence layer"
+description: "Connect any MCP-compatible AI agent to Nous's contact intelligence layer"
 ---
 
-The Proply MCP server exposes your CRM as a set of tools that AI agents (Claude, GPT-4o, Cursor, etc.) can call directly. Agents get structured contact data, activity timelines, and a persistent memory layer — without any prompt engineering.
+The Nous MCP server exposes your CRM as a set of tools that AI agents (Claude, GPT-4o, Cursor, etc.) can call directly. Agents get structured contact data, activity timelines, and a persistent memory layer — without any prompt engineering.
 
 ## Install
 
 ```bash
-npm install -g @goproply/mcp
+npm install -g @opennous/mcp
 ```
 
 Or run without installing:
 
 ```bash
-npx @goproply/mcp
+npx @opennous/mcp
 ```
 
 ## Configuration
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `PROPLY_API_KEY` | Yes | — | Your workspace API key (Settings → API Keys) |
-| `PROPLY_API_URL` | No | `https://api.goproply.com` | Override for self-hosted instances |
+| `NOUS_API_KEY` | Yes | — | Your workspace API key (Settings → API Keys) |
+| `NOUS_API_URL` | No | `https://api.opennous.cloud` | Override for self-hosted instances |
 
 ## Connect to Claude Desktop
 
@@ -34,11 +34,11 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "proply": {
+    "nous": {
       "command": "npx",
-      "args": ["@goproply/mcp"],
+      "args": ["@opennous/mcp"],
       "env": {
-        "PROPLY_API_KEY": "pk_live_xxxxxxxx"
+        "NOUS_API_KEY": "pk_live_xxxxxxxx"
       }
     }
   }
@@ -52,11 +52,11 @@ Add to `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` globally
 ```json
 {
   "mcpServers": {
-    "proply": {
+    "nous": {
       "command": "npx",
-      "args": ["@goproply/mcp"],
+      "args": ["@opennous/mcp"],
       "env": {
-        "PROPLY_API_KEY": "pk_live_xxxxxxxx"
+        "NOUS_API_KEY": "pk_live_xxxxxxxx"
       }
     }
   }
@@ -65,13 +65,13 @@ Add to `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` globally
 
 ## Self-hosted
 
-Point the server at your own instance via `PROPLY_API_URL`:
+Point the server at your own instance via `NOUS_API_URL`:
 
 ```json
 {
   "env": {
-    "PROPLY_API_KEY": "pk_live_xxxxxxxx",
-    "PROPLY_API_URL": "https://api.yourdomain.com"
+    "NOUS_API_KEY": "pk_live_xxxxxxxx",
+    "NOUS_API_URL": "https://api.yourdomain.com"
   }
 }
 ```

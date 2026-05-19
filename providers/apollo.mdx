@@ -5,7 +5,7 @@ description: Connect Apollo as your enrichment source and optionally sync sequen
 
 ## Overview
 
-Apollo has two roles in Proply:
+Apollo has two roles in Nous:
 
 1. **Enrichment** — Apollo's people match API enriches contacts with email, phone, title, and company data. Replaces Prospeo when enabled.
 2. **Sequence signals** — Apollo sequences (emails sent, replies, bounces) ingest as activity signals via webhook.
@@ -15,7 +15,7 @@ Apollo has two roles in Proply:
 ### For enrichment
 
 1. In Apollo, go to **Settings → API Keys** and copy your API key.
-2. In Proply, go to **Settings → Integrations → Apollo**.
+2. In Nous, go to **Settings → Integrations → Apollo**.
 3. Paste your key and toggle **Use for enrichment** on.
 
 <Note>
@@ -24,11 +24,11 @@ Apollo has two roles in Proply:
 
 ### For sequence signals (webhook)
 
-Apollo does not have a native outbound webhook for sequences. Forward Apollo sequence events to Proply using a custom webhook endpoint.
+Apollo does not have a native outbound webhook for sequences. Forward Apollo sequence events to Nous using a custom webhook endpoint.
 
 Map Apollo sequence events like this:
 
-| Apollo event | Proply `activity_type` |
+| Apollo event | Nous `activity_type` |
 |---|---|
 | Email sent | `email_sent` |
 | Email opened | `email_opened` |
@@ -38,7 +38,7 @@ Map Apollo sequence events like this:
 
 ## Enrichment fields
 
-When enrichment runs via Apollo, Proply captures:
+When enrichment runs via Apollo, Nous captures:
 
 | Field | Apollo source |
 |---|---|

@@ -20,7 +20,7 @@ Authorization: Bearer pk_live_xxxxxxxx
 ## Base URL
 
 ```
-https://api.goproply.com
+https://api.opennous.cloud
 ```
 
 All endpoints are prefixed with `/v1`. Self-hosted users can point to their own instance by replacing this with their API domain.
@@ -41,24 +41,24 @@ All errors return JSON with an `error` field.
 
 <CodeGroup>
 ```bash List contacts
-curl https://api.goproply.com/v1/contacts \
+curl https://api.opennous.cloud/v1/contacts \
   -H "X-API-Key: pk_live_xxxxxxxx"
 ```
 
 ```bash Get context for an agent prompt
-curl "https://api.goproply.com/v1/contacts/alex@acmecorp.com/context" \
+curl "https://api.opennous.cloud/v1/contacts/alex@acmecorp.com/context" \
   -H "X-API-Key: pk_live_xxxxxxxx"
 ```
 
 ```bash Log a signal
-curl -X POST https://api.goproply.com/v1/capture \
+curl -X POST https://api.opennous.cloud/v1/capture \
   -H "X-API-Key: pk_live_xxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{"type":"proposal_viewed","email":"alex@acmecorp.com","description":"Opened proposal 3x"}'
 ```
 
 ```bash Save a memory
-curl -X POST https://api.goproply.com/v1/remember \
+curl -X POST https://api.opennous.cloud/v1/remember \
   -H "X-API-Key: pk_live_xxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{"text":"Budget confirmed at $24k ARR","category":"deal","email":"alex@acmecorp.com"}'

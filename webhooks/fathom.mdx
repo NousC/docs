@@ -16,13 +16,13 @@ POST https://api.yourdomain.com/inbound/fathom?workspace_id=<id>
 
 ## Auth
 
-Fathom uses svix-based HMAC signing. Set your Fathom webhook secret in `proply.env`:
+Fathom uses svix-based HMAC signing. Set your Fathom webhook secret in `nous.env`:
 
 ```bash
 FATHOM_WEBHOOK_SECRET=whsec_your-signing-secret
 ```
 
-Proply verifies the `webhook-signature`, `webhook-id`, and `webhook-timestamp` headers automatically. Timestamps older than 5 minutes are rejected.
+Nous verifies the `webhook-signature`, `webhook-id`, and `webhook-timestamp` headers automatically. Timestamps older than 5 minutes are rejected.
 
 ## Setup in Fathom
 

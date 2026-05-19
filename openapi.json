@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Proply Public API",
+    "title": "Nous Public API",
     "description": "REST API for AI agents and external integrations. Authenticate with your workspace API key.",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "https://api.goproply.com",
-      "description": "Proply cloud"
+      "url": "https://api.opennous.cloud",
+      "description": "Nous cloud"
     }
   ],
   "security": [
