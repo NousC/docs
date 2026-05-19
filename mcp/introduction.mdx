@@ -3,7 +3,7 @@ title: "MCP Server"
 description: "Agents query Nous via MCP to pull structured account context — and write back what they learn."
 ---
 
-Agents query Nous via MCP to pull a structured account summary — contact profile, full activity timeline, workspace facts — before drafting outreach, prepping for a call, or logging what just happened. Works with Claude, ChatGPT, Cursor, or any MCP client.
+Agents query Nous via MCP to pull a structured account summary — contact profile, full activity timeline, workspace facts — before drafting outreach, prepping for a call, or logging what just happened.
 
 ## Install
 
@@ -20,7 +20,7 @@ npx @opennous/mcp
 ## Configuration
 
 | Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
+| --- | --- | --- | --- |
 | `NOUS_API_KEY` | Yes | — | Your workspace API key (Settings → API Keys) |
 | `NOUS_API_URL` | No | `https://api.opennous.cloud` | Override for self-hosted instances |
 
@@ -79,14 +79,14 @@ Point the server at your own instance via `NOUS_API_URL`:
 ## Available tools
 
 | Tool | What it does |
-|------|-------------|
+| --- | --- |
 | `get_contact` | Full contact profile — status line, direction arrows, tiered activity timeline, facts with age |
-| `list_contacts` | Contacts sorted by urgency (high ICP + gone cold first), with `!!` flag for stale high-fit contacts |
+| `list_contacts` | Contacts sorted by urgency (high ICP \+ gone cold first), with `!!` flag for stale high-fit contacts |
 | `create_contact` | Add a new contact |
 | `update_contact` | Update profile fields |
 | `delete_contact` | Remove a contact permanently |
-| `get_company` | Company profile + all contacts at the account |
-| `track` | Log an interaction — returns stage advancement + a contextual next-step hint |
+| `get_company` | Company profile \+ all contacts at the account |
+| `track` | Log an interaction — returns stage advancement \+ a contextual next-step hint |
 | `remember` | Store a fact about a contact or company |
 | `get_memories` | Load workspace-level knowledge (ICP, product, pricing) |
 | `search` | Semantic search across all stored facts |
@@ -94,7 +94,7 @@ Point the server at your own instance via `NOUS_API_URL`:
 
 ## Recommended agent workflow
 
-```
+```text
 Finding who to work on:
   → list_contacts  (sorted by urgency — start with !! contacts)
 
