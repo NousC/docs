@@ -9,11 +9,11 @@ description: Log meeting bookings, cancellations, and reschedules from Cal.com o
 POST https://api.yourdomain.com/inbound/cal_com/:workspaceId
 ```
 
-You don't need to copy this URL. When you connect Cal.com in **Settings → Integrations**, Proply calls `POST https://api.cal.com/v2/webhooks` with this URL, a freshly generated signing secret, and the three booking triggers.
+You don't need to copy this URL. When you connect Cal.com in **Settings → Integrations**, Nous calls `POST https://api.cal.com/v2/webhooks` with this URL, a freshly generated signing secret, and the three booking triggers.
 
 ## Auth
 
-Each Cal.com connection stores its own signing key (encrypted) in `workflow_provider_connections.encrypted_credentials.webhook_signing_key`. Cal.com signs every delivery with that key and Proply verifies before processing.
+Each Cal.com connection stores its own signing key (encrypted) in `workflow_provider_connections.encrypted_credentials.webhook_signing_key`. Cal.com signs every delivery with that key and Nous verifies before processing.
 
 | Header | Format |
 |---|---|
@@ -27,7 +27,7 @@ HMAC-SHA256(  message = rawBody,
 ) === header_value
 ```
 
-Comparison is timing-safe. Proply also accepts a leading `sha256=` prefix on the header value in case Cal.com adds one later.
+Comparison is timing-safe. Nous also accepts a leading `sha256=` prefix on the header value in case Cal.com adds one later.
 
 ## Supported events
 

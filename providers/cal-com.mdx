@@ -11,19 +11,19 @@ description: Log meeting bookings, cancellations, and reschedules on contact tim
   </Step>
 
   <Step title="Create an API key">
-    Click **Add**, give the key a name (e.g. *Proply*), choose a never-expiring or long-lived expiration, and copy the `cal_live_…` token shown.
+    Click **Add**, give the key a name (e.g. *Nous*), choose a never-expiring or long-lived expiration, and copy the `cal_live_…` token shown.
   </Step>
 
-  <Step title="Connect in Proply">
+  <Step title="Connect in Nous">
     Go to **Settings → Integrations → + Add Integration → Cal.com**, paste the key, click **Test connection**, then **Save**.
   </Step>
 </Steps>
 
-There's no webhook URL to copy. When you save the connection, Proply calls `POST https://api.cal.com/v2/webhooks` and registers the subscription for you. A **Webhook ✓** badge appears on the Cal.com card once it's live.
+There's no webhook URL to copy. When you save the connection, Nous calls `POST https://api.cal.com/v2/webhooks` and registers the subscription for you. A **Webhook ✓** badge appears on the Cal.com card once it's live.
 
 ## What gets logged
 
-Proply subscribes to three Cal.com triggers:
+Nous subscribes to three Cal.com triggers:
 
 | Cal.com trigger | Activity on contact |
 |---|---|
@@ -31,11 +31,11 @@ Proply subscribes to three Cal.com triggers:
 | `BOOKING_CANCELLED` | `meeting_cancelled` |
 | `BOOKING_RESCHEDULED` | `meeting_scheduled` (new time) |
 
-New attendees that aren't yet contacts in Proply are **created automatically** on `BOOKING_CREATED`.
+New attendees that aren't yet contacts in Nous are **created automatically** on `BOOKING_CREATED`.
 
 ## Backfill on CSV import
 
-When you import contacts via CSV, Proply automatically queries Cal.com for each contact's past bookings:
+When you import contacts via CSV, Nous automatically queries Cal.com for each contact's past bookings:
 
 ```
 GET https://api.cal.com/v2/bookings?attendeeEmail=<email>&limit=100
