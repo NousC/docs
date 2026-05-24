@@ -1,10 +1,16 @@
 ---
 title: "Query"
 api: "POST https://api.opennous.cloud/v2/query"
-description: "Retrieve + summarise a corpus of observations across many entities. The substrate retrieves; your agent finds the pattern."
+description: "Retrieve + summarise observations across many entities. Three powers — group by entity, subtract a set, roll up by value — answer 'hottest leads', 'no reply in 5d', 'funnel by stage' without new endpoints."
 ---
 
 Where `/v2/context` is one entity, `query` is many. Pull the last 30 days of email replies, all meetings in a property, every signal from a CRM — and let your agent reason over the corpus.
+
+Three composable powers cover most "find me X" questions without adding endpoints:
+
+1. **`return: 'entities'`** groups results by entity (one row per person/company), ranked by most-recent matching activity
+2. **`without`** subtracts a second scope from the first — for set-difference queries like "sent but no reply"
+3. **`rollups.by_value`** appears when `scope.kind = 'state'` — counts entities by current value (funnel reports)
 
 ## Request
 
@@ -16,17 +22,18 @@ curl -X POST https://api.opennous.cloud/v2/query \
     "scope": {
       "kind": "event",
       "property": "interaction.email_replied",
-      "since_days": 30,
-      "limit": 200
+      "since_days": 7,
+      "limit": 10
     },
-    "question": "Which segments replied positively this month?"
+    "return": "entities",
+    "question": "Who are the hottest leads this week?"
   }'
 ```
 
 ### Body
 
 <ParamField body="scope" type="object" required>
-  Filter for the corpus.
+  Primary filter for the corpus.
 
   <Expandable title="scope">
     <ParamField body="kind" type="string">
@@ -45,13 +52,22 @@ curl -X POST https://api.opennous.cloud/v2/query \
       Only observations within the last N days.
     </ParamField>
     <ParamField body="limit" type="number">
-      Max items (default 50, cap 200).
+      Max items returned (default 50, cap 200).
     </ParamField>
   </Expandable>
 </ParamField>
 
+<ParamField body="without" type="object">
+  Optional set-subtract filter — **same shape as scope**. Entities matching `scope` MINUS entities matching `without`. Use for "did X but not Y" questions.
+</ParamField>
+
+<ParamField body="return" type="string" default="observations">
+  `"observations"` — one row per observation (the classic shape).
+  `"entities"` — one row per entity, ranked by most-recent matching activity. Each row reports its match count + the most-recent matching observation.
+</ParamField>
+
 <ParamField body="question" type="string">
-  Your analytical question. Echoed back in the response. Doesn't change retrieval — it's a marker for downstream agents that consume the response.
+  Your analytical question. Echoed back in the response. When set (and `without` is not), enables semantic ranking via embeddings.
 </ParamField>
 
 <ParamField body="budget_tokens" type="number">
@@ -60,13 +76,19 @@ curl -X POST https://api.opennous.cloud/v2/query \
 
 ## Response
 
+### `return: 'observations'` (default)
+
 ```json
 {
+  "scope": { ... },
+  "mode": "structured",
+  "return": "observations",
   "matched": 142,
   "returned": 50,
   "sampled": true,
   "items": [
     {
+      "observation_id": "...",
       "entity_id": "...",
       "entity_name": "Sarah Chen",
       "when": "2026-05-21T15:00:00Z",
@@ -78,42 +100,160 @@ curl -X POST https://api.opennous.cloud/v2/query \
   "rollups": {
     "by_type":   { "interaction.email_replied": 142 },
     "by_source": { "gmail": 120, "outlook": 22 }
-  },
-  "meta": { "token_estimate": 1840 },
-  "question": "Which segments replied positively this month?"
+  }
 }
 ```
+
+### `return: 'entities'`
+
+```json
+{
+  "scope": { ... },
+  "return": "entities",
+  "matched": 47,
+  "returned": 10,
+  "items": [
+    {
+      "entity_id": "a1b2c3d4-...",
+      "entity_name": "Sarah Chen",
+      "matches": 4,
+      "most_recent_at": "2026-05-21T15:00:00Z",
+      "most_recent_type": "interaction.email_replied",
+      "most_recent_source": "gmail",
+      "most_recent_summary": "Interested but budget waiting on Q3"
+    }
+  ],
+  "rollups": { ... }
+}
+```
+
+### `rollups.by_value` (when `scope.kind = 'state'`)
+
+```json
+{
+  "scope": { "kind": "state", "property": "stage" },
+  "rollups": {
+    "by_type":   { "stage": 198 },
+    "by_source": { "hubspot": 162, "agent": 36 },
+    "by_value":  {
+      "identified": 120,
+      "aware":      45,
+      "interested": 22,
+      "evaluating":  8,
+      "client":      3
+    }
+  }
+}
+```
+
+## Recipe book
+
+The four most common "find me X" patterns:
+
+### 🔥 Hottest leads — recent replies, grouped
+
+```json
+{
+  "scope": {
+    "kind": "event",
+    "property": "interaction.email_replied",
+    "since_days": 7
+  },
+  "return": "entities",
+  "limit": 10
+}
+```
+
+Top 10 entities by most-recent reply.
+
+### ❄️ Cooled in last 5 days — was active, went silent
+
+```json
+{
+  "scope":   { "kind": "event", "since_days": 30 },
+  "without": { "kind": "event", "since_days": 5 },
+  "return": "entities"
+}
+```
+
+Entities with any activity in the last 30 days, **minus** those with any activity in the last 5 days.
+
+### 📭 Sent without reply in last 5 days
+
+```json
+{
+  "scope":   { "kind": "event", "property": "interaction.email_sent",    "since_days": 5 },
+  "without": { "kind": "event", "property": "interaction.email_replied", "since_days": 5 },
+  "return": "entities"
+}
+```
+
+Entities you sent to in the last 5 days, **minus** those who replied in the same window.
+
+### 📊 Full funnel report
+
+```json
+{
+  "scope": { "kind": "state", "property": "stage" }
+}
+```
+
+Read `rollups.by_value` for the stage distribution. Pair with `since_days` to bound the time window.
 
 ## SDK
 
 <CodeGroup>
 ```typescript Node
-const { items, rollups } = await nous.query(
-  { kind: 'event', property: 'interaction.email_replied', since_days: 30, limit: 200 },
-  { question: 'Which segments replied positively this month?' },
+// Hottest leads this week
+const { items } = await nous.query(
+  { kind: 'event', property: 'interaction.email_replied', since_days: 7, limit: 10 },
+  { return: 'entities' },
 );
-items.forEach(i => console.log(i.entity_name, '—', i.summary));
+items.forEach(e => console.log(e.entity_name, '—', e.matches, 'replies, last', e.most_recent_at));
+
+// Sent without reply in last 5 days
+const noReply = await nous.query(
+  { kind: 'event', property: 'interaction.email_sent', since_days: 5 },
+  {
+    return: 'entities',
+    without: { kind: 'event', property: 'interaction.email_replied', since_days: 5 },
+  },
+);
+
+// Funnel
+const funnel = await nous.query(
+  { kind: 'state', property: 'stage' },
+);
+console.log(funnel.rollups.by_value);
 ```
 
 ```python Python
-result = client.query(
+# Hottest leads this week
+hot = client.query(
     scope={"kind": "event", "property": "interaction.email_replied",
-           "since_days": 30, "limit": 200},
-    question="Which segments replied positively this month?",
+           "since_days": 7, "limit": 10},
+    return_="entities",
 )
-for item in result["items"]:
-    print(item["entity_name"], "—", item["summary"])
+for e in hot["items"]:
+    print(e["entity_name"], "—", e["matches"], "replies, last", e["most_recent_at"])
+
+# Sent without reply in last 5 days
+no_reply = client.query(
+    scope={"kind": "event", "property": "interaction.email_sent",
+           "since_days": 5},
+    return_="entities",
+    without={"kind": "event", "property": "interaction.email_replied",
+             "since_days": 5},
+)
+
+# Funnel
+funnel = client.query(scope={"kind": "state", "property": "stage"})
+print(funnel["rollups"]["by_value"])
 ```
 </CodeGroup>
 
 ## Pattern-finding belongs to the agent
 
-The substrate retrieves and compacts. Your agent does the reasoning. That's deliberate — different agents care about different patterns, and the substrate doesn't pre-decide. Feed the response into the model and let it find the pattern.
+The substrate retrieves and shapes. Your agent does the reasoning. The four recipes above are the most common; combine `scope` + `without` + `return` + `rollups.by_value` for anything else.
 
-## When to call it
-
-- **"Across all accounts this week, who replied positively?"**
-- **"What signal types are firing most often?"**
-- **"How many cold emails went out from Instantly this month?"**
-
-For workspace-level facts about your own business (ICP, pricing, etc.), use [`/v2/workspace/facts`](/public-api/workspace-facts) instead — `query` is for per-entity observations.
+For workspace-level facts about your own business (ICP, pricing, etc.) use [`/v2/workspace/facts`](/public-api/workspace-facts) instead — `query` is for per-entity observations only.

@@ -109,6 +109,45 @@
           "reason":    { "type": "string" }
         }
       },
+      "QueryScope": {
+        "type": "object",
+        "properties": {
+          "kind":       { "type": "string", "enum": ["event", "state"] },
+          "property":   { "type": "string", "description": "Prefix match — 'interaction.email' matches email_sent and email_replied" },
+          "source":     { "type": "string" },
+          "entity_id":  { "type": "string", "format": "uuid" },
+          "since_days": { "type": "number" },
+          "limit":      { "type": "number", "default": 50, "maximum": 200 }
+        }
+      },
+      "QueryItem": {
+        "type": "object",
+        "description": "Returned when request used return='observations' — one row per observation.",
+        "properties": {
+          "observation_id": { "type": "string", "format": "uuid" },
+          "entity_id":      { "type": "string", "format": "uuid" },
+          "entity_name":    { "type": "string", "nullable": true },
+          "when":           { "type": "string", "format": "date-time" },
+          "type":           { "type": "string" },
+          "source":         { "type": "string" },
+          "summary":        { "type": "string", "nullable": true },
+          "similarity":     { "type": "number", "description": "Present in semantic mode (when question is set)" }
+        }
+      },
+      "QueryEntityItem": {
+        "type": "object",
+        "description": "Returned when request used return='entities' — one row per entity, ranked by most-recent matching activity.",
+        "properties": {
+          "entity_id":           { "type": "string", "format": "uuid" },
+          "entity_name":         { "type": "string", "nullable": true },
+          "matches":             { "type": "integer", "description": "Observations in scope for this entity" },
+          "most_recent_at":      { "type": "string", "format": "date-time" },
+          "most_recent_type":    { "type": "string" },
+          "most_recent_source":  { "type": "string" },
+          "most_recent_summary": { "type": "string", "nullable": true },
+          "most_recent_value":   { "description": "Present for state observations (funnel queries)" }
+        }
+      },
       "WorkspaceFact": {
         "type": "object",
         "properties": {
@@ -247,7 +286,7 @@
     "/v2/query": {
       "post": {
         "summary": "Query a corpus of observations",
-        "description": "Retrieve + summarise observations across many entities. The substrate retrieves; your agent finds the pattern.",
+        "description": "Retrieve + summarise observations across many entities. Three composable powers: return='entities' groups by entity, without subtracts a set, rollups.by_value (when scope.kind='state') gives funnel-style counts.",
         "tags": ["Query"],
         "requestBody": {
           "required": true,
@@ -255,19 +294,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["scope"],
                 "properties": {
-                  "scope": {
-                    "type": "object",
-                    "properties": {
-                      "kind":       { "type": "string", "enum": ["event", "state"] },
-                      "property":   { "type": "string", "description": "Prefix match" },
-                      "source":     { "type": "string" },
-                      "entity_id":  { "type": "string", "format": "uuid" },
-                      "since_days": { "type": "number" },
-                      "limit":      { "type": "number", "default": 50, "maximum": 200 }
-                    }
+                  "scope": { "$ref": "#/components/schemas/QueryScope" },
+                  "without": {
+                    "$ref": "#/components/schemas/QueryScope",
+                    "description": "Subtract entities matching this scope from the result. Same shape as scope. Enables 'sent but no reply', 'cooled in N days'."
                   },
-                  "question":      { "type": "string", "description": "Echoed in the response — for downstream agents" },
+                  "return": {
+                    "type": "string",
+                    "enum": ["observations", "entities"],
+                    "default": "observations",
+                    "description": "observations = one row per observation. entities = one row per entity, ranked by most-recent matching activity."
+                  },
+                  "question":      { "type": "string", "description": "Echoed in the response. When set (and `without` not set), enables semantic ranking via embeddings." },
                   "budget_tokens": { "type": "number" }
                 }
               }
@@ -276,18 +316,38 @@
         },
         "responses": {
           "200": {
-            "description": "Matched corpus + rollups",
+            "description": "Matched corpus + rollups. items shape depends on `return`.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "scope":    { "$ref": "#/components/schemas/QueryScope" },
+                    "without":  { "$ref": "#/components/schemas/QueryScope" },
+                    "mode":     { "type": "string", "enum": ["structured", "semantic"] },
+                    "return":   { "type": "string", "enum": ["observations", "entities"] },
                     "matched":  { "type": "integer" },
                     "returned": { "type": "integer" },
                     "sampled":  { "type": "boolean" },
-                    "items":    { "type": "array", "items": { "type": "object" } },
-                    "rollups":  { "type": "object" },
-                    "question": { "type": "string" }
+                    "items": {
+                      "type": "array",
+                      "description": "QueryItem[] when return='observations', QueryEntityItem[] when return='entities'",
+                      "items": {
+                        "oneOf": [
+                          { "$ref": "#/components/schemas/QueryItem" },
+                          { "$ref": "#/components/schemas/QueryEntityItem" }
+                        ]
+                      }
+                    },
+                    "rollups": {
+                      "type": "object",
+                      "properties": {
+                        "by_type":   { "type": "object", "additionalProperties": { "type": "integer" } },
+                        "by_source": { "type": "object", "additionalProperties": { "type": "integer" } },
+                        "by_value":  { "type": "object", "additionalProperties": { "type": "integer" }, "description": "Counts entities by current state value. Present only when scope.kind='state'." }
+                      }
+                    },
+                    "question": { "type": "string", "nullable": true }
                   }
                 }
               }
