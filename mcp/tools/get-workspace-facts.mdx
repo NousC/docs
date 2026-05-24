@@ -1,0 +1,58 @@
+---
+title: "get_workspace_facts"
+description: "The user's own playbook — ICP, market, product, pricing, competitors, playbook notes. Workspace-level facts, NOT per-entity."
+---
+
+The meta-tool. Where `get_account` / `get_context` return facts about a **person or company**, this returns facts the workspace owner has recorded about **their own business** — the playbook your agent should reference when answering "what's our ICP?" or "what differentiates us?"
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `categories` | string[] | | Optional filter (e.g. `["ICP"]` or `["Pricing","Competitors"]`). Omit for all. |
+| `limit` | number | | Max facts. Default 50, cap 500. |
+
+Common categories: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Playbook`. Users can add any custom category in the in-app Intelligence tab.
+
+## Returns
+
+Grouped by category:
+
+```
+ICP (2):
+  GTM Engineers or RevOps leaders at B2B SaaS, 50-200 employees, US.  [3h ago]
+  We focus on teams already using Apollo + Smartlead.                  [2d ago]
+
+PRICING (1):
+  Free self-host. Scale $99/mo. Agency $499/mo.                       [5d ago]
+```
+
+If nothing's recorded:
+
+```
+No workspace facts recorded yet. The user can add them in the Intelligence tab.
+```
+
+## When to call it
+
+- **"What's our ICP?"** → `categories: ["ICP"]`
+- **"What's our pricing strategy?"** → `categories: ["Pricing"]`
+- **"What differentiates us from competitors?"** → `categories: ["Competitors", "Product"]`
+- **"Show me the whole playbook"** → no filter
+
+## When NOT to call it
+
+Anything about a specific person or company — use [`get_context`](/mcp/tools/get-context) or [`get_account`](/mcp/tools/get-account). Anything about activity across many entities — use [`query`](/mcp/tools/query).
+
+## Why it exists
+
+When the agent drafts personalised outreach, it needs BOTH:
+
+- **The contact's context** (`get_context`) — what's true of THEM
+- **The user's playbook** (`get_workspace_facts`) — how WE sell
+
+Combine the two and the agent has everything to write natural copy.
+
+## Backed by
+
+`GET /v2/workspace/facts` — see the [HTTP reference](/public-api/workspace-facts) for the raw JSON shape.

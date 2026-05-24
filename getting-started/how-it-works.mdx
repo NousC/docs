@@ -1,11 +1,11 @@
 ---
 title: "How it works"
-description: "Learn the architecture of Nous"
+description: "The Nous architecture — evidence substrate, identity resolution, claim derivation, and the Mind loop."
 ---
 
 ## Architecture
 
-Nous is composed of 3 main services and 5 external signal sources — all 3 main services run within a **single Docker container** and talk to each other directly. Signal sources push data in through OAuth and webhooks; the unified record is exposed to agents via MCP.
+Nous is one stack: an evidence substrate, a claim-derivation engine, and a thin Context API. Connectors push observations in; agents read engineered context and write more observations. The substrate derives every fact.
 
 ```mermaid theme={null}
 flowchart LR
@@ -13,99 +13,111 @@ flowchart LR
     classDef core fill:#3B82F6,color:white,stroke:#fff
     classDef output fill:#059669,color:white,stroke:#fff
 
-    apollo["Apollo"]:::source
-    sf["Salesforce / CRM"]:::source
-    smartlead["Smartlead"]:::source
-    gmail["Gmail"]:::source
-    linkedin["LinkedIn"]:::source
-    webhooks["Custom Webhooks"]:::source
+    crm["CRM (HubSpot, Pipedrive, Attio)"]:::source
+    out["Outbound (Instantly, Lemlist)"]:::source
+    mail["Gmail / Outlook / SMTP"]:::source
+    li["LinkedIn"]:::source
+    meet["Meetings (Fireflies, Fathom)"]:::source
+    web["Webhooks (RB2B, Signalbase, custom)"]:::source
 
-    ingest["Signal Ingestion"]:::core
+    ingest["Ingestion · normalise to observations"]:::core
     resolve["Identity Resolution"]:::core
-    db[("Unified Record")]:::core
-    sync["Live Sync"]:::core
+    obs[("Observation Spine")]:::core
+    claims["Claim Derivation"]:::core
+    mind["The Mind · scoring + learning loop"]:::core
 
-    mcp["MCP Connector"]:::output
-    api["REST API"]:::output
+    api["Context API (/v2/*)"]:::output
+    mcp["MCP Server"]:::output
+    sdk["SDKs (TS, Python)"]:::output
     agent["Your Agent"]:::output
 
-    apollo --> ingest
-    sf --> ingest
-    smartlead --> ingest
-    gmail --> ingest
-    linkedin --> ingest
-    webhooks --> ingest
+    crm --> ingest
+    out --> ingest
+    mail --> ingest
+    li --> ingest
+    meet --> ingest
+    web --> ingest
 
     ingest --> resolve
-    resolve --> db
-    db --> sync
-    sync --> apollo
-    sync --> sf
+    resolve --> obs
+    obs --> claims
+    claims --> mind
 
-    db --> mcp
-    db --> api
+    obs --> api
+    claims --> api
+    mind --> api
+
+    api --> sdk
+    api --> mcp
+    sdk --> agent
     mcp --> agent
-    api --> agent
 ```
 
-* [Signal Ingestion](#signal-ingestion) - Connects to every GTM tool via OAuth, native integrations, and HMAC webhooks. Every event flows in real time.
+The five pieces:
 
-* [Identity Resolution](#identity-resolution) - Merges every inbound signal into a single record per human. Deduplicates across email, LinkedIn URL, phone, and name+company.
+* [**Ingestion**](#ingestion) — every signal source becomes a stream of observations (events + state) with `source`, `method`, and `observed_at`. Nothing is overwritten.
+* [**Identity Resolution**](#identity-resolution) — every observation is matched to a single entity using email, LinkedIn URL, domain, phone, and name+company fallback.
+* [**Observation Spine**](#observation-spine) — the immutable, append-only record of everything that ever happened. The source of truth.
+* [**Claim Derivation**](#claim-derivation) — claims (the facts you query) are computed from the observation spine. Every claim carries `freshness`, `confidence`, `epistemic_class`, and the `sources` that produced it.
+* [**The Mind**](#the-mind) — predictions stake on claims, the substrate watches what closes, the Scorecard learns. The compounding loop that makes the system sharper every cycle.
 
-* [Unified Record](#unified-record) - The single source of truth per contact. Holds the full activity timeline, AI-synthesized memory, ICP score, and pipeline state.
-
-* [Live Sync](#live-sync) - Propagates changes back to connected tools. Update a stage in Nous, it updates in Salesforce.
-
-* [MCP Connector](#mcp-connector) - Exposes the unified record to AI agents. One call returns everything: context, timeline, memory, deal stage.
-
-* [REST API](#rest-api) - Full HTTP API for reading and writing from any system or agent framework.
+The output surfaces — Context API, MCP, SDKs — are thin wrappers around the substrate. The substrate is the product.
 
 ---
 
-### Signal Ingestion
+### Ingestion
 
-Signal ingestion is how Nous learns about your relationships. It connects to:
+Connectors normalise every signal into an **observation** with a few fixed shapes:
 
-* Apollo, Salesforce, HubSpot, Pipedrive — CRM and prospecting data
-* Smartlead, Instantly — outbound sequence events
-* Gmail, Outlook — email open and reply signals
-* LinkedIn via Unipile — connection requests and messages
-* RB2B, Signalbase — website visits, intent, funding, and job change signals
-* Any HTTP source — custom webhooks with HMAC auth
+- `kind: 'event'` — an interaction happened (`interaction.email_sent`, `interaction.call_held`, etc.)
+- `kind: 'state'` — a fact was observed (`title`, `stage`, `intent`, etc.)
+
+Sources include CRMs (HubSpot, Pipedrive, Attio), outbound platforms (Instantly, Lemlist), Gmail/Outlook/SMTP, LinkedIn (Unipile), meeting capture (Fireflies, Fathom), web identity (RB2B, Signalbase), and any HTTP source via HMAC-signed custom webhooks.
+
+Agents themselves are signal sources too — any [`POST /v2/observations`](/public-api/observations) call adds to the same spine.
 
 ### Identity Resolution
 
-Identity resolution is what makes Nous a unified layer rather than just another data store. Every inbound signal is matched to a single contact record using:
+Identity resolution is what makes Nous a substrate rather than another data store. Every inbound observation is resolved to a single entity using:
 
+* Entity UUID (if you have one)
 * Email address
 * LinkedIn profile URL
+* Domain (for companies)
 * Phone number
-* Name + company matching as a fallback
+* Name + company as a fallback (returns ambiguous when not unique)
 
-The same person in Apollo, Salesforce, and Gmail becomes one clean record — not three.
+The same person in Apollo, HubSpot, and Gmail becomes one entity — not three. Resolve a focus once at API boundary; the substrate handles the rest.
 
-### Unified Record
+### Observation Spine
 
-Each resolved contact has:
+Every observation is **append-only**. Nothing is ever updated, nothing is ever deleted. A state observation with `value: null` asserts that a fact ended — the person left the company, the deal closed lost — without overwriting the history.
 
-* **Activity timeline** - Every email, call, LinkedIn message, CRM update, and sequence event in chronological order
-* **Contact memory** - AI-synthesized facts: objections raised, topics discussed, preferences noted
-* **Company memory** - Org-level context shared across all contacts at an account
-* **ICP score** - How well this contact matches your ideal customer profile, recalculated as signals arrive
-* **Pipeline stage** - One of five behavior-driven stages: identified → aware → interested → evaluating → client
+Two consequences:
 
-### Live Sync
+1. **The substrate self-heals.** When a new observation contradicts an older one, the claim derivation re-runs and the belief shifts toward truth.
+2. **Every claim is auditable.** Trace any claim back to the observations that produced it.
 
-Changes in Nous propagate back to connected tools automatically:
+### Claim Derivation
 
-* Update a pipeline stage → syncs to Salesforce or HubSpot
-* Enrich a contact → updates Apollo and your CRM
-* Your stack stays consistent without manual work
+You don't store facts — you derive them. The claim engine recomputes affected claims after every observation insert (via a `claim_jobs` trigger drained by a worker). Each claim carries:
 
-### MCP Connector
+| Field | Meaning |
+|---|---|
+| `freshness` | `fresh` / `aging` / `suspect` / `expired` — how recently observed |
+| `confidence` | `0.0` – `1.0` — how strongly observations support it |
+| `epistemic_class` | `observed` / `derived` / `asserted` — where the claim came from |
+| `sources` | the connectors that contributed |
 
-The MCP connector is how AI agents read and write to Nous without a UI. Add it to your `mcp.json` and your agent can call tools like `get_contact`, `log_activity`, and `update_pipeline_stage` directly.
+Your agent reads these epistemics on every claim — that's what lets it decide whether to act now or call [`/v2/verify`](/public-api/verify) first.
 
-### REST API
+### The Mind
 
-Full HTTP API for any language or agent framework. Read contacts, write memory, query the pipeline, and manage integrations programmatically.
+The loop that makes the system compound:
+
+1. **Predict** — every entity with claims gets an `icp_fit` prediction staked on the current Scorecard
+2. **Resolve** — outcomes (replies, pipeline advances, closed-won revenue) flow in as new observations
+3. **Calibrate** — the Mind grades old predictions against the resolved outcomes
+4. **Learn** — the Scorecard re-trains on calibrated outcomes; bad signals lose weight, good ones gain
+
+You never see the loop as a feature — you see the result. The product is the [Context API](/public-api/introduction) and the [MCP tools](/mcp/introduction). The Mind is what makes them get sharper as you use them.

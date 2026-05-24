@@ -1,21 +1,9 @@
 ---
 title: "Public API"
-description: "REST API for AI agents, MCP servers, and external integrations. Base path: /v1"
+description: "The v2 Context API — eight endpoints. The agent reads engineered, epistemics-tagged context and writes observations. Nous derives the rest."
 ---
 
-## Authentication
-
-Every request requires a workspace API key. Generate one in **Settings → API Keys**.
-
-Pass it in either header:
-
-```http
-X-API-Key: pk_live_xxxxxxxx
-```
-
-```http
-Authorization: Bearer pk_live_xxxxxxxx
-```
+The Nous Public API is a thin HTTP surface around the **evidence substrate**: every fact Nous knows comes from an observation, every claim carries its source, freshness, and confidence, and the agent never overwrites — it observes.
 
 ## Base URL
 
@@ -23,58 +11,99 @@ Authorization: Bearer pk_live_xxxxxxxx
 https://api.opennous.cloud
 ```
 
-All endpoints are prefixed with `/v1`. Self-hosted users can point to their own instance by replacing this with their API domain.
+Self-hosting? Point at your own deployment.
+
+## Authentication
+
+Every request takes a workspace API key in the `Authorization` header. Create one at **Settings → API Keys** in your workspace.
+
+```bash
+curl https://api.opennous.cloud/v2/attention \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+Keys are workspace-scoped — no separate workspace ID required.
+
+## The eight endpoints
+
+<CardGroup cols={2}>
+  <Card title="POST /v2/context" href="/public-api/context" icon="brain">
+    Engineered context for a task about one entity — the ranked, claim-tagged block your agent consumes before acting.
+  </Card>
+  <Card title="GET /v2/accounts/:id" href="/public-api/accounts" icon="user">
+    The full Account Record — entity + every claim with epistemics + recent timeline.
+  </Card>
+  <Card title="POST /v2/observations" href="/public-api/observations" icon="pen">
+    Record what happened. You observe; Nous derives the claims.
+  </Card>
+  <Card title="POST /v2/query" href="/public-api/query" icon="magnifying-glass">
+    Retrieve + summarise a corpus of observations across many entities.
+  </Card>
+  <Card title="GET /v2/attention" href="/public-api/attention" icon="bell">
+    Workspace-wide: accounts gone quiet, facts decayed — ranked decisions.
+  </Card>
+  <Card title="POST /v2/verify" href="/public-api/verify" icon="shield-check">
+    Re-check one claim against current observations — the calibration check.
+  </Card>
+  <Card title="POST /v2/dedup" href="/public-api/dedup" icon="filter">
+    Cross-list cold-outbound dedup — net_new / engaged / bounced / unsubscribed.
+  </Card>
+  <Card title="GET /v2/workspace/facts" href="/public-api/workspace-facts" icon="book">
+    The user's own playbook — ICP, market, pricing, competitors.
+  </Card>
+</CardGroup>
+
+## Identifiers are universal
+
+Most endpoints accept a `focus` parameter. Pass any of:
+
+- an **entity UUID** (`a1b2c3d4-...`)
+- an **email** (`sarah@acme.com`)
+- a **domain** (`acme.com`)
+- a **LinkedIn URL** (`https://linkedin.com/in/sarah-chen`)
+- a **name** (`Sarah Chen`)
+
+A name may match several people — the response will be `{ status: "ambiguous", candidates: [...] }` so your agent can pick one and re-call.
+
+## Epistemics on every claim
+
+Every claim Nous returns carries three signals so your agent can decide whether to act on it:
+
+| Field | Values | Meaning |
+|---|---|---|
+| `freshness` | `fresh` / `aging` / `suspect` / `expired` | How recently it was observed |
+| `confidence` | `0.0` – `1.0` | How strongly the observations support it |
+| `epistemic_class` | `observed` / `derived` / `asserted` | Where the claim came from |
+
+Agents that ship rely on `freshness === 'fresh' && confidence > 0.7` before acting. Anything weaker — call `/v2/verify` first.
+
+## SDKs
+
+Prefer code over curl? Both wrap the same endpoints:
+
+<CardGroup cols={2}>
+  <Card title="TypeScript / Node" href="https://www.npmjs.com/package/@opennous/sdk" icon="js">
+    `npm install @opennous/sdk`
+  </Card>
+  <Card title="Python" href="https://pypi.org/project/opennous" icon="python">
+    `pip install opennous`
+  </Card>
+</CardGroup>
 
 ## Errors
 
-All errors return JSON with an `error` field.
+All errors return JSON with an `error` code:
 
-| Status | Code | Meaning |
-|--------|------|---------|
-| `400` | `email_required` / `content_required` | Missing required field |
-| `401` | `api_key_required` / `invalid_api_key` | Auth failed |
-| `404` | `contact_not_found` / `company_not_found` | Resource not found |
-| `409` | `email_already_exists` | Duplicate on create |
-| `500` | `internal_error` | Server error |
-
-## Quick examples
-
-<CodeGroup>
-```bash List contacts
-curl https://api.opennous.cloud/v1/contacts \
-  -H "X-API-Key: pk_live_xxxxxxxx"
+```json
+{ "error": "entity_not_found" }
 ```
 
-```bash Get context for an agent prompt
-curl "https://api.opennous.cloud/v1/contacts/alex@acmecorp.com/context" \
-  -H "X-API-Key: pk_live_xxxxxxxx"
-```
-
-```bash Log a signal
-curl -X POST https://api.opennous.cloud/v1/capture \
-  -H "X-API-Key: pk_live_xxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -d '{"type":"proposal_viewed","email":"alex@acmecorp.com","description":"Opened proposal 3x"}'
-```
-
-```bash Save a memory
-curl -X POST https://api.opennous.cloud/v1/remember \
-  -H "X-API-Key: pk_live_xxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -d '{"text":"Budget confirmed at $24k ARR","category":"deal","email":"alex@acmecorp.com"}'
-```
-</CodeGroup>
-
-## Identifier flexibility
-
-The `GET /v1/contacts/:id` endpoint (and several others) accepts either a UUID **or an email address**. AI agents that don't have the UUID can pass the email directly:
-
-```
-GET /v1/contacts/alex@acmecorp.com/context
-```
-
-## Pipeline stages
-
-Contact pipeline stages are: `identified` → `aware` → `interested` → `evaluating` → `client`
-
-Stages may advance automatically when you log activities via `POST /v1/capture` — a database trigger evaluates the signal and promotes the stage if thresholds are met.
+| Status | Error | What to do |
+|---|---|---|
+| 400 | `focus_required`, `invalid_focus`, etc. | Missing or malformed parameter |
+| 401 | `unauthorized` | API key missing or invalid |
+| 402 | `feature_not_in_plan` | Upgrade — visible on the Usage page |
+| 404 | `entity_not_found` | Focus didn't match any entity |
+| 413 | `too_many` | Reduce batch size |
+| 429 | `rate_limited` | Honor `Retry-After` |
+| 500 | `internal_error` | Retry with backoff |

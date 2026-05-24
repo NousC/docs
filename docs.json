@@ -110,40 +110,24 @@
             ]
           },
           {
-            "group": "Contacts",
+            "group": "Endpoints",
             "pages": [
-              "public-api/contacts/list",
-              "public-api/contacts/get",
-              "public-api/contacts/activity",
-              "public-api/contacts/context",
-              "public-api/contacts/create",
-              "public-api/contacts/update",
-              "public-api/contacts/delete"
+              "public-api/context",
+              "public-api/accounts",
+              "public-api/observations",
+              "public-api/query",
+              "public-api/attention",
+              "public-api/verify",
+              "public-api/dedup",
+              "public-api/workspace-facts"
             ]
           },
           {
-            "group": "Companies",
+            "group": "API Keys",
             "pages": [
-              "public-api/companies/get",
-              "public-api/companies/stakeholders"
-            ]
-          },
-          {
-            "group": "Memories",
-            "pages": [
-              "public-api/memories/list",
-              "public-api/memories/search",
-              "public-api/memories/create",
-              "public-api/memories/update",
-              "public-api/memories/delete",
-              "public-api/memories/remember",
-              "public-api/memories/search-post"
-            ]
-          },
-          {
-            "group": "Capture",
-            "pages": [
-              "public-api/capture/log-activity"
+              "public-api/api-keys/list-api-keys",
+              "public-api/api-keys/create-api-key",
+              "public-api/api-keys/delete-api-key"
             ]
           }
         ]
@@ -158,34 +142,15 @@
             ]
           },
           {
-            "group": "Contacts",
+            "group": "Tools",
             "pages": [
-              "mcp/tools/get-contact",
-              "mcp/tools/list-contacts",
-              "mcp/tools/create-contact",
-              "mcp/tools/update-contact",
-              "mcp/tools/delete-contact"
-            ]
-          },
-          {
-            "group": "Companies",
-            "pages": [
-              "mcp/tools/get-company"
-            ]
-          },
-          {
-            "group": "Memory",
-            "pages": [
-              "mcp/tools/remember",
-              "mcp/tools/get-memories",
-              "mcp/tools/search",
-              "mcp/tools/delete-memory"
-            ]
-          },
-          {
-            "group": "Signals",
-            "pages": [
-              "mcp/tools/track"
+              "mcp/tools/get-context",
+              "mcp/tools/get-account",
+              "mcp/tools/record",
+              "mcp/tools/query",
+              "mcp/tools/attention",
+              "mcp/tools/verify",
+              "mcp/tools/get-workspace-facts"
             ]
           }
         ]

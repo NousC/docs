@@ -1,0 +1,113 @@
+---
+title: "Dedup"
+api: "POST https://api.opennous.cloud/v2/dedup"
+description: "Cross-list cold-outbound dedup. Classify identifiers as net_new / engaged / bounced / unsubscribed BEFORE you spend."
+---
+
+The "pre-flight before you pay" check. You're about to scrape 10k leads on Apollo for $300 — paste in the LinkedIn URLs (visible for free in Apollo's preview), get back which ones you already have. Buy only the difference.
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/dedup \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "linkedin_urls": [
+      "https://linkedin.com/in/sarah-chen-vp",
+      "https://linkedin.com/in/jamie-doe"
+    ]
+  }'
+```
+
+You can also pass `emails`, or both:
+
+```json
+{
+  "emails":        ["sarah@acme.com", "jamie@beta.com"],
+  "linkedin_urls": ["https://linkedin.com/in/sarah-chen-vp"]
+}
+```
+
+### Body
+
+<ParamField body="emails" type="string[]">
+  Up to 50,000 emails per call.
+</ParamField>
+
+<ParamField body="linkedin_urls" type="string[]">
+  Up to 50,000 LinkedIn URLs per call.
+</ParamField>
+
+At least one of the two is required. The SDK chunks for you internally — there's no URL-length cap to worry about.
+
+## Response
+
+```json
+{
+  "results": [
+    {
+      "kind": "linkedin_url",
+      "value": "https://linkedin.com/in/sarah-chen-vp",
+      "status": "engaged",
+      "entity_id": "a1b2c3d4-...",
+      "reason": "In active conversation — last touch 4 days ago"
+    },
+    {
+      "kind": "linkedin_url",
+      "value": "https://linkedin.com/in/jamie-doe",
+      "status": "net_new"
+    }
+  ],
+  "summary": {
+    "net_new":      1,
+    "engaged":      1,
+    "recent":       0,
+    "bounced":      0,
+    "unsubscribed": 0,
+    "suppressed":   0,
+    "total":        2
+  }
+}
+```
+
+### Status values
+
+| Status | Meaning | What to do |
+|---|---|---|
+| `net_new` | No prior record. | Safe to send / safe to buy. |
+| `engaged` | In an active conversation. | Don't cold-send. |
+| `recent` | Contacted in the last 30 days. | Defer. |
+| `bounced` | Last delivery bounced (email-only). | Skip. |
+| `unsubscribed` | Opted out or marked do-not-contact. | Skip. |
+| `suppressed` | Workspace-level suppression policy. | Skip. |
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+const out = await nous.classify({
+  linkedin_urls: ['https://linkedin.com/in/sarah-chen-vp', 'https://linkedin.com/in/jamie-doe'],
+});
+console.log(out.summary);
+// → { net_new: 1, engaged: 1, recent: 0, ... }
+```
+
+```python Python
+out = client.classify(linkedin_urls=[
+    "https://linkedin.com/in/sarah-chen-vp",
+    "https://linkedin.com/in/jamie-doe",
+])
+print(out["summary"])
+```
+</CodeGroup>
+
+## Authentication note
+
+Unlike the other v2 endpoints, `/v2/dedup` also accepts the workspace JWT — so the in-app Lists page can call it without going through the API key. External integrations use the API key as normal.
+
+## When to call it
+
+- **Before paying Apollo / Lemlist for a list reveal** — classify the LinkedIn URLs first
+- **As a CSV pre-flight in your own workflow** — drop a 5k-row list, send only the `net_new` rows
+- **In a workspace audit** — how much of last quarter's $X list spend was already in our pipeline?

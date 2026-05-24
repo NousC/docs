@@ -1,94 +1,294 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "Nous Public API",
+    "description": "The v2 Context API — eight endpoints. The agent reads engineered, epistemics-tagged context and writes observations. Nous derives the rest.",
+    "version": "2.0.0"
   },
   "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
+    { "url": "https://api.opennous.cloud", "description": "Nous Cloud" }
   ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
+  "security": [{ "bearerAuth": [] }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Workspace API key. Create at Settings → API Keys. Workspace-scoped — no separate workspace ID required."
+      }
+    },
+    "schemas": {
+      "AmbiguousFocus": {
+        "type": "object",
+        "description": "Returned when a name matches several candidates. Pick one and re-call with focus = candidate.entity_id.",
+        "properties": {
+          "status": { "type": "string", "enum": ["ambiguous"] },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": { "type": "string", "format": "uuid" },
+                "name":      { "type": "string" },
+                "detail":    { "type": "string", "description": "Short context line — e.g. 'VP Sales @ Acme'" }
+              }
             }
           }
-        ],
+        }
+      },
+      "Claim": {
+        "type": "object",
+        "description": "A derived fact about an entity. Every claim carries its epistemics.",
+        "properties": {
+          "property":         { "type": "string", "description": "e.g. 'title', 'stage', 'intent'" },
+          "value":            {},
+          "confidence":       { "type": "number", "minimum": 0, "maximum": 1 },
+          "freshness":        { "type": "string", "enum": ["fresh", "aging", "suspect", "expired"] },
+          "epistemic_class":  { "type": "string", "enum": ["observed", "derived", "asserted"] },
+          "sources":          { "type": "array", "items": { "type": "string" } },
+          "last_observed_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Observation": {
+        "type": "object",
+        "required": ["kind", "property"],
+        "properties": {
+          "kind":        { "type": "string", "enum": ["event", "state"] },
+          "property":    { "type": "string" },
+          "value":       {},
+          "source":      { "type": "string" },
+          "method":      { "type": "string" },
+          "observed_at": { "type": "string", "format": "date-time" },
+          "external_id": { "type": "string" },
+          "raw":         { "type": "object" }
+        }
+      },
+      "AccountRecord": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "object",
+            "properties": {
+              "id":   { "type": "string", "format": "uuid" },
+              "type": { "type": "string", "enum": ["person", "company"] },
+              "name": { "type": "string" }
+            }
+          },
+          "identifiers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind":  { "type": "string", "enum": ["email", "linkedin_url", "domain", "phone"] },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "claims": { "type": "array", "items": { "$ref": "#/components/schemas/Claim" } },
+          "recent_observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind":        { "type": "string" },
+                "property":    { "type": "string" },
+                "observed_at": { "type": "string", "format": "date-time" },
+                "value":       {}
+              }
+            }
+          }
+        }
+      },
+      "DedupItem": {
+        "type": "object",
+        "properties": {
+          "kind":      { "type": "string", "enum": ["email", "linkedin_url"] },
+          "value":     { "type": "string" },
+          "status":    { "type": "string", "enum": ["net_new", "engaged", "recent", "bounced", "unsubscribed", "suppressed"] },
+          "entity_id": { "type": "string", "format": "uuid" },
+          "reason":    { "type": "string" }
+        }
+      },
+      "WorkspaceFact": {
+        "type": "object",
+        "properties": {
+          "id":          { "type": "string", "format": "uuid" },
+          "category":    { "type": "string", "description": "Common: ICP, Market, Product, Pricing, Competitors, Playbook" },
+          "content":     { "type": "string" },
+          "source":      { "type": "string" },
+          "recorded_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": { "error": { "type": "string" }, "message": { "type": "string" } }
+      }
+    }
+  },
+  "paths": {
+    "/v2/context": {
+      "post": {
+        "summary": "Get engineered context",
+        "description": "Engineered context for one task about one entity. Runs the pipeline: retrieve → rank → connect → compress → tag → budget.",
+        "tags": ["Context"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["focus"],
+                "properties": {
+                  "focus":         { "type": "string", "description": "Entity UUID, email, domain, LinkedIn URL, or name" },
+                  "intent":        { "type": "string", "enum": ["account_review", "draft_email", "follow_up", "meeting_prep", "call_prep"], "default": "account_review" },
+                  "budget_tokens": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Engineered context block, or candidates if focus is ambiguous",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entity":       { "type": "object" },
+                        "summary":      { "type": "string" },
+                        "claims":       { "type": "array", "items": { "$ref": "#/components/schemas/Claim" } },
+                        "workspace":    { "type": "array", "items": { "type": "object" } },
+                        "timeline":     { "type": "array", "items": { "type": "object" } },
+                        "stakeholders": { "type": "array", "items": { "type": "object" } },
+                        "predictions":  { "type": "array", "items": { "type": "object" } },
+                        "meta":         { "type": "object" }
+                      }
+                    },
+                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "focus_required or invalid_intent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "entity_not_found",                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/v2/accounts/{id}": {
+      "get": {
+        "summary": "Get the full Account Record",
+        "description": "Entity + every claim with epistemics + recent observation timeline.",
+        "tags": ["Accounts"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "URL-encoded entity UUID, email, domain, LinkedIn URL, or name" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account Record, or candidates if id is ambiguous",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/AccountRecord" },
+                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "description": "entity_not_found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/v2/observations": {
+      "post": {
+        "summary": "Record observations",
+        "description": "Append events or state observations. The substrate derives the new claims and tells you which were recomputed.",
+        "tags": ["Observations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["focus", "observations"],
+                "properties": {
+                  "focus":        { "type": "string", "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name." },
+                  "observations": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/Observation" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recorded count + which claims were recomputed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id":         { "type": "string", "format": "uuid" },
+                    "recorded":          { "type": "integer" },
+                    "claims_recomputed": { "type": "array", "items": { "type": "string" } }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+          "400": { "description": "focus_and_observations_required or invalid_focus", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/v2/query": {
+      "post": {
+        "summary": "Query a corpus of observations",
+        "description": "Retrieve + summarise observations across many entities. The substrate retrieves; your agent finds the pattern.",
+        "tags": ["Query"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "kind":       { "type": "string", "enum": ["event", "state"] },
+                      "property":   { "type": "string", "description": "Prefix match" },
+                      "source":     { "type": "string" },
+                      "entity_id":  { "type": "string", "format": "uuid" },
+                      "since_days": { "type": "number" },
+                      "limit":      { "type": "number", "default": 50, "maximum": 200 }
+                    }
+                  },
+                  "question":      { "type": "string", "description": "Echoed in the response — for downstream agents" },
+                  "budget_tokens": { "type": "number" }
                 }
               }
             }
           }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Matched corpus + rollups",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "matched":  { "type": "integer" },
+                    "returned": { "type": "integer" },
+                    "sampled":  { "type": "boolean" },
+                    "items":    { "type": "array", "items": { "type": "object" } },
+                    "rollups":  { "type": "object" },
+                    "question": { "type": "string" }
+                  }
                 }
               }
             }
@@ -96,121 +296,168 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/v2/attention": {
+      "get": {
+        "summary": "What needs attention",
+        "description": "Workspace-wide ranked decisions: accounts gone quiet, key facts decayed. Each item ships with a suggested action.",
+        "tags": ["Attention"],
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
+          { "name": "limit", "in": "query", "schema": { "type": "number", "default": 25, "maximum": 100 } }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Ranked attention items",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entity_id":        { "type": "string", "format": "uuid" },
+                          "entity_name":      { "type": "string" },
+                          "what":             { "type": "string", "enum": ["going_dark", "claim_stale", "prediction_unresolved", "decay_threshold"] },
+                          "headline":         { "type": "string" },
+                          "suggested_action": { "type": "string" },
+                          "score":            { "type": "number" }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
+    },
+    "/v2/verify": {
       "post": {
-        "description": "Information about a new plant added to the store",
+        "summary": "Verify one claim",
+        "description": "Re-derive one claim against current observations. Returns before + after — the calibration check.",
+        "tags": ["Verify"],
         "requestBody": {
-          "description": "Plant added to the store",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "object",
+                "required": ["focus", "property"],
+                "properties": {
+                  "focus":    { "type": "string" },
+                  "property": { "type": "string" }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+            "description": "Before / after snapshots and a note",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "property": { "type": "string" },
+                        "before":   { "$ref": "#/components/schemas/Claim" },
+                        "after":    { "$ref": "#/components/schemas/Claim" },
+                        "note":     { "type": "string" }
+                      }
+                    },
+                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                  ]
+                }
               }
             }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
           },
-          "message": {
-            "type": "string"
-          }
+          "400": { "description": "focus_and_property_required" },
+          "404": { "description": "claim_not_found or entity_not_found" }
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+    "/v2/dedup": {
+      "post": {
+        "summary": "Classify cold-outbound identifiers",
+        "description": "Cross-list dedup: net_new / engaged / recent / bounced / unsubscribed / suppressed. Up to 50,000 of each kind per call.",
+        "tags": ["Dedup"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emails":        { "type": "array", "items": { "type": "string", "format": "email" } },
+                  "linkedin_urls": { "type": "array", "items": { "type": "string", "format": "uri" } }
+                },
+                "description": "At least one of emails or linkedin_urls required"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-identifier classifications + rollup summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": { "type": "array", "items": { "$ref": "#/components/schemas/DedupItem" } },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "net_new":      { "type": "integer" },
+                        "engaged":      { "type": "integer" },
+                        "recent":       { "type": "integer" },
+                        "bounced":      { "type": "integer" },
+                        "unsubscribed": { "type": "integer" },
+                        "suppressed":   { "type": "integer" },
+                        "total":        { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "identifiers_required" },
+          "413": { "description": "too_many (max 50,000 per kind per call)" }
+        }
+      }
+    },
+    "/v2/workspace/facts": {
+      "get": {
+        "summary": "Get workspace facts",
+        "description": "Workspace-level facts the user has recorded about their own business: ICP, target market, product, pricing, competitors, playbook. Read-only.",
+        "tags": ["Workspace Facts"],
+        "parameters": [
+          { "name": "categories", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list (e.g. 'ICP,Market'). Omit for all." },
+          { "name": "limit",      "in": "query", "schema": { "type": "number", "default": 50, "maximum": 500 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facts grouped by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "facts":       { "type": "array", "items": { "$ref": "#/components/schemas/WorkspaceFact" } },
+                    "count":       { "type": "integer" },
+                    "by_category": { "type": "object", "additionalProperties": { "type": "integer" } }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

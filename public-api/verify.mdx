@@ -1,0 +1,85 @@
+---
+title: "Verify"
+api: "POST https://api.opennous.cloud/v2/verify"
+description: "Re-check one claim against current observations. The calibration check before any high-stakes action."
+---
+
+A claim might be in the substrate but stale. `verify` re-derives it from the **current** observation set and reports before vs after — so your agent knows whether to trust it before acting.
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/verify \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "focus": "sarah@acme.com", "property": "title" }'
+```
+
+### Body
+
+<ParamField body="focus" type="string" required>
+  Entity UUID, email, domain, LinkedIn URL, or name.
+</ParamField>
+
+<ParamField body="property" type="string" required>
+  The claim to re-check — e.g. `"title"`, `"stage"`, `"email"`, `"pipeline_stage"`.
+</ParamField>
+
+## Response
+
+```json
+{
+  "property": "title",
+  "before": {
+    "value": "Senior AE",
+    "confidence": 0.72,
+    "freshness": "aging",
+    "last_observed_at": "2026-03-12T..."
+  },
+  "after": {
+    "value": "VP Sales",
+    "confidence": 0.91,
+    "freshness": "fresh",
+    "last_observed_at": "2026-05-18T..."
+  },
+  "note": "Re-derived from current observations."
+}
+```
+
+If no fresh evidence supports the claim, `after.freshness` stays `suspect` or `expired` and `note` tells you to record a new observation or re-enrich.
+
+### Ambiguous focus
+
+Same shape as other endpoints:
+
+```json
+{ "status": "ambiguous", "candidates": [ ... ] }
+```
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+const v = await nous.verify('sarah@acme.com', 'title');
+if (v.after.freshness === 'fresh') {
+  // safe to act on
+} else {
+  // re-enrich or record a new observation first
+}
+```
+
+```python Python
+v = client.verify("sarah@acme.com", prop="title")
+if v["after"]["freshness"] == "fresh":
+    # safe to act on
+    pass
+```
+</CodeGroup>
+
+## When to call it
+
+- **Before any high-stakes write back to a CRM** ("is the stage really `closed_won`?")
+- **Before sending a personalised email** ("is the title still VP Sales?")
+- **When a claim's `freshness` is `suspect` or `expired`** in the response of `/v2/context` or `/v2/accounts/:id`
+
+If you act on every claim without verifying, you're trusting the substrate's last-observation timestamp. For most workflows that's fine. For ones that matter, verify first.

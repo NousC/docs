@@ -1,0 +1,82 @@
+---
+title: "record"
+description: "Record what happened or what you learned. You observe — Nous derives the updated facts. The only write verb."
+---
+
+Agents never overwrite. They observe. `record` appends one or more observations to the immutable spine; the substrate re-derives the affected claims and tells you which ones changed.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `focus` | string | ✓ | Email or entity UUID — needs a precise identifier so the entity can be created if it doesn't exist |
+| `observations` | array | ✓ | One or more observations to record |
+
+Each observation:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `kind` | `"event"` or `"state"` | ✓ | `event` = an interaction; `state` = a fact |
+| `property` | string | ✓ | e.g. `interaction.email_sent`, `interaction.call_held`, `job_title`, `pipeline_stage` |
+| `value` | any | | Event detail, or the fact value. Use `null` on a state observation to assert the fact ended |
+| `source` | string | | Where the signal came from. Default: `agent` |
+
+## Examples
+
+Sent an email:
+
+```json
+{
+  "focus": "sarah@acme.com",
+  "observations": [
+    {
+      "kind": "event",
+      "property": "interaction.email_sent",
+      "value": { "subject": "Q3 pricing", "body_snippet": "Quick note on…" }
+    }
+  ]
+}
+```
+
+Learned their title changed:
+
+```json
+{
+  "focus": "sarah@acme.com",
+  "observations": [
+    { "kind": "state", "property": "job_title", "value": "VP of Engineering" }
+  ]
+}
+```
+
+A fact ended (they left the company):
+
+```json
+{
+  "focus": "sarah@acme.com",
+  "observations": [
+    { "kind": "state", "property": "job_title", "value": null }
+  ]
+}
+```
+
+## Returns
+
+```
+Recorded 1 observation.
+Facts updated: job_title.
+(entity_id: a1b2c3d4-...)
+```
+
+`Facts updated` lists the state properties whose claim was re-derived after the batch — useful for downstream refresh logic.
+
+## The observation model
+
+Two reasons agents observe instead of update:
+
+1. **The substrate self-heals** — a new observation contradicts an old one and the claim derivation re-runs, pulling the belief back toward truth. Nothing is "lost."
+2. **Every claim is auditable** — `epistemic_class` + `sources` on every claim trace back to the observations that produced it.
+
+## Backed by
+
+`POST /v2/observations` — see the [HTTP reference](/public-api/observations) for the raw JSON shape.

@@ -1,0 +1,71 @@
+---
+title: "Attention"
+api: "GET https://api.opennous.cloud/v2/attention"
+description: "Workspace-wide: accounts gone quiet, key facts decayed. Ranked decisions, each with a suggested action."
+---
+
+The "what should I work next?" endpoint. Returns a ranked list of accounts that have decayed past your decision thresholds — gone quiet, key facts expired, deals that haven't moved — each with a suggested next action.
+
+## Request
+
+```bash
+curl 'https://api.opennous.cloud/v2/attention?limit=10' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+### Query params
+
+<ParamField query="limit" type="number" default="25">
+  Max items. Cap 100.
+</ParamField>
+
+## Response
+
+```json
+{
+  "items": [
+    {
+      "entity_id": "a1b2c3d4-...",
+      "entity_name": "Arnold Schwarzenegger",
+      "entity_type": "person",
+      "what": "going_dark",
+      "headline": "Arnold Schwarzenegger — no activity for 35 days",
+      "suggested_action": "Re-engage with a follow-up or close the account out",
+      "score": 0.78,
+      "last_observed_at": "2026-04-19T..."
+    }
+  ],
+  "meta": { "total": 5 }
+}
+```
+
+### `what` values
+
+| Value | Meaning |
+|---|---|
+| `going_dark` | No activity in N days; pipeline stage suggests they should be moving |
+| `claim_stale` | Key claim (title, stage, etc.) expired the freshness window |
+| `prediction_unresolved` | An open prediction has aged past its resolution horizon |
+| `decay_threshold` | Custom decay rule fired |
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+const { items } = await nous.attention({ limit: 10 });
+items.forEach(i => console.log(i.headline, '→', i.suggested_action));
+```
+
+```python Python
+for item in client.attention(limit=10)["items"]:
+    print(item["headline"], "→", item["suggested_action"])
+```
+</CodeGroup>
+
+## When to call it
+
+- **At the start of an agent's working session** — pick what to act on
+- **As a recurring cron** that feeds a Slack channel or task queue
+- **In a Playground** ("who has gone quiet?") to surface the today-list
+
+`attention` is the agent's compass.

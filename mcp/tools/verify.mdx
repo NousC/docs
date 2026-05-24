@@ -1,0 +1,48 @@
+---
+title: "verify"
+description: "Re-check a specific fact before you act on it. The calibration check."
+---
+
+A claim might be in the substrate but stale. `verify` re-derives one claim from the **current** observation set and tells you whether to trust it.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `focus` | string | ✓ | Email, LinkedIn URL, entity UUID, or name |
+| `property` | string | ✓ | The fact to re-check — e.g. `email`, `job_title`, `pipeline_stage` |
+
+## Returns
+
+```
+job_title: VP Sales  [91% · fresh]
+Re-derived from current observations.
+```
+
+If no fresh evidence supports the claim:
+
+```
+job_title: Senior AE  [72% · suspect]
+Re-derived from existing observations — still suspect. No fresh evidence;
+record a new observation or re-enrich to confirm.
+```
+
+### Ambiguous name
+
+```
+"Sarah Chen" matches several people. Call verify again with one of these entity ids:
+  • Sarah Chen — VP Sales @ Acme  [a1b2c3d4-...]
+  • Sarah Chen — Designer @ Pixel [b2c3d4e5-...]
+```
+
+## When to call it
+
+- **Before any high-stakes write back to a CRM** ("is the stage really `closed_won`?")
+- **Before sending a personalised email** ("is the title still VP Sales?")
+- **When a claim's freshness is `suspect` or `expired`** in a `get_context` or `get_account` response
+
+If you act on every claim without verifying, you're trusting the substrate's last-observation timestamp. For most workflows that's fine. For ones that matter, verify first.
+
+## Backed by
+
+`POST /v2/verify` — see the [HTTP reference](/public-api/verify) for the raw JSON shape.

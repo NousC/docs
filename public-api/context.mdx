@@ -1,0 +1,115 @@
+---
+title: "Get Context"
+api: "POST https://api.opennous.cloud/v2/context"
+description: "Engineered context for one task about one entity. The ranked, claim-tagged block your agent consumes before acting."
+---
+
+The headline endpoint. Pass who you're working on and what you're about to do — get back a focused, ranked context block: the facts that matter, each with confidence and freshness, plus the recent timeline, buying-group stakeholders, and open predictions.
+
+**Call this before drafting outreach, preparing for a meeting, or making any decision about a person or company.**
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/context \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "focus": "sarah@acme.com",
+    "intent": "follow_up",
+    "budget_tokens": 1500
+  }'
+```
+
+### Body
+
+<ParamField body="focus" type="string" required>
+  Who to look up. Accepts an **email**, **domain**, **LinkedIn URL**, **entity UUID**, or a **name**. A name may match several people — the response will surface candidates.
+</ParamField>
+
+<ParamField body="intent" type="string">
+  What you're about to do. Shapes which context surfaces. One of:
+  - `account_review` *(default)* — general lookup
+  - `draft_email` — outreach prep
+  - `follow_up` — re-engagement after a gap
+  - `meeting_prep` — pre-meeting brief
+  - `call_prep` — pre-call brief
+</ParamField>
+
+<ParamField body="budget_tokens" type="number">
+  Approximate token budget for the returned context block. The pipeline ranks and compresses to fit.
+</ParamField>
+
+## Response
+
+```json
+{
+  "entity": { "id": "...", "type": "person", "name": "Sarah Chen" },
+  "summary": "Sarah is evaluating for Q3; primary concern is Salesforce migration.",
+  "claims": [
+    {
+      "property": "title",
+      "value": "VP Sales",
+      "confidence": 0.92,
+      "freshness": "fresh",
+      "epistemic_class": "observed",
+      "sources": ["hubspot", "linkedin"]
+    }
+  ],
+  "workspace": [
+    { "property": "ICP", "value": "GTM Engineers or RevOps" }
+  ],
+  "timeline": [
+    { "tier": "recent", "when": "2026-05-21T15:00:00Z", "type": "interaction.email_replied", "summary": "Interested but budget waiting on Q3." }
+  ],
+  "stakeholders": [
+    { "name": "Maria Lopez", "role": "CFO" }
+  ],
+  "predictions": [
+    { "kind": "icp_fit", "value": 0.84, "confidence": 0.78 }
+  ],
+  "meta": { "claims_returned": 12, "token_estimate": 1480 }
+}
+```
+
+### Ambiguous focus
+
+If `focus` is a name that matches several people, you'll get:
+
+```json
+{
+  "status": "ambiguous",
+  "candidates": [
+    { "entity_id": "...", "name": "Sarah Chen", "detail": "VP Sales @ Acme" },
+    { "entity_id": "...", "name": "Sarah Chen", "detail": "Designer @ Pixel" }
+  ]
+}
+```
+
+Pick one and re-call with `focus: "<entity_id>"`.
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+import { Nous } from '@opennous/sdk';
+const nous = new Nous({ apiKey: process.env.NOUS_API_KEY! });
+
+const ctx = await nous.getContext('sarah@acme.com', { intent: 'follow_up' });
+console.log(ctx.summary);
+```
+
+```python Python
+from opennous import NousClient
+client = NousClient(api_key="YOUR_API_KEY")
+
+ctx = client.get_context("sarah@acme.com", intent="follow_up")
+print(ctx["summary"])
+```
+</CodeGroup>
+
+## When to call it
+
+- **Before any outbound action** on a known contact
+- **At the start of meeting prep** with a saved intent for the use case
+- **NOT** for "what do we know about X" questions where you want raw data — use [`/v2/accounts/:id`](/public-api/accounts) for that

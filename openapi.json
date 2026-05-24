@@ -2,729 +2,461 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Nous Public API",
-    "description": "REST API for AI agents and external integrations. Authenticate with your workspace API key.",
-    "version": "1.0.0"
+    "description": "The v2 Context API — eight endpoints. The agent reads engineered, epistemics-tagged context and writes observations. Nous derives the rest.",
+    "version": "2.0.0"
   },
   "servers": [
-    {
-      "url": "https://api.opennous.cloud",
-      "description": "Nous cloud"
-    }
+    { "url": "https://api.opennous.cloud", "description": "Nous Cloud" }
   ],
-  "security": [
-    { "apiKey": [] }
-  ],
+  "security": [{ "bearerAuth": [] }],
   "components": {
     "securitySchemes": {
-      "apiKey": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-API-Key",
-        "description": "Your workspace API key (also accepted as `Authorization: Bearer <key>`)"
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Workspace API key. Create at Settings → API Keys. Workspace-scoped — no separate workspace ID required."
       }
     },
     "schemas": {
-      "Fact": {
+      "AmbiguousFocus": {
         "type": "object",
-        "description": "A stored memory fact, scoped to a contact or their company.",
+        "description": "Returned when a name matches several candidates. Pick one and re-call with focus = candidate.entity_id.",
         "properties": {
-          "scope": { "type": "string", "enum": ["contact", "company"], "description": "Whether this fact is about the person or their whole org" },
-          "category": { "type": "string", "description": "Logical grouping, e.g. General, Pricing, Motivation, Objection" },
-          "content": { "type": "string", "description": "The fact itself — one clear, reusable sentence" },
-          "graph_layer": { "type": "string", "enum": ["private", "public"], "description": "private = from your own interactions; public = from public signals" }
+          "status": { "type": "string", "enum": ["ambiguous"] },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": { "type": "string", "format": "uuid" },
+                "name":      { "type": "string" },
+                "detail":    { "type": "string", "description": "Short context line — e.g. 'VP Sales @ Acme'" }
+              }
+            }
+          }
         }
       },
-      "Contact": {
+      "Claim": {
         "type": "object",
-        "description": "Contact profile returned by GET /v1/contacts/:id. The list endpoint (GET /v1/contacts) returns a subset without facts, activities, or company_details.",
+        "description": "A derived fact about an entity. Every claim carries its epistemics.",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "email": { "type": "string", "format": "email" },
-          "first_name": { "type": "string" },
-          "last_name": { "type": "string" },
-          "name": { "type": "string", "description": "first_name + last_name, pre-joined" },
-          "title": { "type": "string", "description": "Job title (alias for job_title)" },
-          "job_title": { "type": "string" },
-          "phone": { "type": "string" },
-          "linkedin_url": { "type": "string" },
-          "photo_url": { "type": "string" },
-          "notes": { "type": "string" },
-          "company": { "type": "string" },
-          "company_id": { "type": "string", "format": "uuid" },
-          "pipeline_stage": {
-            "type": "string",
-            "enum": ["identified", "aware", "interested", "evaluating", "client"]
-          },
-          "icp_score": { "type": "number", "minimum": 0, "maximum": 100 },
-          "icp_fit": { "type": "string", "description": "Qualitative ICP classification, e.g. strong_fit, potential_fit, weak_fit" },
-          "deal_health_score": { "type": "number", "minimum": 0, "maximum": 100 },
-          "last_activity_at": { "type": "string", "format": "date-time" },
-          "memory_summary": { "type": "string", "description": "AI-generated 2-sentence relationship summary. Refreshed automatically after new signals land." },
-          "facts": {
-            "type": "array",
-            "description": "Stored facts about this contact and their company, newest first. Only present on GET /v1/contacts/:id — not on list.",
-            "items": { "$ref": "#/components/schemas/Fact" }
-          },
-          "company_details": {
+          "property":         { "type": "string", "description": "e.g. 'title', 'stage', 'intent'" },
+          "value":            {},
+          "confidence":       { "type": "number", "minimum": 0, "maximum": 1 },
+          "freshness":        { "type": "string", "enum": ["fresh", "aging", "suspect", "expired"] },
+          "epistemic_class":  { "type": "string", "enum": ["observed", "derived", "asserted"] },
+          "sources":          { "type": "array", "items": { "type": "string" } },
+          "last_observed_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Observation": {
+        "type": "object",
+        "required": ["kind", "property"],
+        "properties": {
+          "kind":        { "type": "string", "enum": ["event", "state"] },
+          "property":    { "type": "string" },
+          "value":       {},
+          "source":      { "type": "string" },
+          "method":      { "type": "string" },
+          "observed_at": { "type": "string", "format": "date-time" },
+          "external_id": { "type": "string" },
+          "raw":         { "type": "object" }
+        }
+      },
+      "AccountRecord": {
+        "type": "object",
+        "properties": {
+          "entity": {
             "type": "object",
-            "description": "Firmographic data for the contact's company. Only present on GET /v1/contacts/:id.",
             "properties": {
-              "name": { "type": "string" },
-              "domain": { "type": "string" },
-              "industry": { "type": "string" },
-              "employee_count": { "type": "integer" },
-              "location": { "type": "string" }
+              "id":   { "type": "string", "format": "uuid" },
+              "type": { "type": "string", "enum": ["person", "company"] },
+              "name": { "type": "string" }
             }
           },
-          "signals_30d": {
-            "type": "object",
-            "description": "Activity type → count for the last 30 days. Only present on GET /v1/contacts/:id.",
-            "additionalProperties": { "type": "integer" }
-          }
-        }
-      },
-      "Company": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "company_id": { "type": "string", "format": "uuid", "description": "Alias for id — always present in MCP tool output" },
-          "name": { "type": "string" },
-          "domain": { "type": "string" },
-          "industry": { "type": "string" },
-          "employee_count": { "type": "integer" },
-          "deal_health_score": { "type": "number", "minimum": 0, "maximum": 100 },
-          "description": { "type": "string" },
-          "linkedin_url": { "type": "string" },
-          "website": { "type": "string" },
-          "contacts": {
+          "identifiers": {
             "type": "array",
-            "description": "All contacts at this company with their stage and ICP score",
-            "items": { "$ref": "#/components/schemas/Contact" }
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind":  { "type": "string", "enum": ["email", "linkedin_url", "domain", "phone"] },
+                "value": { "type": "string" }
+              }
+            }
           },
-          "total_contacts": { "type": "integer" },
-          "facts": {
+          "claims": { "type": "array", "items": { "$ref": "#/components/schemas/Claim" } },
+          "recent_observations": {
             "type": "array",
-            "description": "Company-level facts shared across all contacts at this org",
-            "items": { "$ref": "#/components/schemas/Fact" }
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind":        { "type": "string" },
+                "property":    { "type": "string" },
+                "observed_at": { "type": "string", "format": "date-time" },
+                "value":       {}
+              }
+            }
           }
         }
       },
-      "Memory": {
+      "DedupItem": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "content": { "type": "string" },
-          "category": { "type": "string" },
-          "source": { "type": "string" },
-          "metadata": { "type": "object" },
-          "created_at": { "type": "string", "format": "date-time" }
+          "kind":      { "type": "string", "enum": ["email", "linkedin_url"] },
+          "value":     { "type": "string" },
+          "status":    { "type": "string", "enum": ["net_new", "engaged", "recent", "bounced", "unsubscribed", "suppressed"] },
+          "entity_id": { "type": "string", "format": "uuid" },
+          "reason":    { "type": "string" }
         }
       },
-      "Activity": {
+      "WorkspaceFact": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "type": { "type": "string" },
-          "source": { "type": "string" },
-          "occurred_at": { "type": "string", "format": "date-time" },
-          "description": { "type": "string" },
-          "body": { "type": "string" }
+          "id":          { "type": "string", "format": "uuid" },
+          "category":    { "type": "string", "description": "Common: ICP, Market, Product, Pricing, Competitors, Playbook" },
+          "content":     { "type": "string" },
+          "source":      { "type": "string" },
+          "recorded_at": { "type": "string", "format": "date-time" }
         }
       },
       "Error": {
         "type": "object",
-        "properties": {
-          "error": { "type": "string" }
-        }
+        "properties": { "error": { "type": "string" }, "message": { "type": "string" } }
       }
     }
   },
   "paths": {
-    "/v1/contacts": {
-      "get": {
-        "operationId": "listContacts",
-        "summary": "List contacts",
-        "description": "Returns a paginated list of contacts for the workspace. Filter by stage, company, or search query.",
-        "tags": ["Contacts"],
-        "parameters": [
-          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Full-text search across name, email, and company" },
-          { "name": "pipeline_stage", "in": "query", "schema": { "type": "string", "enum": ["identified", "aware", "interested", "evaluating", "client"] }, "description": "Filter by pipeline stage" },
-          { "name": "company_id", "in": "query", "schema": { "type": "string", "format": "uuid" }, "description": "Filter by company UUID" },
-          { "name": "linkedin_url", "in": "query", "schema": { "type": "string" }, "description": "Exact match on LinkedIn URL" },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 200 } },
-          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of contacts",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "contacts": { "type": "array", "items": { "$ref": "#/components/schemas/Contact" } },
-                    "total": { "type": "integer" }
-                  }
-                },
-                "example": {
-                  "contacts": [
-                    {
-                      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                      "email": "alex@acmecorp.com",
-                      "name": "Alex Chen",
-                      "first_name": "Alex",
-                      "last_name": "Chen",
-                      "job_title": "VP of Engineering",
-                      "company": "Acme Corp",
-                      "company_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-                      "pipeline_stage": "evaluating",
-                      "icp_score": 87,
-                      "deal_health_score": 72,
-                      "last_activity_at": "2026-05-14T10:30:00Z"
-                    }
-                  ],
-                  "total": 1
-                }
-              }
-            }
-          },
-          "401": { "description": "Missing or invalid API key", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      },
+    "/v2/context": {
       "post": {
-        "operationId": "createContact",
-        "summary": "Create contact",
-        "description": "Creates a new contact. Email is required and must be unique within the workspace.",
-        "tags": ["Contacts"],
+        "summary": "Get engineered context",
+        "description": "Engineered context for one task about one entity. Runs the pipeline: retrieve → rank → connect → compress → tag → budget.",
+        "tags": ["Context"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email"],
+                "required": ["focus"],
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
-                  "first_name": { "type": "string" },
-                  "last_name": { "type": "string" },
-                  "company": { "type": "string" },
-                  "job_title": { "type": "string" },
-                  "phone": { "type": "string" },
-                  "linkedin_url": { "type": "string" },
-                  "notes": { "type": "string" }
+                  "focus":         { "type": "string", "description": "Entity UUID, email, domain, LinkedIn URL, or name" },
+                  "intent":        { "type": "string", "enum": ["account_review", "draft_email", "follow_up", "meeting_prep", "call_prep"], "default": "account_review" },
+                  "budget_tokens": { "type": "number" }
                 }
-              },
-              "example": {
-                "email": "alex@acmecorp.com",
-                "first_name": "Alex",
-                "last_name": "Chen",
-                "company": "Acme Corp",
-                "job_title": "VP of Engineering",
-                "linkedin_url": "https://linkedin.com/in/alexchen"
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Contact created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Contact" } } } },
-          "409": { "description": "Email already exists", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "email_already_exists" } } } },
-          "401": { "description": "Unauthorized" }
-        }
-      }
-    },
-    "/v1/contacts/{id}": {
-      "get": {
-        "operationId": "getContact",
-        "summary": "Get contact",
-        "description": "Retrieve a contact by UUID or email address.",
-        "tags": ["Contacts"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Contact UUID or email address" }
-        ],
-        "responses": {
-          "200": { "description": "Contact", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Contact" } } } },
-          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "contact_not_found" } } } }
-        }
-      },
-      "patch": {
-        "operationId": "updateContact",
-        "summary": "Update contact",
-        "description": "Partially update a contact. Only provided fields are changed.",
-        "tags": ["Contacts"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "first_name": { "type": "string" },
-                  "last_name": { "type": "string" },
-                  "job_title": { "type": "string" },
-                  "company": { "type": "string" },
-                  "phone": { "type": "string" },
-                  "linkedin_url": { "type": "string" },
-                  "notes": { "type": "string" },
-                  "pipeline_stage": { "type": "string", "enum": ["identified", "aware", "interested", "evaluating", "client"] }
-                }
-              },
-              "example": { "job_title": "CTO", "pipeline_stage": "evaluating" }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Updated contact", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Contact" } } } },
-          "404": { "description": "Not found" }
-        }
-      },
-      "delete": {
-        "operationId": "deleteContact",
-        "summary": "Delete contact",
-        "description": "Permanently deletes a contact and all associated activity.",
-        "tags": ["Contacts"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
-        ],
-        "responses": {
-          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "type": "object", "properties": { "deleted": { "type": "boolean" } } }, "example": { "deleted": true } } } },
-          "404": { "description": "Not found" }
-        }
-      }
-    },
-    "/v1/contacts/{id}/activity": {
-      "get": {
-        "operationId": "getContactActivity",
-        "summary": "Get contact activity",
-        "description": "Returns raw activity log entries for a contact, newest first. Use `since` to bound the window — the MCP server passes `since=90d` to cap token usage.",
-        "tags": ["Contacts"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Contact UUID or email" },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 100 } },
-          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" }, "description": "Only return activities at or after this ISO timestamp" }
-        ],
-        "responses": {
           "200": {
-            "description": "Activity timeline",
+            "description": "Engineered context block, or candidates if focus is ambiguous",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "contact_id": { "type": "string", "format": "uuid" },
-                    "total": { "type": "integer" },
-                    "activities": { "type": "array", "items": { "$ref": "#/components/schemas/Activity" } }
-                  }
-                },
-                "example": {
-                  "contact_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                  "total": 3,
-                  "activities": [
-                    { "id": "act-001", "type": "email_sent", "source": "gmail", "occurred_at": "2026-05-14T10:00:00Z", "description": "Sent proposal follow-up", "body": "Hi Alex, following up on the proposal..." },
-                    { "id": "act-002", "type": "calendar_meeting", "source": "google_calendar", "occurred_at": "2026-05-10T14:00:00Z", "description": "30-min discovery call" }
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entity":       { "type": "object" },
+                        "summary":      { "type": "string" },
+                        "claims":       { "type": "array", "items": { "$ref": "#/components/schemas/Claim" } },
+                        "workspace":    { "type": "array", "items": { "type": "object" } },
+                        "timeline":     { "type": "array", "items": { "type": "object" } },
+                        "stakeholders": { "type": "array", "items": { "type": "object" } },
+                        "predictions":  { "type": "array", "items": { "type": "object" } },
+                        "meta":         { "type": "object" }
+                      }
+                    },
+                    { "$ref": "#/components/schemas/AmbiguousFocus" }
                   ]
                 }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "400": { "description": "focus_required or invalid_intent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "entity_not_found",                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
     },
-    "/v1/contacts/{id}/context": {
+    "/v2/accounts/{id}": {
       "get": {
-        "operationId": "getContactContext",
-        "summary": "Get contact context",
-        "description": "Returns a pre-formatted context block — designed to be dropped directly into an AI prompt. Includes stage, scores, recent activity, and key facts.",
-        "tags": ["Contacts"],
+        "summary": "Get the full Account Record",
+        "description": "Entity + every claim with epistemics + recent observation timeline.",
+        "tags": ["Accounts"],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Contact UUID or email" }
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "URL-encoded entity UUID, email, domain, LinkedIn URL, or name" }
         ],
         "responses": {
           "200": {
-            "description": "Context block",
+            "description": "Account Record, or candidates if id is ambiguous",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "contact_id": { "type": "string", "format": "uuid" },
-                    "company_id": { "type": "string", "format": "uuid" },
-                    "context": { "type": "string", "description": "Plain-text context block ready to inject into a prompt" },
-                    "token_estimate": { "type": "integer" }
-                  }
-                },
-                "example": {
-                  "contact_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                  "company_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-                  "context": "Alex Chen · VP of Engineering · Acme Corp\nStage: evaluating  |  ICP: 87  |  Health: 72  |  Last seen: May 14\n\nContext: High-intent buyer, evaluating vendor migration\n\nThis week (2 touchpoints):\n  May 14 — email_sent: Sent proposal follow-up\n  May 12 — calendar_meeting: 30-min discovery call\n\nFacts:\n  [deal] Budget confirmed at $24k ARR\n  [preference] Prefers async over calls",
-                  "token_estimate": 128
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/AccountRecord" },
+                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                  ]
                 }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "404": { "description": "entity_not_found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
     },
-    "/v1/companies/{id}": {
-      "get": {
-        "operationId": "getCompany",
-        "summary": "Get company",
-        "description": "Retrieve a company profile including enriched firmographic data.",
-        "tags": ["Companies"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
-        ],
-        "responses": {
-          "200": { "description": "Company profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Company" } } } },
-          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "company_not_found" } } } }
-        }
-      }
-    },
-    "/v1/companies/{id}/stakeholders": {
-      "get": {
-        "operationId": "getCompanyStakeholders",
-        "summary": "Get buying committee",
-        "description": "Returns all contacts at a company, their derived roles (champion, decision_maker, budget_holder, etc.), and graph edges connecting them.",
-        "tags": ["Companies"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
-        ],
+    "/v2/observations": {
+      "post": {
+        "summary": "Record observations",
+        "description": "Append events or state observations. The substrate derives the new claims and tells you which were recomputed.",
+        "tags": ["Observations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["focus", "observations"],
+                "properties": {
+                  "focus":        { "type": "string", "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name." },
+                  "observations": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/Observation" } }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Buying committee",
+            "description": "Recorded count + which claims were recomputed",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "company": { "$ref": "#/components/schemas/Company" },
-                    "contacts": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          { "$ref": "#/components/schemas/Contact" },
-                          { "type": "object", "properties": { "roles": { "type": "array", "items": { "type": "string" } } } }
-                        ]
-                      }
-                    },
-                    "edges": {
+                    "entity_id":         { "type": "string", "format": "uuid" },
+                    "recorded":          { "type": "integer" },
+                    "claims_recomputed": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "focus_and_observations_required or invalid_focus", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/v2/query": {
+      "post": {
+        "summary": "Query a corpus of observations",
+        "description": "Retrieve + summarise observations across many entities. The substrate retrieves; your agent finds the pattern.",
+        "tags": ["Query"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "kind":       { "type": "string", "enum": ["event", "state"] },
+                      "property":   { "type": "string", "description": "Prefix match" },
+                      "source":     { "type": "string" },
+                      "entity_id":  { "type": "string", "format": "uuid" },
+                      "since_days": { "type": "number" },
+                      "limit":      { "type": "number", "default": 50, "maximum": 200 }
+                    }
+                  },
+                  "question":      { "type": "string", "description": "Echoed in the response — for downstream agents" },
+                  "budget_tokens": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matched corpus + rollups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "matched":  { "type": "integer" },
+                    "returned": { "type": "integer" },
+                    "sampled":  { "type": "boolean" },
+                    "items":    { "type": "array", "items": { "type": "object" } },
+                    "rollups":  { "type": "object" },
+                    "question": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/attention": {
+      "get": {
+        "summary": "What needs attention",
+        "description": "Workspace-wide ranked decisions: accounts gone quiet, key facts decayed. Each item ships with a suggested action.",
+        "tags": ["Attention"],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "number", "default": 25, "maximum": 100 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked attention items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "subject": { "type": "string" },
-                          "subject_id": { "type": "string" },
-                          "relationship": { "type": "string" },
-                          "object": { "type": "string" },
-                          "object_id": { "type": "string" },
-                          "confidence": { "type": "number" }
+                          "entity_id":        { "type": "string", "format": "uuid" },
+                          "entity_name":      { "type": "string" },
+                          "what":             { "type": "string", "enum": ["going_dark", "claim_stale", "prediction_unresolved", "decay_threshold"] },
+                          "headline":         { "type": "string" },
+                          "suggested_action": { "type": "string" },
+                          "score":            { "type": "number" }
                         }
                       }
                     }
                   }
-                },
-                "example": {
-                  "company": { "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901", "name": "Acme Corp", "domain": "acmecorp.com", "industry": "SaaS" },
-                  "contacts": [
-                    { "id": "a1b2c3d4-...", "name": "Alex Chen", "job_title": "VP of Engineering", "pipeline_stage": "evaluating", "icp_score": 87, "roles": ["champion"] },
-                    { "id": "c3d4e5f6-...", "name": "Sarah Kim", "job_title": "CFO", "pipeline_stage": "aware", "icp_score": 72, "roles": ["budget_holder"] }
-                  ],
-                  "edges": [
-                    { "subject": "Alex Chen", "relationship": "REPORTS_TO", "object": "Sarah Kim", "confidence": 0.9 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/verify": {
+      "post": {
+        "summary": "Verify one claim",
+        "description": "Re-derive one claim against current observations. Returns before + after — the calibration check.",
+        "tags": ["Verify"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["focus", "property"],
+                "properties": {
+                  "focus":    { "type": "string" },
+                  "property": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Before / after snapshots and a note",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "property": { "type": "string" },
+                        "before":   { "$ref": "#/components/schemas/Claim" },
+                        "after":    { "$ref": "#/components/schemas/Claim" },
+                        "note":     { "type": "string" }
+                      }
+                    },
+                    { "$ref": "#/components/schemas/AmbiguousFocus" }
                   ]
                 }
               }
             }
           },
-          "404": { "description": "Not found" }
+          "400": { "description": "focus_and_property_required" },
+          "404": { "description": "claim_not_found or entity_not_found" }
         }
       }
     },
-    "/v1/memories": {
-      "get": {
-        "operationId": "listMemories",
-        "summary": "List memories",
-        "description": "Returns workspace-level facts and memories. Optionally filter by category.",
-        "tags": ["Memories"],
-        "parameters": [
-          { "name": "category", "in": "query", "schema": { "type": "string" }, "description": "Filter by category (e.g. `deal`, `preference`, `General`)" },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }
-        ],
+    "/v2/dedup": {
+      "post": {
+        "summary": "Classify cold-outbound identifiers",
+        "description": "Cross-list dedup: net_new / engaged / recent / bounced / unsubscribed / suppressed. Up to 50,000 of each kind per call.",
+        "tags": ["Dedup"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emails":        { "type": "array", "items": { "type": "string", "format": "email" } },
+                  "linkedin_urls": { "type": "array", "items": { "type": "string", "format": "uri" } }
+                },
+                "description": "At least one of emails or linkedin_urls required"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Memories",
+            "description": "Per-identifier classifications + rollup summary",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "memories": { "type": "array", "items": { "$ref": "#/components/schemas/Memory" } }
+                    "results": { "type": "array", "items": { "$ref": "#/components/schemas/DedupItem" } },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "net_new":      { "type": "integer" },
+                        "engaged":      { "type": "integer" },
+                        "recent":       { "type": "integer" },
+                        "bounced":      { "type": "integer" },
+                        "unsubscribed": { "type": "integer" },
+                        "suppressed":   { "type": "integer" },
+                        "total":        { "type": "integer" }
+                      }
+                    }
                   }
-                },
-                "example": {
-                  "memories": [
-                    { "id": "m1", "content": "Budget confirmed at $24k ARR", "category": "deal", "source": "agent", "created_at": "2026-05-14T10:00:00Z" }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/memories/search": {
-      "get": {
-        "operationId": "searchMemories",
-        "summary": "Search memories",
-        "description": "Semantic search across workspace memories. Optionally scoped to a contact or company.",
-        "tags": ["Memories"],
-        "parameters": [
-          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Search query" },
-          { "name": "contact_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
-          { "name": "company_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
-        ],
-        "responses": {
-          "200": {
-            "description": "Search results",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": { "type": "array", "items": { "$ref": "#/components/schemas/Memory" } }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/memory": {
-      "post": {
-        "operationId": "createMemory",
-        "summary": "Save memory",
-        "description": "Store a fact or memory. Attach it to a contact or company via `contact_id` / `company_id`.",
-        "tags": ["Memories"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["content"],
-                "properties": {
-                  "content": { "type": "string", "description": "The fact to store" },
-                  "category": { "type": "string", "default": "General", "description": "Logical grouping (e.g. `deal`, `preference`, `risk`)" },
-                  "source": { "type": "string", "default": "api" },
-                  "contact_id": { "type": "string", "format": "uuid" },
-                  "company_id": { "type": "string", "format": "uuid" },
-                  "metadata": { "type": "object" }
-                }
-              },
-              "example": {
-                "content": "Alex confirmed budget at $24k ARR in the May 12 call",
-                "category": "deal",
-                "contact_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": { "description": "Memory saved", "content": { "application/json": { "schema": { "type": "object", "properties": { "memory": { "$ref": "#/components/schemas/Memory" } } } } } },
-          "400": { "description": "content_required" }
-        }
-      }
-    },
-    "/v1/memory/{id}": {
-      "patch": {
-        "operationId": "updateMemory",
-        "summary": "Update memory",
-        "description": "Update the content or category of an existing memory.",
-        "tags": ["Memories"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "content": { "type": "string" },
-                  "category": { "type": "string" },
-                  "metadata": { "type": "object" }
-                }
-              },
-              "example": { "content": "Budget confirmed at $30k ARR (revised upward)", "category": "deal" }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Updated", "content": { "application/json": { "schema": { "type": "object", "properties": { "memory": { "$ref": "#/components/schemas/Memory" } } } } } },
-          "404": { "description": "Not found" }
-        }
-      },
-      "delete": {
-        "operationId": "deleteMemory",
-        "summary": "Delete memory",
-        "description": "Soft-deletes a memory (sets `is_active: false`). Recoverable from the database.",
-        "tags": ["Memories"],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
-        ],
-        "responses": {
-          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "type": "object", "properties": { "deleted": { "type": "boolean" } } }, "example": { "deleted": true } } } },
-          "404": { "description": "Not found" }
-        }
-      }
-    },
-    "/v1/remember": {
-      "post": {
-        "operationId": "rememberFact",
-        "summary": "Remember (shortcut)",
-        "description": "MCP-friendly shortcut for saving a memory. Accepts `text`, `fact`, or `content` as aliases. Can resolve a contact by `email` if you don't have the UUID.",
-        "tags": ["Memories"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "content": { "type": "string" },
-                  "text": { "type": "string", "description": "Alias for `content`" },
-                  "fact": { "type": "string", "description": "Alias for `content`" },
-                  "category": { "type": "string", "default": "General" },
-                  "source": { "type": "string", "default": "api" },
-                  "contact_id": { "type": "string", "format": "uuid" },
-                  "email": { "type": "string", "format": "email", "description": "Resolve contact by email instead of UUID" },
-                  "company_id": { "type": "string", "format": "uuid" },
-                  "metadata": { "type": "object" }
-                }
-              },
-              "example": {
-                "text": "Alex said he's evaluating us against Salesforce",
-                "category": "deal",
-                "email": "alex@acmecorp.com"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Stored",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "memory": { "$ref": "#/components/schemas/Memory" },
-                    "stored": { "type": "integer" },
-                    "facts": { "type": "array", "items": { "type": "object", "properties": { "content": { "type": "string" } } } }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/search": {
-      "post": {
-        "operationId": "searchMemoriesPost",
-        "summary": "Search (shortcut)",
-        "description": "POST variant of memory search — useful when the query is long or includes complex filters. Same results as `GET /v1/memories/search`.",
-        "tags": ["Memories"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["q"],
-                "properties": {
-                  "q": { "type": "string" },
-                  "contact_id": { "type": "string", "format": "uuid" },
-                  "company_id": { "type": "string", "format": "uuid" },
-                  "limit": { "type": "integer", "default": 10 }
-                }
-              },
-              "example": { "q": "budget discussion", "contact_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890" }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Results", "content": { "application/json": { "schema": { "type": "object", "properties": { "results": { "type": "array", "items": { "$ref": "#/components/schemas/Memory" } } } } } } }
-        }
-      }
-    },
-    "/v1/capture": {
-      "post": {
-        "operationId": "captureActivity",
-        "summary": "Log activity",
-        "description": "Log a signal or activity event for a contact. The pipeline stage may advance automatically based on DB triggers. Accepts either `contact_id` (UUID) or `email` to identify the contact.",
-        "tags": ["Capture"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["type"],
-                "properties": {
-                  "type": { "type": "string", "description": "Activity type (e.g. `email_sent`, `call_completed`, `proposal_viewed`, `website_visit`)" },
-                  "contact_id": { "type": "string", "format": "uuid", "description": "Required if `email` not provided" },
-                  "email": { "type": "string", "format": "email", "description": "Required if `contact_id` not provided" },
-                  "description": { "type": "string" },
-                  "source": { "type": "string", "default": "agent", "description": "Integration source label" },
-                  "occurred_at": { "type": "string", "format": "date-time", "description": "Defaults to now" },
-                  "metadata": { "type": "object" }
-                }
-              },
-              "example": {
-                "type": "proposal_viewed",
-                "email": "alex@acmecorp.com",
-                "description": "Alex opened the proposal 3x in 10 minutes",
-                "source": "agent",
-                "occurred_at": "2026-05-14T10:30:00Z"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Activity logged",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "activity": { "$ref": "#/components/schemas/Activity" },
-                    "contact_id": { "type": "string", "format": "uuid" },
-                    "stage_before": { "type": "string" },
-                    "stage_after": { "type": "string" },
-                    "deal_health_score": { "type": "number" }
-                  }
-                },
-                "example": {
-                  "activity": { "id": "act-999", "type": "proposal_viewed", "source": "agent", "occurred_at": "2026-05-14T10:30:00Z", "description": "Alex opened the proposal 3x in 10 minutes" },
-                  "contact_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                  "stage_before": "interested",
-                  "stage_after": "evaluating",
-                  "deal_health_score": 78
                 }
               }
             }
           },
-          "404": { "description": "Contact not found" },
-          "400": { "description": "type_required or contact_id_or_email_required" }
+          "400": { "description": "identifiers_required" },
+          "413": { "description": "too_many (max 50,000 per kind per call)" }
+        }
+      }
+    },
+    "/v2/workspace/facts": {
+      "get": {
+        "summary": "Get workspace facts",
+        "description": "Workspace-level facts the user has recorded about their own business: ICP, target market, product, pricing, competitors, playbook. Read-only.",
+        "tags": ["Workspace Facts"],
+        "parameters": [
+          { "name": "categories", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list (e.g. 'ICP,Market'). Omit for all." },
+          { "name": "limit",      "in": "query", "schema": { "type": "number", "default": 50, "maximum": 500 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facts grouped by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "facts":       { "type": "array", "items": { "$ref": "#/components/schemas/WorkspaceFact" } },
+                    "count":       { "type": "integer" },
+                    "by_category": { "type": "object", "additionalProperties": { "type": "integer" } }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

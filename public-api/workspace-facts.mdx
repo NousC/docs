@@ -1,0 +1,79 @@
+---
+title: "Workspace Facts"
+api: "GET https://api.opennous.cloud/v2/workspace/facts"
+description: "The user's own playbook — ICP, target market, product, pricing, competitors. Workspace-level facts, not per-entity."
+---
+
+Where the per-entity endpoints (`/v2/accounts/:id`, `/v2/context`) return facts about **people and companies**, this returns facts the workspace owner has recorded about **their own business** — the playbook the agent should reference when answering questions like "what's our ICP?" or "what's our pricing?"
+
+## Request
+
+```bash
+curl 'https://api.opennous.cloud/v2/workspace/facts?categories=ICP,Market&limit=20' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+### Query params
+
+<ParamField query="categories" type="string">
+  Comma-separated list to filter (e.g. `ICP,Pricing`). Omit to return all categories.
+
+  Common categories: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Playbook`. Users can add any custom category in the in-app Intelligence tab.
+</ParamField>
+
+<ParamField query="limit" type="number" default="50">
+  Max facts to return. Cap 500.
+</ParamField>
+
+## Response
+
+```json
+{
+  "facts": [
+    {
+      "id": "7e2bd11f-...",
+      "category": "ICP",
+      "content": "GTM Engineers or RevOps leaders at B2B SaaS, 50-200 employees, US.",
+      "source": "manual",
+      "recorded_at": "2026-05-24T16:37:54Z"
+    },
+    {
+      "id": "aec9de1c-...",
+      "category": "Pricing",
+      "content": "Free self-host. Scale $99/mo. Agency $499/mo.",
+      "source": "manual",
+      "recorded_at": "2026-05-20T11:02:00Z"
+    }
+  ],
+  "count": 2,
+  "by_category": { "ICP": 1, "Pricing": 1 }
+}
+```
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+const { facts } = await nous.getWorkspaceFacts({ categories: ['ICP'] });
+for (const f of facts) console.log(`[${f.category}] ${f.content}`);
+```
+
+```python Python
+facts = client.get_workspace_facts(categories=["ICP"])
+for f in facts["facts"]:
+    print(f'[{f["category"]}] {f["content"]}')
+```
+</CodeGroup>
+
+## When to call it
+
+- **"What's our ICP?"** — `categories=["ICP"]`
+- **"What's our pricing strategy?"** — `categories=["Pricing"]`
+- **"What differentiates us from competitors?"** — `categories=["Competitors","Product"]`
+- **"Show me the whole playbook"** — no `categories` filter
+
+When you're writing an agent that drafts personalised outreach, the agent needs BOTH the contact's context (`/v2/context`) AND the user's playbook (`/v2/workspace/facts`). The playbook tells it how YOU sell; the context tells it about THEM. Combine for natural copy.
+
+## How facts get there
+
+Facts are written through the in-app **Intelligence** tab (Scorecard empty state, or directly into the workspace memory) or via [`POST /v2/observations`](/public-api/observations) with a `note.<uuid>` property on the workspace entity. Both write paths produce the same asserted-claim records this endpoint reads.

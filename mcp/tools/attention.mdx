@@ -1,0 +1,44 @@
+---
+title: "attention"
+description: "What needs your attention across the workspace right now — accounts gone quiet, key facts decayed. Each item ships with a suggested action."
+---
+
+The "what should I work next?" tool. Returns a ranked list of accounts that have decayed past your thresholds, with a suggested next action on each.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `limit` | number | | Max items. Default 25, cap 100. |
+
+## Returns
+
+```
+Needs attention (5):
+  Arnold Schwarzenegger — no activity for 35 days
+      → Re-engage with a follow-up or close the account out
+  Rinor Recica — no activity for 45 days
+      → Re-engage with a follow-up or close the account out
+  Brian Dempsey — no activity for 48 days
+      → Re-engage with a follow-up or close the account out
+  Arkadiusz Czarniecki — no activity for 68 days
+      → Re-engage with a follow-up or close the account out
+  Gudrun Glinder — no activity for 125 days
+      → Re-engage with a follow-up or close the account out
+```
+
+If nothing needs attention:
+
+```
+Nothing needs attention right now.
+```
+
+## When to call it
+
+- **At the start of an agent's working session** — pick what to act on
+- **As a recurring cron** that surfaces accounts into a Slack channel or task queue
+- **In a Playground prompt** ("who has gone quiet that I should follow up with?") to surface the today-list
+
+## Backed by
+
+`GET /v2/attention` — see the [HTTP reference](/public-api/attention) for the raw JSON shape.

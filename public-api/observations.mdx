@@ -1,0 +1,111 @@
+---
+title: "Record Observations"
+api: "POST https://api.opennous.cloud/v2/observations"
+description: "Record what happened. You observe; Nous derives the claims."
+---
+
+The only write verb in the substrate. Agents never overwrite — they record observations. Nous derives the new claims automatically from the full observation history and tells you which were recomputed.
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/observations \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "focus": "sarah@acme.com",
+    "observations": [
+      {
+        "kind": "event",
+        "property": "interaction.email_sent",
+        "value": { "subject": "Q3 pricing", "body_snippet": "..." }
+      },
+      {
+        "kind": "state",
+        "property": "intent",
+        "value": "evaluating",
+        "source": "agent"
+      }
+    ]
+  }'
+```
+
+### Body
+
+<ParamField body="focus" type="string" required>
+  Entity UUID, email, domain, or LinkedIn URL. **Not** a bare name — writes need a precise identifier so the entity can be created if it doesn't exist yet.
+</ParamField>
+
+<ParamField body="observations" type="array" required>
+  One or more observations to append. Each:
+
+  <Expandable title="observation">
+    <ParamField body="kind" type="string" required>
+      `"event"` for an interaction (email sent, call held, page visited) or `"state"` for a fact (title is VP Sales, intent is evaluating).
+    </ParamField>
+    <ParamField body="property" type="string" required>
+      Namespaced — events use `interaction.<type>` (e.g. `interaction.email_sent`); state uses bare names (e.g. `title`, `intent`, `stage`).
+    </ParamField>
+    <ParamField body="value" type="any">
+      The observation payload. For events: detail object. For state: the value (use `null` to assert the fact ended — they left the role, etc.).
+    </ParamField>
+    <ParamField body="source" type="string">
+      Where the signal came from. Default: `"agent"`.
+    </ParamField>
+    <ParamField body="method" type="string">
+      How it was captured. Default: `"api"`.
+    </ParamField>
+    <ParamField body="observed_at" type="string (ISO 8601)">
+      When it happened. Default: now.
+    </ParamField>
+    <ParamField body="external_id" type="string">
+      Dedup key from the upstream system (e.g. the HubSpot engagement ID).
+    </ParamField>
+    <ParamField body="raw" type="object">
+      The full upstream payload, stored for audit. Not interpreted.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+```json
+{
+  "entity_id": "a1b2c3d4-...",
+  "recorded": 2,
+  "claims_recomputed": ["intent"]
+}
+```
+
+`claims_recomputed` lists the state properties whose claim was re-derived after this batch — your downstream UI can refetch only those.
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+const result = await nous.record('sarah@acme.com', [
+  { kind: 'event', property: 'interaction.email_sent',
+    value: { subject: 'Q3 pricing', body_snippet: '…' } },
+  { kind: 'state', property: 'intent', value: 'evaluating' },
+]);
+console.log(result.claims_recomputed); // → ['intent']
+```
+
+```python Python
+result = client.record("sarah@acme.com", observations=[
+    {"kind": "event", "property": "interaction.email_sent",
+     "value": {"subject": "Q3 pricing", "body_snippet": "…"}},
+    {"kind": "state", "property": "intent", "value": "evaluating"},
+])
+print(result["claims_recomputed"])  # → ['intent']
+```
+</CodeGroup>
+
+## The observation model
+
+You're appending to an immutable spine. Two reasons:
+
+1. **The substrate self-heals** — when a new observation contradicts an old one, the claim derivation re-runs and the belief shifts. Nothing is ever "lost."
+2. **Every claim is auditable** — `epistemic_class` + `sources` on every claim let your agent (and your audit log) see exactly which observations support it.
+
+Use `null` value on a `state` observation to assert the fact ended — they left the company, the deal closed-lost, the email bounced.

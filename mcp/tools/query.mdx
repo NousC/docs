@@ -1,0 +1,76 @@
+---
+title: "query"
+description: "Retrieve + summarise a corpus of activity across many people. The substrate retrieves; your agent finds the pattern."
+---
+
+Where `get_context` is one person, `query` is many. Pull the last 30 days of email replies, every meeting from `fireflies`, every cold email sent — and let your agent reason over the result.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `scope` | object | ✓ | Filter for the corpus |
+| `question` | string | | Your analytical question — echoed in the response |
+
+### Scope
+
+| Field | Type | Description |
+|---|---|---|
+| `kind` | `"event"` or `"state"` | Limit to one observation type |
+| `property` | string | Prefix match — `interaction.email` covers `email_sent` and `email_replied` |
+| `source` | string | e.g. `gmail`, `linkedin`, `fireflies` |
+| `entity_id` | string | Scope to one entity |
+| `since_days` | number | Only observations within the last N days |
+| `limit` | number | Max items (default 50, cap 200) |
+
+## Returns
+
+```
+142 matches (showing 50)
+142× email replied
+
+  2d ago   Sarah Chen          email replied: Interested but budget waiting on Q3
+  3d ago   Maria Lopez         email replied: Send it over
+  4d ago   James Park          email replied: We're already evaluating two vendors
+  …
+```
+
+## Examples
+
+"What email replies came in this week?"
+
+```json
+{
+  "scope": {
+    "kind": "event",
+    "property": "interaction.email_replied",
+    "since_days": 7,
+    "limit": 50
+  },
+  "question": "What email replies came in this week?"
+}
+```
+
+"All meetings on a specific account":
+
+```json
+{
+  "scope": {
+    "kind": "event",
+    "property": "interaction.meeting",
+    "entity_id": "a1b2c3d4-..."
+  }
+}
+```
+
+## When to call it
+
+- **"Across all accounts this week, who replied positively?"**
+- **"What signal types are firing most often?"**
+- **"How many cold emails went out from Instantly this month?"**
+
+For workspace-level facts about your own business (ICP, pricing, etc.) use [`get_workspace_facts`](/mcp/tools/get-workspace-facts) — `query` is for per-entity observations only.
+
+## Backed by
+
+`POST /v2/query` — see the [HTTP reference](/public-api/query) for the raw JSON shape.

@@ -1,0 +1,66 @@
+---
+title: "get_context"
+description: "Engineered context for one task about one entity. The headline call before drafting outreach, prepping a meeting, or making any decision about a person or company."
+---
+
+The most-used tool. Pass who you're working on and what you're about to do — get back a focused, ranked block: facts with confidence + freshness, the recent timeline, the buying-group stakeholders, and any open predictions.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `focus` | string | ✓ | Email, LinkedIn URL, domain, entity UUID, or name |
+| `intent` | enum | | `account_review` *(default)*, `draft_email`, `follow_up`, `meeting_prep`, `call_prep` |
+| `budget_tokens` | number | | Approximate token budget for the returned block |
+
+## Returns
+
+Formatted text — one line per claim, the recent timeline, stakeholders, predictions:
+
+```
+Sarah is evaluating for Q3; primary concern is Salesforce migration.
+
+FACTS (12):
+  title: VP Sales                              [92% · fresh]
+  stage: evaluating                            [81% · fresh]
+  intent: budget_q3                            [78% · aging]
+
+YOUR CONTEXT (ICP / product / positioning):
+  ICP: GTM Engineers or RevOps leaders, B2B SaaS, 50–200 employees
+
+TIMELINE:
+  2d ago    email replied: Interested but budget waiting on Q3
+  4d ago    linkedin message: Can we reschedule?
+  1w ago    proposal sent: Q3 outbound package — $12k/yr
+
+STAKEHOLDERS:
+  Maria Lopez — CFO
+  James Park — Head of Eng
+
+PREDICTIONS:
+  icp_fit: 0.84 (78%)
+
+(entity_id: a1b2c3d4-...)
+```
+
+### Ambiguous name
+
+If `focus` is a name that matches several people:
+
+```
+"Sarah Chen" matches several people. Call get_context again with one of these entity ids:
+  • Sarah Chen — VP Sales @ Acme  [a1b2c3d4-...]
+  • Sarah Chen — Designer @ Pixel [b2c3d4e5-...]
+```
+
+## When to call it
+
+- **Before any outbound action** on a known contact
+- **At the start of meeting prep** — pick the `intent` that matches the use case
+- **Whenever your agent needs to ground a decision** in a person's current state
+
+For raw data ("what do we know about X?"), prefer [`get_account`](/mcp/tools/get-account). For questions about your OWN business (ICP, pricing), use [`get_workspace_facts`](/mcp/tools/get-workspace-facts).
+
+## Backed by
+
+`POST /v2/context` — see the [HTTP reference](/public-api/context) for the raw JSON shape.

@@ -1,0 +1,47 @@
+---
+title: "get_account"
+description: "The full Account Record — every known fact with its confidence and freshness, plus the recent activity timeline."
+---
+
+Returns the complete projection for a person or company. Use this when you want the raw picture; prefer [`get_context`](/mcp/tools/get-context) for task-shaped output ranked for a specific intent.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | ✓ | Email address or entity UUID |
+
+## Returns
+
+```
+person · a1b2c3d4-...
+
+FACTS (8):
+  title: VP Sales            [92% · fresh]
+  stage: evaluating          [81% · fresh]
+  intent: budget_q3          [78% · aging]
+  email: sarah@acme.com      [95% · fresh]
+  company: Acme              [88% · fresh]
+  industry: B2B SaaS         [70% · aging]
+  seniority: vp              [85% · fresh]
+  decision_role: champion    [62% · aging]
+
+TIMELINE (30):
+  2d ago    interaction.email_replied
+  4d ago    interaction.linkedin_message
+  1w ago    interaction.proposal_sent
+  2w ago    interaction.call_held
+  …
+```
+
+## When to call it
+
+- **"What do we know about X?"** type questions
+- Building an audit / debug view of a contact
+- When the agent needs to inspect `epistemic_class` and `sources` to understand WHY a claim is held
+
+For action-oriented context (drafting outreach, prepping a meeting), prefer [`get_context`](/mcp/tools/get-context).
+
+## Backed by
+
+`GET /v2/accounts/:id` — see the [HTTP reference](/public-api/accounts) for the raw JSON shape.

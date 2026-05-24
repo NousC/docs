@@ -1,0 +1,119 @@
+---
+title: "Query"
+api: "POST https://api.opennous.cloud/v2/query"
+description: "Retrieve + summarise a corpus of observations across many entities. The substrate retrieves; your agent finds the pattern."
+---
+
+Where `/v2/context` is one entity, `query` is many. Pull the last 30 days of email replies, all meetings in a property, every signal from a CRM — and let your agent reason over the corpus.
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/query \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "scope": {
+      "kind": "event",
+      "property": "interaction.email_replied",
+      "since_days": 30,
+      "limit": 200
+    },
+    "question": "Which segments replied positively this month?"
+  }'
+```
+
+### Body
+
+<ParamField body="scope" type="object" required>
+  Filter for the corpus.
+
+  <Expandable title="scope">
+    <ParamField body="kind" type="string">
+      `"event"` or `"state"`. Omit for both.
+    </ParamField>
+    <ParamField body="property" type="string">
+      Prefix match — `interaction.email` matches `email_sent` and `email_replied`.
+    </ParamField>
+    <ParamField body="source" type="string">
+      e.g. `"gmail"`, `"linkedin"`, `"fireflies"`.
+    </ParamField>
+    <ParamField body="entity_id" type="string">
+      Scope to one entity.
+    </ParamField>
+    <ParamField body="since_days" type="number">
+      Only observations within the last N days.
+    </ParamField>
+    <ParamField body="limit" type="number">
+      Max items (default 50, cap 200).
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="question" type="string">
+  Your analytical question. Echoed back in the response. Doesn't change retrieval — it's a marker for downstream agents that consume the response.
+</ParamField>
+
+<ParamField body="budget_tokens" type="number">
+  Approximate token budget for item summaries.
+</ParamField>
+
+## Response
+
+```json
+{
+  "matched": 142,
+  "returned": 50,
+  "sampled": true,
+  "items": [
+    {
+      "entity_id": "...",
+      "entity_name": "Sarah Chen",
+      "when": "2026-05-21T15:00:00Z",
+      "type": "interaction.email_replied",
+      "source": "gmail",
+      "summary": "Interested but budget waiting on Q3"
+    }
+  ],
+  "rollups": {
+    "by_type":   { "interaction.email_replied": 142 },
+    "by_source": { "gmail": 120, "outlook": 22 }
+  },
+  "meta": { "token_estimate": 1840 },
+  "question": "Which segments replied positively this month?"
+}
+```
+
+## SDK
+
+<CodeGroup>
+```typescript Node
+const { items, rollups } = await nous.query(
+  { kind: 'event', property: 'interaction.email_replied', since_days: 30, limit: 200 },
+  { question: 'Which segments replied positively this month?' },
+);
+items.forEach(i => console.log(i.entity_name, '—', i.summary));
+```
+
+```python Python
+result = client.query(
+    scope={"kind": "event", "property": "interaction.email_replied",
+           "since_days": 30, "limit": 200},
+    question="Which segments replied positively this month?",
+)
+for item in result["items"]:
+    print(item["entity_name"], "—", item["summary"])
+```
+</CodeGroup>
+
+## Pattern-finding belongs to the agent
+
+The substrate retrieves and compacts. Your agent does the reasoning. That's deliberate — different agents care about different patterns, and the substrate doesn't pre-decide. Feed the response into the model and let it find the pattern.
+
+## When to call it
+
+- **"Across all accounts this week, who replied positively?"**
+- **"What signal types are firing most often?"**
+- **"How many cold emails went out from Instantly this month?"**
+
+For workspace-level facts about your own business (ICP, pricing, etc.), use [`/v2/workspace/facts`](/public-api/workspace-facts) instead — `query` is for per-entity observations.
