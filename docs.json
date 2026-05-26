@@ -49,7 +49,10 @@
               {
                 "group": "Outbound",
                 "pages": [
-                  "providers/instantly"
+                  "providers/instantly",
+                  "providers/emailbison",
+                  "providers/heyreach",
+                  "providers/smartlead"
                 ]
               },
               {
@@ -88,6 +91,9 @@
                 "pages": [
                   "webhooks/overview",
                   "webhooks/instantly",
+                  "webhooks/emailbison",
+                  "webhooks/heyreach",
+                  "webhooks/smartlead",
                   "webhooks/fireflies",
                   "webhooks/fathom",
                   "webhooks/rb2b",

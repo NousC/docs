@@ -1,0 +1,37 @@
+---
+title: HeyReach
+description: Log LinkedIn outbound events from HeyReach on contact timelines.
+---
+
+## Connect via API Key
+
+<Steps>
+  <Step title="Open API settings in HeyReach">
+    In HeyReach go to **Settings → API** and create an API key. API keys never expire, but can be revoked from the same page.
+
+  </Step>
+
+  <Step title="Connect in Nous">
+    Go to **Settings → Integrations → + Add Integration → HeyReach**, paste the key, and click **Connect**. Nous verifies it by calling `GET /api/public/auth/CheckApiKey` against `https://api.heyreach.io`.
+
+  </Step>
+</Steps>
+
+## Webhooks (auto-registered)
+
+HeyReach exposes a webhook API, so Nous registers the webhooks for you on connect. No paste step needed.
+
+On connect Nous calls `POST /api/public/webhooks/CreateWebhook` once for each of these event types, all pointed at the same workspace-scoped URL:
+
+- `MESSAGE_REPLY_RECEIVED`
+- `INMAIL_REPLY_RECEIVED`
+- `CONNECTION_REQUEST_ACCEPTED`
+- `LEAD_TAG_UPDATED`
+
+The resulting webhook IDs are stored on the connection so that disconnecting HeyReach in Nous also deletes the webhooks on the HeyReach side.
+
+See the [HeyReach webhook reference](/webhooks/heyreach) for the event-to-activity mapping.
+
+## Optional: shared secret
+
+For an extra layer of protection on the inbound URL, set `HEYREACH_WEBHOOK_SECRET` in `nous.env`. When set, Nous appends `?secret=<value>` to the registered webhook URL and rejects any inbound request whose query string doesn't match.

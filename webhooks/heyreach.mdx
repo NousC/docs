@@ -1,0 +1,66 @@
+---
+title: HeyReach Webhook
+description: Log LinkedIn outbound events from HeyReach on contact timelines.
+---
+
+## Endpoint
+
+Auto-registered on connect. The URL Nous registers with HeyReach is:
+
+```
+POST https://api.yourdomain.com/inbound/heyreach/<your-workspace-id>
+```
+
+You can see it (and the registered webhook IDs) under **Settings → Integrations → HeyReach** after connecting.
+
+## Auth
+
+HeyReach does not sign webhook payloads. For an extra layer of protection, set `HEYREACH_WEBHOOK_SECRET` in `nous.env`. When set, Nous appends `?secret=<value>` to the registered URL and rejects any inbound request whose query string doesn't match.
+
+## Setup in HeyReach
+
+Nothing manual. On connect, Nous calls `POST /api/public/webhooks/CreateWebhook` once per event type. On disconnect, Nous calls `DELETE /api/public/webhooks/DeleteWebhook?webhookId=…` for each.
+
+## Supported events
+
+| HeyReach event | Activity logged | Creates contact? |
+|---|---|---|
+| `MESSAGE_REPLY_RECEIVED` | `linkedin_message_received` | Yes |
+| `EVERY_MESSAGE_REPLY_RECEIVED` | `linkedin_message_received` | Yes |
+| `INMAIL_REPLY_RECEIVED` | `linkedin_message_received` | Yes |
+| `CONNECTION_REQUEST_ACCEPTED` | `linkedin_connection_accepted` | Yes |
+| `CONNECTION_REQUEST_SENT` | `linkedin_connection_sent` | No |
+| `MESSAGE_SENT` | `linkedin_message_sent` | No |
+| `INMAIL_SENT` | `linkedin_message_sent` | No |
+| `FOLLOW_SENT` | `linkedin_follow_sent` | No |
+| `LIKED_POST` | `linkedin_like` | No |
+| `VIEWED_PROFILE` | `linkedin_profile_view` | No |
+| `CAMPAIGN_COMPLETED` | `campaign_completed` | No |
+| `LEAD_TAG_UPDATED` | `tag_updated` | No |
+
+Replies and accepted connections create a new contact if one doesn't exist yet. All other events are update-only.
+
+## Payload
+
+Nous reads these fields from the HeyReach payload:
+
+```json
+{
+  "eventType": "MESSAGE_REPLY_RECEIVED",
+  "leadProfile": {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "emailAddress": "jane@company.com",
+    "linkedInUrl": "https://linkedin.com/in/janesmith"
+  },
+  "campaign": { "id": 123, "name": "LinkedIn Q2" },
+  "message": { "id": "m_abc", "text": "Thanks for reaching out..." },
+  "timestamp": "2026-05-26T12:00:00Z"
+}
+```
+
+Identity resolves on LinkedIn URL first, then email — so connections without an email-on-file are still matched.
+
+## Deduplication
+
+Events are deduplicated by message ID where one is present. Otherwise events are keyed on `{eventType, lead, timestamp}`.

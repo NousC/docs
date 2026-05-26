@@ -1,0 +1,65 @@
+---
+title: Smartlead Webhook
+description: Log email outbound events from Smartlead on contact timelines.
+---
+
+## Endpoint
+
+Your webhook URL is shown in **Settings → Integrations → Webhooks → Smartlead**. It looks like:
+
+```
+POST https://api.yourdomain.com/inbound/smartlead/<your-workspace-id>
+```
+
+Copy it directly from the UI — your workspace ID is already embedded.
+
+## Auth
+
+Smartlead webhooks are not signed by default. For an extra layer of protection, set `SMARTLEAD_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the URL when pasting it into Smartlead. Nous rejects any inbound request whose query string doesn't match.
+
+## Setup in Smartlead
+
+Smartlead webhooks are configured per campaign.
+
+1. Open the campaign you want to track.
+2. Go to **Settings → Webhooks → Add Webhook**.
+3. Paste the URL from Nous and tick the events you want.
+4. Repeat for every campaign you care about.
+
+## Supported events
+
+| Smartlead event | Activity logged | Creates contact? |
+|---|---|---|
+| `EMAIL_REPLIED` | `email_received` | Yes |
+| `EMAIL_SENT` | `email_sent` | No |
+| `EMAIL_OPENED` | `email_opened` | No |
+| `EMAIL_CLICKED` | `email_opened` | No |
+| `EMAIL_BOUNCED` | `email_bounced` | No |
+| `EMAIL_UNSUBSCRIBED` | `email_bounced` | No |
+
+Replies create a new contact if one doesn't exist yet. All other events are update-only.
+
+## Payload
+
+Nous reads these fields from the Smartlead payload:
+
+```json
+{
+  "event": "EMAIL_REPLIED",
+  "campaign_id": 123,
+  "campaign_name": "Q2 Outreach",
+  "lead": {
+    "email": "prospect@company.com",
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "company_name": "Acme"
+  },
+  "reply": { "text": "Thanks for reaching out..." },
+  "message_id": "msg_abc123",
+  "timestamp": "2026-05-26T12:00:00Z"
+}
+```
+
+## Deduplication
+
+Events are deduplicated by `message_id`. If Smartlead retries a delivery, the duplicate is silently dropped.

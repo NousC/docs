@@ -1,0 +1,68 @@
+---
+title: EmailBison Webhook
+description: Log email outbound events from EmailBison on contact timelines.
+---
+
+## Endpoint
+
+Your webhook URL is shown in **Settings → Integrations → Webhooks → EmailBison**. It looks like:
+
+```
+POST https://api.yourdomain.com/inbound/emailbison/<your-workspace-id>
+```
+
+Copy it directly from the UI — your workspace ID is already embedded.
+
+## Auth
+
+EmailBison does not sign webhook payloads. For an extra layer of protection, set `EMAILBISON_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the URL when pasting it into EmailBison. Nous rejects any inbound request whose query string doesn't match.
+
+## Setup in EmailBison
+
+1. In EmailBison go to **Settings → Webhooks**.
+2. Click **New Webhook URL** and paste your URL from Nous.
+3. Pick the events you want (see table below).
+
+## Supported events
+
+| EmailBison event | Activity logged | Creates contact? |
+|---|---|---|
+| `reply_received` / `REPLY_RECEIVED` | `email_received` | Yes |
+| `email_replied` / `EMAIL_REPLIED` | `email_received` | Yes |
+| `interested` / `INTERESTED` | `email_received` | Yes |
+| `email_sent` / `EMAIL_SENT` | `email_sent` | No |
+| `email_opened` / `EMAIL_OPENED` | `email_opened` | No |
+| `email_clicked` / `EMAIL_CLICKED` | `email_opened` | No |
+| `email_bounced` / `EMAIL_BOUNCED` | `email_bounced` | No |
+| `unsubscribed` / `UNSUBSCRIBED` | `email_bounced` | No |
+
+Replies and interested-tags create a new contact if one doesn't exist yet. All other events are update-only. Unknown event types are logged to the workspace system event log so you can iterate without losing data.
+
+## Payload
+
+EmailBison wraps each event in an envelope:
+
+```json
+{
+  "event": {
+    "type": "REPLY_RECEIVED",
+    "name": "Reply Received",
+    "instance_url": "https://dedi.emailbison.com",
+    "workspace_id": 2,
+    "workspace_name": "Red Team"
+  },
+  "data": {
+    "lead": { "email": "prospect@company.com", "first_name": "Jane", "last_name": "Smith" },
+    "campaign_id": 123,
+    "campaign_name": "Q2 Outreach",
+    "reply_text": "Thanks for reaching out...",
+    "message_id": "msg_abc123"
+  }
+}
+```
+
+Nous accepts both the wrapped form above and a flattened variant (top-level `type`, `lead_email`, etc.) — useful for test payloads.
+
+## Deduplication
+
+Events are deduplicated by `message_id`. If EmailBison retries a delivery (it retries up to five times across 24 hours), the duplicate is silently dropped.

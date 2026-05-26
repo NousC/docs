@@ -1,0 +1,45 @@
+---
+title: Smartlead
+description: Log email outbound events from Smartlead on contact timelines.
+---
+
+## Connect via API Key
+
+<Steps>
+  <Step title="Open API settings in Smartlead">
+    In Smartlead go to **Settings → API Keys** and copy your API key.
+
+  </Step>
+
+  <Step title="Connect in Nous">
+    Go to **Settings → Integrations → + Add Integration → Smartlead**, paste the key, and click **Connect**. Nous verifies it by calling `GET /api/v1/campaigns/?api_key=...` against `https://server.smartlead.ai`.
+
+  </Step>
+</Steps>
+
+## Set up the Webhook (recommended)
+
+Smartlead webhooks are configured per campaign in the Smartlead UI, so this step is manual.
+
+<Steps>
+  <Step title="Copy your webhook URL from Nous">
+    Go to **Settings → Integrations → Webhooks → Smartlead** and copy the URL shown.
+
+  </Step>
+
+  <Step title="Add the webhook in Smartlead">
+    In Smartlead open the campaign you want to track, go to **Settings → Webhooks → Add Webhook**, paste the URL, and tick the events you want.
+
+  </Step>
+
+  <Step title="Repeat for every campaign you want signals from">
+    Smartlead scopes webhooks to a single campaign. Add the same URL to each campaign you care about.
+
+  </Step>
+</Steps>
+
+See the [Smartlead webhook reference](/webhooks/smartlead) for the event-to-activity mapping.
+
+## Optional: shared secret
+
+Set `SMARTLEAD_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the webhook URL when pasting it into Smartlead. Nous rejects any inbound request whose query string doesn't match.
