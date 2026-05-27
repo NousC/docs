@@ -65,6 +65,33 @@ curl https://api.opennous.cloud/v2/accounts/sarah%40acme.com \
 }
 ```
 
+`recent_observations` is **truncated** to the most recent 50 events. Treat counts derived from it (number of replies, messages, etc.) as lower bounds, not totals. For accurate counts across a longer window or many entities, use [`POST /v2/query`](/public-api/query).
+
+### Claim shapes worth knowing
+
+Most claims hold a simple scalar value (`"VP Sales"`, `"evaluating"`, `0.78`). A few hold structured objects — read these as **nested** rather than flat. The big one is `channels`, which carries per-channel state for LinkedIn, email, and anything else Nous tracks per-contact:
+
+```json
+{
+  "property": "channels",
+  "value": {
+    "linkedin": {
+      "url": "https://www.linkedin.com/in/sarah-chen",
+      "state": "connected",
+      "member_id": "ACoAA...",
+      "connected_at": "2026-05-18T18:50:13Z",
+      "synced_at": "2026-05-27T09:00:00Z"
+    },
+    "email": {
+      "state": "active",
+      "last_bounced_at": null
+    }
+  }
+}
+```
+
+So adapters reading "is this person connected on LinkedIn?" should look at `claims.channels.value.linkedin.state === 'connected'`, not a flat `linkedin.state` claim. New channels get added under the same `value` object as integrations land.
+
 ### Ambiguous focus
 
 Same shape as `/v2/context`:

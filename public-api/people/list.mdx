@@ -51,7 +51,7 @@ curl 'https://api.opennous.cloud/v2/people?pipeline_stage=interested&last_activi
 {
   "people": [
     {
-      "entity_id": "a1b2c3d4-...",
+      "id": "a1b2c3d4-...",
       "email": "sarah@acme.com",
       "first_name": "Sarah",
       "last_name": "Chen",
@@ -67,3 +67,5 @@ curl 'https://api.opennous.cloud/v2/people?pipeline_stage=interested&last_activi
   "offset": 0
 }
 ```
+
+`id` is the entity UUID. Pass it to `GET /v2/accounts/:id`, `POST /v2/context`, `POST /v2/observations` — anywhere the v2 surface accepts a `focus`. (`POST` and `PATCH` responses include both `id` and `entity_id`; they always carry the same value.)
