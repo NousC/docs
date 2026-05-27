@@ -107,7 +107,7 @@
         ]
       },
       {
-        "tab": "Public API",
+        "tab": "REST API",
         "groups": [
           {
             "group": "Overview",
@@ -121,6 +121,8 @@
               "public-api/context",
               "public-api/accounts",
               "public-api/observations",
+              "public-api/people",
+              "public-api/leads",
               "public-api/query",
               "public-api/attention",
               "public-api/verify",

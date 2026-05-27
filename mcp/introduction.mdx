@@ -3,7 +3,9 @@ title: "MCP Server"
 description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous Account Record."
 ---
 
-The Nous MCP server is a thin stdio process that exposes the v2 Context API as **seven tools** any MCP-compatible client can call. Your agent gets engineered, epistemics-tagged context — never raw rows.
+The Nous MCP server is a thin stdio process that exposes the v2 substrate as **seven tools** any MCP-compatible client can call. Your agent gets engineered, epistemics-tagged context, never raw rows.
+
+The MCP is one of two ways Nous exposes the same substrate. Reach for it when the right call is reasoned at runtime. Use the [REST API](/public-api/introduction) instead when a workflow runtime already knows the parameters (n8n filtering a list, a form intake creating a lead, a job patching `sent_at` mid-loop). Both surfaces sit on the same evidence substrate, so a write through one is visible to the other.
 
 ## Install in 30 seconds
 
