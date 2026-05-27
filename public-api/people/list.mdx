@@ -1,0 +1,69 @@
+---
+title: "List People"
+api: "GET https://api.opennous.cloud/v2/people"
+description: "Filtered, paginated list of people in the workspace. Workflow shape — same projection your agent sees through /v2/accounts/:id."
+---
+
+```bash
+curl 'https://api.opennous.cloud/v2/people?pipeline_stage=interested&last_activity_after=7d&limit=50' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+## Query parameters
+
+<ParamField query="search" type="string">
+  Substring match across email, first name, last name, company.
+</ParamField>
+<ParamField query="pipeline_stage" type="string">
+  Exact match. One of `identified`, `aware`, `interested`, `evaluating`, `client`.
+</ParamField>
+<ParamField query="source" type="string">
+  Exact match on the entity's source claim.
+</ParamField>
+<ParamField query="status" type="string">
+  Entity status. `active` (default) or `archived`.
+</ParamField>
+<ParamField query="has_email" type="boolean">
+  Restrict to people who do or do not have an email identifier.
+</ParamField>
+<ParamField query="has_linkedin" type="boolean">
+  Restrict to people who do or do not have a LinkedIn URL.
+</ParamField>
+<ParamField query="last_activity_before" type="string">
+  Duration like `2d`, `7d`, `30d`. Returns people whose last activity was before now minus the duration, including people who never had activity. Use this for the "gone quiet for N" filter inside a morning loop.
+</ParamField>
+<ParamField query="last_activity_after" type="string">
+  Duration like `2d`, `7d`, `30d`. Returns people active within the window.
+</ParamField>
+<ParamField query="sort" type="string">
+  `last_activity_desc` (default) or `last_activity_asc`.
+</ParamField>
+<ParamField query="limit" type="integer" default="100">
+  Page size. Max 1000.
+</ParamField>
+<ParamField query="offset" type="integer" default="0">
+  Page offset.
+</ParamField>
+
+## Response
+
+```json
+{
+  "people": [
+    {
+      "entity_id": "a1b2c3d4-...",
+      "email": "sarah@acme.com",
+      "first_name": "Sarah",
+      "last_name": "Chen",
+      "job_title": "VP Sales",
+      "company": "Acme",
+      "linkedin_url": "https://linkedin.com/in/sarah-chen",
+      "pipeline_stage": "interested",
+      "icp_score": 0.78,
+      "last_activity_at": "2026-05-25T18:11:32Z"
+    }
+  ],
+  "limit": 50,
+  "offset": 0
+}
+```

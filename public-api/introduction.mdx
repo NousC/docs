@@ -66,11 +66,19 @@ Keys are workspace-scoped, so no separate workspace ID is required.
   <Card title="POST /v2/observations" href="/public-api/observations" icon="pen">
     Record what happened. You observe; Nous derives the claims.
   </Card>
-  <Card title="POST + PATCH /v2/people" href="/public-api/people" icon="user-plus">
+  <Card title="POST + PATCH /v2/people" href="/public-api/people/create" icon="user-plus">
     Create a person from a form intake. PATCH asserts fields like email, title, or company directly onto the entity.
   </Card>
-  <Card title="POST + PATCH /v2/leads" href="/public-api/leads" icon="square-plus">
+  <Card title="POST + PATCH /v2/leads" href="/public-api/leads/create" icon="square-plus">
     Add leads to a list. PATCH a row mid-workflow to record progress before the async webhook arrives.
+  </Card>
+</CardGroup>
+
+### React
+
+<CardGroup cols={1}>
+  <Card title="Triggers (outbound webhooks)" href="/public-api/triggers/introduction" icon="bolt">
+    Subscribe a URL to interaction events. The instant a reply, connection accept, or meeting lands, Nous POSTs a signed payload to your workflow. The agent-gets-paged surface for the Account Record.
   </Card>
 </CardGroup>
 

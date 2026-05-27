@@ -1,0 +1,63 @@
+---
+title: "Create Person"
+api: "POST https://api.opennous.cloud/v2/people"
+description: "Create or upsert a person by identifier. Idempotent — if an entity with one of the identifiers already exists, you get it back with any new claim values asserted onto it."
+---
+
+Use this from a form intake hook. Safe to call repeatedly for the same person.
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/people \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "sarah@acme.com",
+    "linkedin_url": "https://linkedin.com/in/sarah-chen",
+    "first_name": "Sarah",
+    "last_name": "Chen",
+    "job_title": "VP Sales",
+    "company": "Acme"
+  }'
+```
+
+## Body
+
+At least one identifier is required.
+
+<ParamField body="email" type="string">
+  Adds an `email` identifier to the entity.
+</ParamField>
+<ParamField body="linkedin_url" type="string">
+  Adds a `linkedin_url` identifier.
+</ParamField>
+<ParamField body="linkedin_member_id" type="string">
+  Adds a `linkedin_member_id` identifier.
+</ParamField>
+<ParamField body="hubspot_id" type="string">
+  Adds a `hubspot` identifier.
+</ParamField>
+<ParamField body="pipedrive_id" type="string">
+  Adds a `pipedrive` identifier.
+</ParamField>
+<ParamField body="apollo_id" type="string">
+  Adds an `apollo` identifier.
+</ParamField>
+<ParamField body="attio_id" type="string">
+  Adds an `attio` identifier.
+</ParamField>
+
+Every other field on the body is asserted as a claim. Common ones include `first_name`, `last_name`, `job_title`, `company`, `seniority`, `department`, `city`, `country`, `phone`, `pipeline_stage`.
+
+## Response
+
+```json
+{
+  "person": {
+    "entity_id": "a1b2c3d4-...",
+    "email": "sarah@acme.com",
+    "first_name": "Sarah",
+    "job_title": "VP Sales",
+    "...": "..."
+  }
+}
+```

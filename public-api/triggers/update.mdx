@@ -1,0 +1,50 @@
+---
+title: "Update Trigger"
+api: "PATCH https://api.opennous.cloud/api/triggers/{id}"
+description: "Change a subscription's name, URL, events, active state, or rotate its signing secret."
+---
+
+```bash
+curl -X PATCH https://api.opennous.cloud/api/triggers/trg_... \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "events": ["interaction.email_received", "interaction.meeting_held"] }'
+```
+
+## Body
+
+Any subset of:
+
+<ParamField body="name" type="string" />
+<ParamField body="url" type="string" />
+<ParamField body="events" type="string[]">
+  Replaces the full events list. Pass every event you want active.
+</ParamField>
+<ParamField body="active" type="boolean">
+  Toggle delivery without deleting the subscription. Inactive subscriptions don't receive new events; queued events for an inactive sub are dead-lettered.
+</ParamField>
+<ParamField body="rotate_secret" type="boolean">
+  Generate a new signing secret. The previous secret stops working immediately. Response includes the new `signing_secret`.
+</ParamField>
+
+## Response
+
+```json
+{
+  "trigger": {
+    "id": "trg_...",
+    "events": ["interaction.email_received", "interaction.meeting_held"],
+    "...": "..."
+  }
+}
+```
+
+When `rotate_secret: true`:
+
+```json
+{
+  "trigger": { "...": "..." },
+  "signing_secret": "whsec_...",
+  "message": "New signing_secret returned — the previous one has been revoked. Update your verifier."
+}
+```

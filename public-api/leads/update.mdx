@@ -1,0 +1,41 @@
+---
+title: "Update Lead"
+api: "PATCH https://api.opennous.cloud/v2/leads/{id}"
+description: "Patch a lead row mid-workflow. The morning-loop fix — record sent_at the instant you fire the email so the next iteration's filter excludes the row."
+---
+
+```bash
+curl -X PATCH https://api.opennous.cloud/v2/leads/9f1e... \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "sent_at": "2026-05-27T08:01:11Z", "status": "sent" }'
+```
+
+## Body
+
+Pass any subset of `status`, `reply_outcome`, `replied_at`, `sent_at`, `send_variant`, `scorecard_score`, `contact_id`, `features`, `fields`.
+
+## Response
+
+```json
+{
+  "lead": {
+    "id": "9f1e...",
+    "sent_at": "2026-05-27T08:01:11Z",
+    "status": "sent",
+    "...": "..."
+  }
+}
+```
+
+## The morning-loop pattern
+
+This is the canonical n8n shape for chasing non-responders.
+
+1. Pull the batch. `GET /v2/leads?list_id=...&sent_before=2d&has_replied=false`.
+2. Loop over each row. Draft the follow-up via your prompt of choice.
+3. Send the email through Smartlead, Lemlist, or Gmail.
+4. **Immediately PATCH the row.** `{ "sent_at": "<now>", "status": "sent" }`. The next iteration's filter excludes the row.
+5. Also write an observation against the entity with the upstream `message_id` as `external_id`. The async webhook from your sending tool will arrive minutes later and hit the same `external_id`, so the activity is recorded once.
+
+The PATCH gives you immediate consistency for the loop. The observation gives the agent the full timeline. The `external_id` makes the double-write safe.

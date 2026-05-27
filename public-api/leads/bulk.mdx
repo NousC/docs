@@ -1,0 +1,36 @@
+---
+title: "Bulk Create Leads"
+api: "POST https://api.opennous.cloud/v2/leads/bulk"
+description: "Add up to 1000 leads to a list in a single call. Same dedup behaviour as single create."
+---
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/leads/bulk \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "list_id": "LIST_UUID",
+    "leads": [
+      { "email": "a@acme.com", "name": "A" },
+      { "email": "b@acme.com", "name": "B" }
+    ]
+  }'
+```
+
+## Body
+
+<ParamField body="list_id" type="string" required>
+  UUID of the destination lead list.
+</ParamField>
+<ParamField body="leads" type="array" required>
+  Array of lead objects. Each row takes the same shape as the single-create body (minus `list_id`).
+</ParamField>
+<ParamField body="importDuplicates" type="boolean" default="false">
+  Force-insert even if the email or LinkedIn URL is already in the workspace.
+</ParamField>
+
+## Response
+
+```json
+{ "inserted": 2, "skipped": 0, "duplicate_skipped": 0 }
+```
