@@ -1,0 +1,41 @@
+---
+title: "Update Person"
+api: "PATCH https://api.opennous.cloud/v2/people/{id}"
+description: "Assert claim values directly on a person. Asserted claims are sticky — the derivation engine will not overwrite them from later observations."
+---
+
+`:id` may be an entity UUID, email, domain, or LinkedIn URL. Identifier fields on the body attach to the entity. Every other field is asserted as a claim.
+
+```bash
+curl -X PATCH https://api.opennous.cloud/v2/people/sarah@acme.com \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "job_title": "Chief Revenue Officer",
+    "phone": "+1-415-555-0100"
+  }'
+```
+
+## Body
+
+Any subset of identifier fields (`email`, `linkedin_url`, `linkedin_member_id`, `hubspot_id`, `pipedrive_id`, `apollo_id`, `attio_id`) plus any claim fields (`first_name`, `last_name`, `job_title`, `company`, `seniority`, `department`, `city`, `country`, `phone`, `pipeline_stage`, etc.).
+
+To clear a claim, pass `null` for its value. The claim is invalidated rather than deleted, so prior values remain auditable.
+
+## Response
+
+```json
+{
+  "person": {
+    "entity_id": "a1b2c3d4-...",
+    "job_title": "Chief Revenue Officer",
+    "phone": "+1-415-555-0100",
+    "...": "..."
+  },
+  "claims_written": 2
+}
+```
+
+## The write model in one line
+
+Observations record what happened. Assertions through `POST` and `PATCH` declare what is true now. Both land in the same substrate, both show up in `/v2/accounts/:id`, and asserted claims stick until you change them.

@@ -1,0 +1,109 @@
+---
+title: "Triggers"
+description: "Outbound webhooks. Nous POSTs to your URL the moment a tracked interaction happens, so your workflow runs without polling and without a webhook subscription on the upstream tool."
+---
+
+A trigger is a subscription. You give Nous a URL and a list of events; whenever one of those events happens on the Account Record, Nous POSTs a signed payload to your URL.
+
+The point is the same as the rest of the platform. Your workflow runtime (n8n, Make, a Claude routine, a custom backend) does not need to subscribe to Smartlead, HeyReach, Instantly, Gmail, LinkedIn, Calendly, Fireflies, and Fathom separately. Nous already ingests all of them, resolves them to one person, and emits a unified event stream. You subscribe once.
+
+## The event catalog
+
+Six events ship in v1. All are interactions — the moments that drive a workflow. See the [events reference](/public-api/triggers/events) for sample payloads.
+
+| Event | Fired when |
+|---|---|
+| `interaction.email_received` | A reply lands (Instantly, Smartlead, EmailBison, Lemlist, Gmail) |
+| `interaction.email_bounced` | A bounce or unsubscribe |
+| `interaction.linkedin_connection_accepted` | A connection request was accepted |
+| `interaction.linkedin_message_received` | A reply on LinkedIn |
+| `interaction.meeting_scheduled` | A booking on Calendly or Cal.com |
+| `interaction.meeting_held` | Fireflies or Fathom recorded a meeting |
+
+More events will be added over time. The naming is `interaction.<verb>` so new events do not collide with existing claim properties.
+
+## What's in the payload
+
+Small on purpose. Just enough to identify the person and what happened.
+
+```json
+{
+  "event_id": "evt_a1b2c3...",
+  "event_type": "interaction.email_received",
+  "occurred_at": "2026-05-27T14:33:18Z",
+  "workspace_id": "ws_...",
+  "entity_id": "ent_...",
+  "person": {
+    "entity_id": "ent_...",
+    "email": "sarah@acme.com",
+    "linkedin_url": "https://linkedin.com/in/sarah-chen",
+    "name": "Sarah Chen",
+    "job_title": "VP Sales",
+    "company": "Acme"
+  },
+  "event_data": {
+    "source": "instantly",
+    "summary": "Yes, interested in seeing this. When works for a 15-min?",
+    "description": null,
+    "external_id": "msg_inst_98123"
+  }
+}
+```
+
+When your workflow needs more — the timeline, every claim, open predictions, attention items — call [`/v2/context`](/public-api/context) or [`/v2/accounts/:id`](/public-api/accounts) with the `entity_id` from the payload. The receiver re-fetches; Nous does not bloat every event.
+
+## Signing
+
+Every POST carries an HMAC-SHA256 signature of the raw body, computed with the signing secret returned at create time. Verify it before trusting the payload.
+
+```
+POST /your-webhook
+Content-Type: application/json
+User-Agent: Nous-Triggers/1.0
+X-Nous-Signature: sha256=<hex>
+X-Nous-Event-Id: evt_a1b2c3...
+X-Nous-Event-Type: interaction.email_received
+```
+
+```typescript
+import crypto from 'node:crypto';
+
+function verifyNousSignature(rawBody: string, header: string, secret: string) {
+  const expected = 'sha256=' + crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  // constant-time compare — protects against timing attacks
+  const a = Buffer.from(expected);
+  const b = Buffer.from(header);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+```
+
+The signing secret is returned **once**, in the response to `POST /api/triggers`. Save it. If you lose it, rotate via `PATCH /api/triggers/:id` with `{ "rotate_secret": true }`.
+
+## Idempotency
+
+`X-Nous-Event-Id` is unique per event. If you see the same id twice (rare — only happens when Nous retries and your earlier response was actually received), drop the duplicate.
+
+## Retry policy
+
+If your URL returns 2xx, the event is marked delivered. If it returns 5xx, 408, 429, or times out, Nous retries with exponential backoff (1m, 5m, 30m) up to three attempts, then dead-letters. A 4xx response (other than 408/429) is treated as a permanent failure and not retried — fix the bug and rotate-replay if you need to recover.
+
+The delivery worker runs every 30 seconds, so a successful event reaches your URL within a minute of the underlying interaction landing in Nous.
+
+## Manage triggers
+
+Triggers are workspace-scoped. Auth works with either the dashboard JWT or an API key, so you can register subscriptions from a script or n8n flow.
+
+<CardGroup cols={2}>
+  <Card title="GET /api/triggers" href="/public-api/triggers/list" icon="list">
+    List subscriptions in the workspace.
+  </Card>
+  <Card title="POST /api/triggers" href="/public-api/triggers/create" icon="plus">
+    Create a subscription and receive the signing secret.
+  </Card>
+  <Card title="PATCH /api/triggers/:id" href="/public-api/triggers/update" icon="pen">
+    Update name, URL, events, active, or rotate the secret.
+  </Card>
+  <Card title="DELETE /api/triggers/:id" href="/public-api/triggers/delete" icon="trash">
+    Remove a subscription.
+  </Card>
+</CardGroup>

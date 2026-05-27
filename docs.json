@@ -116,18 +116,59 @@
             ]
           },
           {
-            "group": "Endpoints",
+            "group": "Account Context",
             "pages": [
               "public-api/context",
-              "public-api/accounts",
-              "public-api/observations",
-              "public-api/people",
-              "public-api/leads",
+              "public-api/accounts"
+            ]
+          },
+          {
+            "group": "Observations",
+            "pages": [
+              "public-api/observations"
+            ]
+          },
+          {
+            "group": "People",
+            "pages": [
+              "public-api/people/list",
+              "public-api/people/create",
+              "public-api/people/update"
+            ]
+          },
+          {
+            "group": "Leads",
+            "pages": [
+              "public-api/leads/list",
+              "public-api/leads/create",
+              "public-api/leads/bulk",
+              "public-api/leads/update"
+            ]
+          },
+          {
+            "group": "Search",
+            "pages": [
               "public-api/query",
               "public-api/attention",
               "public-api/verify",
-              "public-api/dedup",
+              "public-api/dedup"
+            ]
+          },
+          {
+            "group": "Workspace",
+            "pages": [
               "public-api/workspace-facts"
+            ]
+          },
+          {
+            "group": "Triggers",
+            "pages": [
+              "public-api/triggers/introduction",
+              "public-api/triggers/events",
+              "public-api/triggers/list",
+              "public-api/triggers/create",
+              "public-api/triggers/update",
+              "public-api/triggers/delete"
             ]
           },
           {

@@ -1,0 +1,56 @@
+---
+title: "Create Trigger"
+api: "POST https://api.opennous.cloud/api/triggers"
+description: "Create a webhook subscription. The signing secret is returned ONCE — save it."
+---
+
+```bash
+curl -X POST https://api.opennous.cloud/api/triggers \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "n8n — chase positive replies",
+    "url": "https://hooks.n8n.cloud/abc...",
+    "events": ["interaction.email_received", "interaction.linkedin_message_received"]
+  }'
+```
+
+## Body
+
+<ParamField body="name" type="string" required>
+  Human label. Shown in the dashboard and logs.
+</ParamField>
+<ParamField body="url" type="string" required>
+  HTTPS URL Nous will POST to. (http accepted for local dev.)
+</ParamField>
+<ParamField body="events" type="string[]" required>
+  Array of event types from the [catalog](/public-api/triggers/events). Must be non-empty.
+</ParamField>
+
+## Response
+
+```json
+{
+  "trigger": {
+    "id": "trg_...",
+    "name": "n8n — chase positive replies",
+    "url": "https://hooks.n8n.cloud/abc...",
+    "events": ["interaction.email_received", "interaction.linkedin_message_received"],
+    "active": true,
+    "created_at": "2026-05-27T11:01:00Z"
+  },
+  "signing_secret": "whsec_KZx9q2...e8jh",
+  "message": "Save this signing_secret — it is shown only once. Use it to verify the X-Nous-Signature header on incoming POSTs."
+}
+```
+
+Use `signing_secret` to verify the HMAC-SHA256 signature on every incoming POST. See the [Overview](/public-api/triggers/introduction) for verification code.
+
+## Errors
+
+| Code | Meaning |
+|---|---|
+| `name_required` | Empty name |
+| `invalid_url`, `invalid_url_protocol` | URL parse failure |
+| `events_required` | `events` empty or missing |
+| `unknown_event:<type>` | Event not in the catalog |

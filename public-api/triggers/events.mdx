@@ -1,0 +1,118 @@
+---
+title: "Events Reference"
+description: "Every event you can subscribe to, with a sample payload."
+---
+
+Six events ship in v1. Each row arrives signed with HMAC-SHA256 (see [Overview](/public-api/triggers/introduction)) and carries the same envelope shape — `event_id`, `event_type`, `occurred_at`, `workspace_id`, `entity_id`, `person`, `event_data`.
+
+## `interaction.email_received`
+
+A reply landed in any of the email senders Nous ingests from (Instantly, Smartlead, EmailBison, Lemlist, Gmail). This is the highest-signal event in GTM. Most workflows you build will start here.
+
+```json
+{
+  "event_id": "evt_a1b2c3...",
+  "event_type": "interaction.email_received",
+  "occurred_at": "2026-05-27T14:33:18Z",
+  "workspace_id": "ws_...",
+  "entity_id": "ent_...",
+  "person": {
+    "entity_id": "ent_...",
+    "email": "sarah@acme.com",
+    "linkedin_url": "https://linkedin.com/in/sarah-chen",
+    "name": "Sarah Chen",
+    "job_title": "VP Sales",
+    "company": "Acme"
+  },
+  "event_data": {
+    "source": "instantly",
+    "summary": "Yes, interested in seeing this. When works for a 15-min?",
+    "description": null,
+    "external_id": "msg_inst_98123"
+  }
+}
+```
+
+The `summary` field carries the reply body (up to 500 chars). To classify sentiment or pull the full conversation, call [`/v2/context`](/public-api/context) with the `entity_id` and `intent: "follow_up"`.
+
+## `interaction.email_bounced`
+
+A bounce or an unsubscribe. The same shape; `event_data.source` tells you which sender flagged it.
+
+```json
+{
+  "event_type": "interaction.email_bounced",
+  "event_data": { "source": "smartlead", "summary": null, "external_id": "..." },
+  "...": "..."
+}
+```
+
+Use this to mark the lead unsendable in your workflow (or just let Nous's `reachability_status` claim handle it for the next [`/v2/dedup`](/public-api/dedup) call).
+
+## `interaction.linkedin_connection_accepted`
+
+Fired when HeyReach reports a `CONNECTION_REQUEST_ACCEPTED` event.
+
+```json
+{
+  "event_type": "interaction.linkedin_connection_accepted",
+  "event_data": { "source": "heyreach", "summary": null, "external_id": "..." },
+  "person": { "linkedin_url": "https://linkedin.com/in/sarah-chen", "...": "..." }
+}
+```
+
+The canonical "now send them a personalised first message" trigger.
+
+## `interaction.linkedin_message_received`
+
+A reply on LinkedIn — either through the HeyReach webhook (`MESSAGE_REPLY_RECEIVED`, `INMAIL_REPLY_RECEIVED`) or the direct Unipile-backed LinkedIn integration.
+
+```json
+{
+  "event_type": "interaction.linkedin_message_received",
+  "event_data": {
+    "source": "heyreach",
+    "summary": "Sounds good, let's chat next week.",
+    "external_id": "li_msg_..."
+  },
+  "person": { "linkedin_url": "...", "...": "..." }
+}
+```
+
+## `interaction.meeting_scheduled`
+
+A booking on Calendly or Cal.com.
+
+```json
+{
+  "event_type": "interaction.meeting_scheduled",
+  "event_data": {
+    "source": "calendly",
+    "summary": null,
+    "description": "Booked: 30-min Intro Call",
+    "external_id": "..."
+  },
+  "person": { "email": "sarah@acme.com", "...": "..." }
+}
+```
+
+The booking confirmation. Use it to push a thank-you note, prep the deal in your CRM, or draft a brief for whoever is taking the call.
+
+## `interaction.meeting_held`
+
+Fireflies or Fathom recorded a meeting transcript.
+
+```json
+{
+  "event_type": "interaction.meeting_held",
+  "event_data": {
+    "source": "fireflies",
+    "summary": "Discussed pricing, integration timeline, security review...",
+    "description": "Meeting: Acme x Nous — Intro",
+    "external_id": "ff_..."
+  },
+  "person": { "email": "sarah@acme.com", "...": "..." }
+}
+```
+
+The post-meeting follow-up moment. A workflow here typically pulls the full transcript context via [`/v2/context`](/public-api/context) (intent `follow_up`), drafts a recap email, logs next steps.

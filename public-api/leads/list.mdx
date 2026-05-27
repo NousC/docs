@@ -1,0 +1,72 @@
+---
+title: "List Leads"
+api: "GET https://api.opennous.cloud/v2/leads"
+description: "Filtered, paginated list of leads across all lead lists in the workspace."
+---
+
+Lead Lists is a Scale-plan feature.
+
+```bash
+curl 'https://api.opennous.cloud/v2/leads?list_id=LIST_UUID&status=sent&sent_before=2d&limit=100' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+## Query parameters
+
+<ParamField query="list_id" type="string">
+  UUID of a single list. Omit to query across every list in the workspace.
+</ParamField>
+<ParamField query="status" type="string">
+  Exact match. One of `pending`, `sent`, `replied`, `bounced`.
+</ParamField>
+<ParamField query="reply_outcome" type="string">
+  One of `interested`, `objection`, `wrong_fit`, `unsubscribe`.
+</ParamField>
+<ParamField query="has_replied" type="boolean">
+  `true` returns rows where `replied_at` is set. `false` returns rows still waiting.
+</ParamField>
+<ParamField query="has_email" type="boolean">
+  Restrict by whether the row has an email.
+</ParamField>
+<ParamField query="sent_within" type="string">
+  Duration like `2d`, `7d`. Returns rows sent within the window.
+</ParamField>
+<ParamField query="sent_before" type="string">
+  Duration like `2d`, `7d`. Returns rows whose last send was before the cutoff, including rows that were never sent. Use this for "no outreach in N days" filters.
+</ParamField>
+<ParamField query="score_gte" type="number">
+  Minimum `scorecard_score` (0..1).
+</ParamField>
+<ParamField query="sort" type="string">
+  `created_desc` (default), `created_asc`, `score_desc`.
+</ParamField>
+<ParamField query="limit" type="integer" default="100">
+  Page size. Max 1000.
+</ParamField>
+<ParamField query="offset" type="integer" default="0">
+  Page offset.
+</ParamField>
+
+## Response
+
+```json
+{
+  "leads": [
+    {
+      "id": "9f1e...",
+      "lead_list_id": "1234-...",
+      "email": "sarah@acme.com",
+      "name": "Sarah Chen",
+      "company": "Acme",
+      "linkedin_url": "https://linkedin.com/in/sarah-chen",
+      "sent_at": "2026-05-23T08:01:11Z",
+      "status": "sent",
+      "reply_outcome": null,
+      "scorecard_score": 0.78,
+      "fields": { "title": "VP Sales", "industry": "SaaS" }
+    }
+  ],
+  "limit": 100,
+  "offset": 0
+}
+```

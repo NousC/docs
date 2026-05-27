@@ -1,0 +1,16 @@
+---
+title: "Delete Trigger"
+api: "DELETE https://api.opennous.cloud/api/triggers/{id}"
+description: "Remove a subscription. Queued but undelivered events for it are dropped."
+---
+
+```bash
+curl -X DELETE https://api.opennous.cloud/api/triggers/trg_... \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+## Response
+
+`204 No Content` on success. `404 not_found` if the subscription doesn't exist (or belongs to another workspace).
+
+Outstanding `outbound_events` rows for the deleted subscription are cascaded out. If you only want to pause delivery, use [PATCH with `active: false`](/public-api/triggers/update) instead.
