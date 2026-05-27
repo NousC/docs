@@ -53,6 +53,7 @@ Every other field on the body is asserted as a claim. Common ones include `first
 ```json
 {
   "person": {
+    "id": "a1b2c3d4-...",
     "entity_id": "a1b2c3d4-...",
     "email": "sarah@acme.com",
     "first_name": "Sarah",
@@ -61,3 +62,5 @@ Every other field on the body is asserted as a claim. Common ones include `first
   }
 }
 ```
+
+Both `id` and `entity_id` are returned and always carry the same value (the entity UUID). `GET /v2/people` returns only `id`.

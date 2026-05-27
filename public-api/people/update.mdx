@@ -27,6 +27,7 @@ To clear a claim, pass `null` for its value. The claim is invalidated rather tha
 ```json
 {
   "person": {
+    "id": "a1b2c3d4-...",
     "entity_id": "a1b2c3d4-...",
     "job_title": "Chief Revenue Officer",
     "phone": "+1-415-555-0100",
@@ -35,6 +36,8 @@ To clear a claim, pass `null` for its value. The claim is invalidated rather tha
   "claims_written": 2
 }
 ```
+
+Both `id` and `entity_id` are returned and always carry the same value (the entity UUID). `GET /v2/people` returns only `id`.
 
 ## The write model in one line
 
