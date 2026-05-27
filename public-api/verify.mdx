@@ -56,26 +56,6 @@ Same shape as other endpoints:
 { "status": "ambiguous", "candidates": [ ... ] }
 ```
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-const v = await nous.verify('sarah@acme.com', 'title');
-if (v.after.freshness === 'fresh') {
-  // safe to act on
-} else {
-  // re-enrich or record a new observation first
-}
-```
-
-```python Python
-v = client.verify("sarah@acme.com", prop="title")
-if v["after"]["freshness"] == "fresh":
-    # safe to act on
-    pass
-```
-</CodeGroup>
-
 ## When to call it
 
 - **Before any high-stakes write back to a CRM** ("is the stage really `closed_won`?")

@@ -50,21 +50,6 @@ curl 'https://api.opennous.cloud/v2/workspace/facts?categories=ICP,Market&limit=
 }
 ```
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-const { facts } = await nous.getWorkspaceFacts({ categories: ['ICP'] });
-for (const f of facts) console.log(`[${f.category}] ${f.content}`);
-```
-
-```python Python
-facts = client.get_workspace_facts(categories=["ICP"])
-for f in facts["facts"]:
-    print(f'[{f["category"]}] {f["content"]}')
-```
-</CodeGroup>
-
 ## When to call it
 
 - **"What's our ICP?"** — `categories=["ICP"]`

@@ -200,58 +200,6 @@ Entities you sent to in the last 5 days, **minus** those who replied in the same
 
 Read `rollups.by_value` for the stage distribution. Pair with `since_days` to bound the time window.
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-// Hottest leads this week
-const { items } = await nous.query(
-  { kind: 'event', property: 'interaction.email_replied', since_days: 7, limit: 10 },
-  { return: 'entities' },
-);
-items.forEach(e => console.log(e.entity_name, '—', e.matches, 'replies, last', e.most_recent_at));
-
-// Sent without reply in last 5 days
-const noReply = await nous.query(
-  { kind: 'event', property: 'interaction.email_sent', since_days: 5 },
-  {
-    return: 'entities',
-    without: { kind: 'event', property: 'interaction.email_replied', since_days: 5 },
-  },
-);
-
-// Funnel
-const funnel = await nous.query(
-  { kind: 'state', property: 'stage' },
-);
-console.log(funnel.rollups.by_value);
-```
-
-```python Python
-# Hottest leads this week
-hot = client.query(
-    scope={"kind": "event", "property": "interaction.email_replied",
-           "since_days": 7, "limit": 10},
-    return_="entities",
-)
-for e in hot["items"]:
-    print(e["entity_name"], "—", e["matches"], "replies, last", e["most_recent_at"])
-
-# Sent without reply in last 5 days
-no_reply = client.query(
-    scope={"kind": "event", "property": "interaction.email_sent",
-           "since_days": 5},
-    return_="entities",
-    without={"kind": "event", "property": "interaction.email_replied",
-             "since_days": 5},
-)
-
-# Funnel
-funnel = client.query(scope={"kind": "state", "property": "stage"})
-print(funnel["rollups"]["by_value"])
-```
-</CodeGroup>
-
 ## Pattern-finding belongs to the agent
 
 The substrate retrieves and shapes. Your agent does the reasoning. The four recipes above are the most common; combine `scope` + `without` + `return` + `rollups.by_value` for anything else.

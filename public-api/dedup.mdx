@@ -39,7 +39,7 @@ You can also pass `emails`, or both:
   Up to 50,000 LinkedIn URLs per call.
 </ParamField>
 
-At least one of the two is required. The SDK chunks for you internally — there's no URL-length cap to worry about.
+At least one of the two is required. The API chunks internally, so there's no URL-length cap to worry about.
 
 ## Response
 
@@ -81,26 +81,6 @@ At least one of the two is required. The SDK chunks for you internally — there
 | `bounced` | Last delivery bounced (email-only). | Skip. |
 | `unsubscribed` | Opted out or marked do-not-contact. | Skip. |
 | `suppressed` | Workspace-level suppression policy. | Skip. |
-
-## SDK
-
-<CodeGroup>
-```typescript Node
-const out = await nous.classify({
-  linkedin_urls: ['https://linkedin.com/in/sarah-chen-vp', 'https://linkedin.com/in/jamie-doe'],
-});
-console.log(out.summary);
-// → { net_new: 1, engaged: 1, recent: 0, ... }
-```
-
-```python Python
-out = client.classify(linkedin_urls=[
-    "https://linkedin.com/in/sarah-chen-vp",
-    "https://linkedin.com/in/jamie-doe",
-])
-print(out["summary"])
-```
-</CodeGroup>
 
 ## Authentication note
 

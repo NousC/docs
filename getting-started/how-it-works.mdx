@@ -26,9 +26,8 @@ flowchart LR
     claims["Claim Derivation"]:::core
     mind["The Mind · scoring + learning loop"]:::core
 
-    api["Context API (/v2/*)"]:::output
+    api["REST API (/v2/*)"]:::output
     mcp["MCP Server"]:::output
-    sdk["SDKs (TS, Python)"]:::output
     agent["Your Agent"]:::output
 
     crm --> ingest
@@ -47,9 +46,8 @@ flowchart LR
     claims --> api
     mind --> api
 
-    api --> sdk
+    api --> agent
     api --> mcp
-    sdk --> agent
     mcp --> agent
 ```
 
@@ -61,7 +59,7 @@ The five pieces:
 * [**Claim Derivation**](#claim-derivation) — claims (the facts you query) are computed from the observation spine. Every claim carries `freshness`, `confidence`, `epistemic_class`, and the `sources` that produced it.
 * [**The Mind**](#the-mind) — predictions stake on claims, the substrate watches what closes, the Scorecard learns. The compounding loop that makes the system sharper every cycle.
 
-The output surfaces — Context API, MCP, SDKs — are thin wrappers around the substrate. The substrate is the product.
+The output surfaces — the REST API and the MCP server — are thin wrappers around the substrate. The substrate is the product.
 
 ---
 

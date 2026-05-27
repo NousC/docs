@@ -109,19 +109,6 @@ Every claim Nous returns carries three signals so the caller can decide whether 
 
 Workflows that depend on a fact should check `freshness === 'fresh' && confidence > 0.7`. Anything weaker, call `/v2/verify` first.
 
-## SDKs
-
-Prefer code over curl? Both wrap the same endpoints.
-
-<CardGroup cols={2}>
-  <Card title="TypeScript / Node" href="https://www.npmjs.com/package/@opennous/sdk" icon="js">
-    `npm install @opennous/sdk`
-  </Card>
-  <Card title="Python" href="https://pypi.org/project/opennous" icon="python">
-    `pip install opennous`
-  </Card>
-</CardGroup>
-
 ## Errors
 
 All errors return JSON with an `error` code.

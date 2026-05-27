@@ -88,26 +88,6 @@ If `focus` is a name that matches several people, you'll get:
 
 Pick one and re-call with `focus: "<entity_id>"`.
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-import { Nous } from '@opennous/sdk';
-const nous = new Nous({ apiKey: process.env.NOUS_API_KEY! });
-
-const ctx = await nous.getContext('sarah@acme.com', { intent: 'follow_up' });
-console.log(ctx.summary);
-```
-
-```python Python
-from opennous import NousClient
-client = NousClient(api_key="YOUR_API_KEY")
-
-ctx = client.get_context("sarah@acme.com", intent="follow_up")
-print(ctx["summary"])
-```
-</CodeGroup>
-
 ## When to call it
 
 - **Before any outbound action** on a known contact
