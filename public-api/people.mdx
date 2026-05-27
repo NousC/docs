@@ -170,26 +170,3 @@ To clear a claim, pass `null` for its value. The claim is invalidated rather tha
 ## The write model in one line
 
 Observations record what happened. Assertions through `POST` and `PATCH` declare what is true now. Both land in the same substrate, both show up in `/v2/accounts/:id`, and asserted claims stick until you change them.
-
-## SDK
-
-<CodeGroup>
-```typescript Node
-const people = await nous.people.list({ pipeline_stage: 'interested', last_activity_after: '7d' });
-
-const sarah = await nous.people.update('sarah@acme.com', {
-  job_title: 'Chief Revenue Officer',
-  phone: '+1-415-555-0100',
-});
-```
-
-```python Python
-people = client.people.list(pipeline_stage="interested", last_activity_after="7d")
-
-sarah = client.people.update(
-    "sarah@acme.com",
-    job_title="Chief Revenue Officer",
-    phone="+1-415-555-0100",
-)
-```
-</CodeGroup>

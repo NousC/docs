@@ -191,34 +191,3 @@ This is the canonical n8n shape for chasing non-responders, and the reason `PATC
 5. Also write an observation against the entity with the upstream `message_id` as `external_id`. The async webhook from your sending tool will arrive minutes later and hit the same `external_id`, so the activity is recorded once.
 
 The PATCH gives you immediate consistency for the loop. The observation gives the agent the full timeline. The `external_id` makes the double-write safe.
-
-## SDK
-
-<CodeGroup>
-```typescript Node
-const batch = await nous.leads.list({
-  list_id: 'LIST_UUID',
-  sent_before: '2d',
-  has_replied: false,
-  limit: 25,
-});
-
-for (const lead of batch.leads) {
-  await sendEmail(lead);  // your sender
-  await nous.leads.update(lead.id, { sent_at: new Date().toISOString(), status: 'sent' });
-}
-```
-
-```python Python
-batch = client.leads.list(
-    list_id="LIST_UUID",
-    sent_before="2d",
-    has_replied=False,
-    limit=25,
-)
-
-for lead in batch["leads"]:
-    send_email(lead)  # your sender
-    client.leads.update(lead["id"], sent_at=datetime.utcnow().isoformat(), status="sent")
-```
-</CodeGroup>
