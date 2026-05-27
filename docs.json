@@ -164,11 +164,7 @@
             "group": "Triggers",
             "pages": [
               "public-api/triggers/introduction",
-              "public-api/triggers/events",
-              "public-api/triggers/list",
-              "public-api/triggers/create",
-              "public-api/triggers/update",
-              "public-api/triggers/delete"
+              "public-api/triggers/events"
             ]
           },
           {

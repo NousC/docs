@@ -89,21 +89,6 @@ If your URL returns 2xx, the event is marked delivered. If it returns 5xx, 408, 
 
 The delivery worker runs every 30 seconds, so a successful event reaches your URL within a minute of the underlying interaction landing in Nous.
 
-## Manage triggers
+## Setting one up
 
-Triggers are workspace-scoped. Auth works with either the dashboard JWT or an API key, so you can register subscriptions from a script or n8n flow.
-
-<CardGroup cols={2}>
-  <Card title="GET /api/triggers" href="/public-api/triggers/list" icon="list">
-    List subscriptions in the workspace.
-  </Card>
-  <Card title="POST /api/triggers" href="/public-api/triggers/create" icon="plus">
-    Create a subscription and receive the signing secret.
-  </Card>
-  <Card title="PATCH /api/triggers/:id" href="/public-api/triggers/update" icon="pen">
-    Update name, URL, events, active, or rotate the secret.
-  </Card>
-  <Card title="DELETE /api/triggers/:id" href="/public-api/triggers/delete" icon="trash">
-    Remove a subscription.
-  </Card>
-</CardGroup>
+Triggers are managed in the app, not through the REST API. Open **Settings → Triggers** in your workspace, click **New trigger**, paste your URL, pick the events you care about. The signing secret is shown once at create time — save it to your receiver.
