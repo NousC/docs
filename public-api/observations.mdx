@@ -79,28 +79,6 @@ curl -X POST https://api.opennous.cloud/v2/observations \
 
 `claims_recomputed` lists the state properties whose claim was re-derived after this batch — your downstream UI can refetch only those.
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-const result = await nous.record('sarah@acme.com', [
-  { kind: 'event', property: 'interaction.email_sent',
-    value: { subject: 'Q3 pricing', body_snippet: '…' } },
-  { kind: 'state', property: 'intent', value: 'evaluating' },
-]);
-console.log(result.claims_recomputed); // → ['intent']
-```
-
-```python Python
-result = client.record("sarah@acme.com", observations=[
-    {"kind": "event", "property": "interaction.email_sent",
-     "value": {"subject": "Q3 pricing", "body_snippet": "…"}},
-    {"kind": "state", "property": "intent", "value": "evaluating"},
-])
-print(result["claims_recomputed"])  # → ['intent']
-```
-</CodeGroup>
-
 ## The observation model
 
 You're appending to an immutable spine. Two reasons:

@@ -48,20 +48,6 @@ curl 'https://api.opennous.cloud/v2/attention?limit=10' \
 | `prediction_unresolved` | An open prediction has aged past its resolution horizon |
 | `decay_threshold` | Custom decay rule fired |
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-const { items } = await nous.attention({ limit: 10 });
-items.forEach(i => console.log(i.headline, '→', i.suggested_action));
-```
-
-```python Python
-for item in client.attention(limit=10)["items"]:
-    print(item["headline"], "→", item["suggested_action"])
-```
-</CodeGroup>
-
 ## When to call it
 
 - **At the start of an agent's working session** — pick what to act on

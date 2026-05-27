@@ -1,9 +1,11 @@
 ---
-title: "Public API"
-description: "The v2 Context API — eight endpoints. The agent reads engineered, epistemics-tagged context and writes observations. Nous derives the rest."
+title: "REST API"
+description: "The deterministic surface for workflow runtimes. Call it from n8n, Make, Zapier, or any backend. Parameters are known up front; responses are stable rows."
 ---
 
-The Nous Public API is a thin HTTP surface around the **evidence substrate**: every fact Nous knows comes from an observation, every claim carries its source, freshness, and confidence, and the agent never overwrites — it observes.
+The REST API is one of two ways Nous exposes the v2 substrate. Reach for it when the caller already knows what to read or write — a workflow runtime fetching a filtered list of people, a form intake creating a lead, a daily job patching `sent_at` mid-loop.
+
+For agent-time decisions where the right action is reasoned at runtime — semantic exploration, intent-shaped context, recording an observation from open text — use the [MCP server](/mcp/introduction) instead. Both surfaces sit on the same evidence substrate, so a write through one is visible to the other.
 
 ## Base URL
 
@@ -22,40 +24,70 @@ curl https://api.opennous.cloud/v2/attention \
   -H 'Authorization: Bearer YOUR_API_KEY'
 ```
 
-Keys are workspace-scoped — no separate workspace ID required.
+Keys are workspace-scoped, so no separate workspace ID is required.
 
-## The eight endpoints
+## The endpoints
+
+### Read
 
 <CardGroup cols={2}>
   <Card title="POST /v2/context" href="/public-api/context" icon="brain">
-    Engineered context for a task about one entity — the ranked, claim-tagged block your agent consumes before acting.
+    Engineered context for a task about one entity. The ranked, claim-tagged block your agent consumes before acting.
   </Card>
   <Card title="GET /v2/accounts/:id" href="/public-api/accounts" icon="user">
-    The full Account Record — entity + every claim with epistemics + recent timeline.
+    The full Account Record. Entity plus every claim with epistemics plus the recent timeline.
   </Card>
-  <Card title="POST /v2/observations" href="/public-api/observations" icon="pen">
-    Record what happened. You observe; Nous derives the claims.
+  <Card title="GET /v2/people" href="/public-api/people" icon="users">
+    Filtered list of people in the workspace. Workflow shape — paginate, filter, sort.
+  </Card>
+  <Card title="GET /v2/leads" href="/public-api/leads" icon="list">
+    Filtered list of leads across lead lists. Same shape as `/v2/people`, with lead-specific fields.
   </Card>
   <Card title="POST /v2/query" href="/public-api/query" icon="magnifying-glass">
-    Retrieve + summarise a corpus of observations across many entities.
+    Retrieve and summarise a corpus of observations across many entities.
   </Card>
   <Card title="GET /v2/attention" href="/public-api/attention" icon="bell">
-    Workspace-wide: accounts gone quiet, facts decayed — ranked decisions.
+    Workspace-wide. Accounts gone quiet, facts decayed, ranked decisions.
   </Card>
   <Card title="POST /v2/verify" href="/public-api/verify" icon="shield-check">
-    Re-check one claim against current observations — the calibration check.
+    Re-check one claim against current observations. The calibration check.
   </Card>
   <Card title="POST /v2/dedup" href="/public-api/dedup" icon="filter">
-    Cross-list cold-outbound dedup — net_new / engaged / bounced / unsubscribed.
+    Cross-list cold-outbound dedup. net_new, engaged, bounced, unsubscribed.
   </Card>
   <Card title="GET /v2/workspace/facts" href="/public-api/workspace-facts" icon="book">
-    The user's own playbook — ICP, market, pricing, competitors.
+    The user's own playbook. ICP, market, pricing, competitors.
   </Card>
 </CardGroup>
 
+### Write
+
+<CardGroup cols={2}>
+  <Card title="POST /v2/observations" href="/public-api/observations" icon="pen">
+    Record what happened. You observe; Nous derives the claims.
+  </Card>
+  <Card title="POST + PATCH /v2/people" href="/public-api/people" icon="user-plus">
+    Create a person from a form intake. PATCH asserts fields like email, title, or company directly onto the entity.
+  </Card>
+  <Card title="POST + PATCH /v2/leads" href="/public-api/leads" icon="square-plus">
+    Add leads to a list. PATCH a row mid-workflow to record progress before the async webhook arrives.
+  </Card>
+</CardGroup>
+
+## Two write shapes, one substrate
+
+Both write paths land in the same evidence substrate.
+
+| Path | What it writes | When to use |
+|---|---|---|
+| `POST /v2/observations` | An immutable event or state observation; Nous re-derives the claim from the full history | The agent has just seen something happen; an integration is mirroring activity from another system |
+| `PATCH /v2/people` / `PATCH /v2/leads` | An asserted claim (sticky, confidence 1.0) directly on the entity; the derivation engine will not overwrite it | A workflow runtime is setting a field as ground truth (enrichment result, manual edit, form value) |
+
+The asserted-claim path is the deterministic shape n8n needs. The observation path is how the substrate self-heals as new evidence arrives. They coexist.
+
 ## Identifiers are universal
 
-Most endpoints accept a `focus` parameter. Pass any of:
+Most endpoints accept a `focus` parameter (or use `:id`). Pass any of:
 
 - an **entity UUID** (`a1b2c3d4-...`)
 - an **email** (`sarah@acme.com`)
@@ -63,11 +95,11 @@ Most endpoints accept a `focus` parameter. Pass any of:
 - a **LinkedIn URL** (`https://linkedin.com/in/sarah-chen`)
 - a **name** (`Sarah Chen`)
 
-A name may match several people — the response will be `{ status: "ambiguous", candidates: [...] }` so your agent can pick one and re-call.
+A name may match several people. The response will be `{ status: "ambiguous", candidates: [...] }` so your workflow can pick one and re-call.
 
 ## Epistemics on every claim
 
-Every claim Nous returns carries three signals so your agent can decide whether to act on it:
+Every claim Nous returns carries three signals so the caller can decide whether to act on it.
 
 | Field | Values | Meaning |
 |---|---|---|
@@ -75,24 +107,11 @@ Every claim Nous returns carries three signals so your agent can decide whether 
 | `confidence` | `0.0` – `1.0` | How strongly the observations support it |
 | `epistemic_class` | `observed` / `derived` / `asserted` | Where the claim came from |
 
-Agents that ship rely on `freshness === 'fresh' && confidence > 0.7` before acting. Anything weaker — call `/v2/verify` first.
-
-## SDKs
-
-Prefer code over curl? Both wrap the same endpoints:
-
-<CardGroup cols={2}>
-  <Card title="TypeScript / Node" href="https://www.npmjs.com/package/@opennous/sdk" icon="js">
-    `npm install @opennous/sdk`
-  </Card>
-  <Card title="Python" href="https://pypi.org/project/opennous" icon="python">
-    `pip install opennous`
-  </Card>
-</CardGroup>
+Workflows that depend on a fact should check `freshness === 'fresh' && confidence > 0.7`. Anything weaker, call `/v2/verify` first.
 
 ## Errors
 
-All errors return JSON with an `error` code:
+All errors return JSON with an `error` code.
 
 ```json
 { "error": "entity_not_found" }
@@ -102,8 +121,8 @@ All errors return JSON with an `error` code:
 |---|---|---|
 | 400 | `focus_required`, `invalid_focus`, etc. | Missing or malformed parameter |
 | 401 | `unauthorized` | API key missing or invalid |
-| 402 | `feature_not_in_plan` | Upgrade — visible on the Usage page |
-| 404 | `entity_not_found` | Focus didn't match any entity |
+| 402 | `feature_not_in_plan` | Upgrade. Visible on the Usage page |
+| 404 | `entity_not_found` | Focus did not match any entity |
 | 413 | `too_many` | Reduce batch size |
 | 429 | `rate_limited` | Honor `Retry-After` |
 | 500 | `internal_error` | Retry with backoff |

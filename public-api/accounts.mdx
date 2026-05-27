@@ -73,23 +73,6 @@ Same shape as `/v2/context`:
 { "status": "ambiguous", "candidates": [ ... ] }
 ```
 
-## SDK
-
-<CodeGroup>
-```typescript Node
-const account = await nous.getAccount('acme.com');
-for (const c of account.claims) {
-  console.log(`${c.property} = ${c.value}  [${c.freshness} · ${c.confidence}]`);
-}
-```
-
-```python Python
-account = client.get_account("acme.com")
-for c in account["claims"]:
-    print(f'{c["property"]} = {c["value"]}  [{c["freshness"]} · {c["confidence"]:.2f}]')
-```
-</CodeGroup>
-
 ## When to call it
 
 - **"What do we know about X?"** type questions

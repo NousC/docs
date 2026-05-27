@@ -14,14 +14,14 @@ We're shipping under a new name. Nous is the context layer that GTM agents run o
 If you're on Nous Cloud or self-hosting, update your integrations this week.
 
 - **Environment variables.** `PROPLY_API_KEY` → `NOUS_API_KEY`, `PROPLY_BASE_URL` → `NOUS_BASE_URL`. Rotate your `.env` and redeploy.
-- **HTTP header.** Custom clients must send `x-nous-client` instead of `x-proply-client` when calling the [Public API](/public-api/introduction).
-- **SDKs.** Install `@opennous/sdk` (npm), `@opennous/mcp` (npm), and `nous` (PyPI). The old `@goproply/*` and `proply` packages are no longer published.
+- **HTTP header.** Custom clients must send `x-nous-client` instead of `x-proply-client` when calling the [REST API](/public-api/introduction).
+- **MCP server.** Install `@opennous/mcp` (npm). The old `@goproply/*` package is no longer published.
 - **Domains.** The app moved to [`app.opennous.cloud`](https://app.opennous.cloud), the API to `api.opennous.cloud`, and the docs to `docs.opennous.cloud`. Update any bookmarks, OAuth redirect URIs, and webhook destinations that point to `goproply.com`.
 
 ### What stays the same
 
 - Your workspace, contacts, memories, and provider connections.
-- All [Public API](/public-api/introduction) and [MCP](/mcp/introduction) endpoints, request shapes, and response formats.
+- All [REST API](/public-api/introduction) and [MCP](/mcp/introduction) endpoints, request shapes, and response formats.
 - Pricing and plans on Nous Cloud.
 
 Need help migrating? Ping us on [Discord](https://discord.gg/npa59RTgs).
