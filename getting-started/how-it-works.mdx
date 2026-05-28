@@ -22,7 +22,7 @@ flowchart LR
 
     ingest["Ingestion"]:::core
     resolve["Identity Resolution"]:::core
-    graph[("The Customer Graph")]:::core
+    cg[("The Customer Graph")]:::core
 
     api["REST API"]:::output
     mcp["MCP Server"]:::output
@@ -36,10 +36,10 @@ flowchart LR
     web --> ingest
 
     ingest --> resolve
-    resolve --> graph
+    resolve --> cg
 
-    graph --> api
-    graph --> mcp
+    cg --> api
+    cg --> mcp
     api --> agent
     mcp --> agent
 ```
