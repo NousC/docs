@@ -86,9 +86,40 @@ First run builds all images — takes 2–3 minutes. After that:
 * Frontend → `https://app.yourdomain.com`
 * API → `https://api.yourdomain.com`
 
-## Step 6: Connect your first integration
+## Step 6: Enable email auth in Supabase
 
-Open `https://app.yourdomain.com` → **Settings → Integrations** and connect at least one signal source to start populating the unified record.
+Open your Supabase project → **Authentication → Providers → Email** and turn it on. Without this, no one can sign up.
+
+If you want Google sign-in, enable the **Google** provider in the same panel and set your OAuth client ID and secret.
+
+## Step 7: Create your first user
+
+Open `https://app.yourdomain.com` and click **Sign up**. Enter your email and password, confirm the OTP, and run through the onboarding flow. Your workspace is created at the end of onboarding.
+
+## Step 8: Create an API key
+
+In the app, go to **Settings → API Keys → Create Key**. Use that key for the MCP server or any REST call. The MCP config looks like this.
+
+```json
+{
+  "mcpServers": {
+    "nous": {
+      "command": "npx",
+      "args": ["-y", "@opennous/mcp"],
+      "env": {
+        "NOUS_API_KEY": "sk_live_...",
+        "NOUS_API_URL": "https://api.yourdomain.com"
+      }
+    }
+  }
+}
+```
+
+Self-hosters must set `NOUS_API_URL` to their own API domain. Otherwise the MCP server talks to Nous Cloud.
+
+## Step 9: Connect your first integration
+
+Open **Settings → Integrations** and connect at least one signal source to start populating your customer graph.
 
 ---
 

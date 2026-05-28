@@ -26,10 +26,7 @@
             "group": "Installation",
             "pages": [
               "installation/docker-compose",
-              "installation/docker",
-              "installation/helm",
-              "installation/development-environment",
-              "installation/dev-container"
+              "installation/development-environment"
             ]
           },
           {
@@ -245,11 +242,6 @@
           "anchor": "Discord",
           "href": "https://discord.gg/npa59RTgs",
           "icon": "discord"
-        },
-        {
-          "anchor": "YouTube",
-          "href": "https://youtube.com",
-          "icon": "youtube"
         }
       ]
     }
