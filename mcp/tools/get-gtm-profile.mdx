@@ -1,9 +1,11 @@
 ---
-title: "get_workspace_facts"
-description: "The user's own playbook — ICP, market, product, pricing, competitors, playbook notes. Workspace-level facts, NOT per-entity."
+title: "get_gtm_profile"
+description: "The user's own GTM profile — ICP, market, product, pricing, competitors, positioning. Workspace-level, NOT per-entity."
 ---
 
-The meta-tool. Where `get_account` / `get_context` return facts about a **person or company**, this returns facts the workspace owner has recorded about **their own business** — the playbook your agent should reference when answering "what's our ICP?" or "what differentiates us?"
+The meta-tool. Where `get_account` / `get_context` return facts about a **person or company**, this returns the workspace owner's own **GTM profile** — what they sell, who to, pricing, and positioning — the context your agent should reference when answering "what's our ICP?" or "what differentiates us?"
+
+<Note>Formerly `get_workspace_facts` — that name still works as an alias.</Note>
 
 ## Parameters
 
@@ -12,7 +14,7 @@ The meta-tool. Where `get_account` / `get_context` return facts about a **person
 | `categories` | string[] | | Optional filter (e.g. `["ICP"]` or `["Pricing","Competitors"]`). Omit for all. |
 | `limit` | number | | Max facts. Default 50, cap 500. |
 
-Common categories: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Playbook`. Users can add any custom category in the in-app Intelligence tab.
+Common categories: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Playbook`. Users can add any custom category in the in-app GTM Context tab.
 
 ## Returns
 
@@ -30,7 +32,7 @@ PRICING (1):
 If nothing's recorded:
 
 ```
-No workspace facts recorded yet. The user can add them in the Intelligence tab.
+No GTM profile recorded yet. The user can set it up in the GTM Context tab.
 ```
 
 ## When to call it
@@ -38,7 +40,7 @@ No workspace facts recorded yet. The user can add them in the Intelligence tab.
 - **"What's our ICP?"** → `categories: ["ICP"]`
 - **"What's our pricing strategy?"** → `categories: ["Pricing"]`
 - **"What differentiates us from competitors?"** → `categories: ["Competitors", "Product"]`
-- **"Show me the whole playbook"** → no filter
+- **"Show me the whole GTM profile"** → no filter
 
 ## When NOT to call it
 
@@ -49,10 +51,10 @@ Anything about a specific person or company — use [`get_context`](/mcp/tools/g
 When the agent drafts personalised outreach, it needs BOTH:
 
 - **The contact's context** (`get_context`) — what's true of THEM
-- **The user's playbook** (`get_workspace_facts`) — how WE sell
+- **The user's GTM profile** (`get_gtm_profile`) — how WE sell
 
 Combine the two and the agent has everything to write natural copy.
 
 ## Backed by
 
-`GET /v2/workspace/facts` — see the [HTTP reference](/public-api/workspace-facts) for the raw JSON shape.
+`GET /v2/workspace/facts` — see the [HTTP reference](/public-api/gtm-profile) for the raw JSON shape.

@@ -154,7 +154,7 @@
           {
             "group": "Workspace",
             "pages": [
-              "public-api/workspace-facts"
+              "public-api/gtm-profile"
             ]
           },
           {
@@ -162,14 +162,6 @@
             "pages": [
               "public-api/triggers/introduction",
               "public-api/triggers/events"
-            ]
-          },
-          {
-            "group": "API Keys",
-            "pages": [
-              "public-api/api-keys/list-api-keys",
-              "public-api/api-keys/create-api-key",
-              "public-api/api-keys/delete-api-key"
             ]
           }
         ]
@@ -192,7 +184,7 @@
               "mcp/tools/query",
               "mcp/tools/attention",
               "mcp/tools/verify",
-              "mcp/tools/get-workspace-facts"
+              "mcp/tools/get-gtm-profile"
             ]
           }
         ]
@@ -283,5 +275,12 @@
     "socials": {
       "github": "https://github.com/bennetglinder1/nous"
     }
-  }
+  },
+  "redirects": [
+    { "source": "/public-api/workspace-facts", "destination": "/public-api/gtm-profile" },
+    { "source": "/mcp/tools/get-workspace-facts", "destination": "/mcp/tools/get-gtm-profile" },
+    { "source": "/public-api/api-keys/list-api-keys", "destination": "/public-api/introduction" },
+    { "source": "/public-api/api-keys/create-api-key", "destination": "/public-api/introduction" },
+    { "source": "/public-api/api-keys/delete-api-key", "destination": "/public-api/introduction" }
+  ]
 }

@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Nous Public API",
+    "title": "Nous REST API",
     "description": "The v2 Context API — eight endpoints. The agent reads engineered, epistemics-tagged context and writes observations. Nous derives the rest.",
     "version": "2.0.0"
   },

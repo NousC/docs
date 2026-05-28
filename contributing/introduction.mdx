@@ -34,7 +34,7 @@ pnpm test         # run all tests
 
 Express.js with ESM throughout. Routes live in `apps/api/src/routes/` split into:
 - `/api/*` — internal app routes (Supabase JWT auth)
-- `/v1/*` — public API routes (API key auth)
+- `/v1/*` — REST API routes (API key auth)
 - `/inbound/*` — unauthenticated webhook receivers (routed via Caddy to the worker)
 
 ### Worker

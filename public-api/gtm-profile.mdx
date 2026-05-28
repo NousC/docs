@@ -1,10 +1,10 @@
 ---
-title: "Workspace Facts"
+title: "GTM Profile"
 api: "GET https://api.opennous.cloud/v2/workspace/facts"
-description: "The user's own playbook — ICP, target market, product, pricing, competitors. Workspace-level facts, not per-entity."
+description: "The user's own GTM profile — ICP, target market, product, pricing, competitors. Workspace-level, not per-entity."
 ---
 
-Where the per-entity endpoints (`/v2/accounts/:id`, `/v2/context`) return facts about **people and companies**, this returns facts the workspace owner has recorded about **their own business** — the playbook the agent should reference when answering questions like "what's our ICP?" or "what's our pricing?"
+Where the per-entity endpoints (`/v2/accounts/:id`, `/v2/context`) return facts about **people and companies**, this returns the workspace owner's own **GTM profile** — what they sell, who they sell to, pricing, and positioning — the context an agent should reference when answering questions like "what's our ICP?" or "what's our pricing?"
 
 ## Request
 
@@ -18,7 +18,7 @@ curl 'https://api.opennous.cloud/v2/workspace/facts?categories=ICP,Market&limit=
 <ParamField query="categories" type="string">
   Comma-separated list to filter (e.g. `ICP,Pricing`). Omit to return all categories.
 
-  Common categories: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Playbook`. Users can add any custom category in the in-app Intelligence tab.
+  Common categories: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Playbook`. Users can add any custom category in the in-app GTM Context tab.
 </ParamField>
 
 <ParamField query="limit" type="number" default="50">
@@ -57,8 +57,8 @@ curl 'https://api.opennous.cloud/v2/workspace/facts?categories=ICP,Market&limit=
 - **"What differentiates us from competitors?"** — `categories=["Competitors","Product"]`
 - **"Show me the whole playbook"** — no `categories` filter
 
-When you're writing an agent that drafts personalised outreach, the agent needs BOTH the contact's context (`/v2/context`) AND the user's playbook (`/v2/workspace/facts`). The playbook tells it how YOU sell; the context tells it about THEM. Combine for natural copy.
+When you're writing an agent that drafts personalised outreach, the agent needs BOTH the contact's context (`/v2/context`) AND the user's GTM profile (`/v2/workspace/facts`). The GTM profile tells it how YOU sell; the context tells it about THEM. Combine for natural copy.
 
-## How facts get there
+## How it gets there
 
-Facts are written through the in-app **Intelligence** tab (Scorecard empty state, or directly into the workspace memory) or via [`POST /v2/observations`](/public-api/observations) with a `note.<uuid>` property on the workspace entity. Both write paths produce the same asserted-claim records this endpoint reads.
+The GTM profile is built through the in-app **GTM Context** tab (the guided Playbook setup, or added directly) or via [`POST /v2/observations`](/public-api/observations) with a `note.<uuid>` property on the workspace entity. Both write paths produce the same asserted-claim records this endpoint reads.
