@@ -125,8 +125,8 @@ Clients that accept only a bare URL with no auth header can pass the key as a qu
   <Card title="verify" href="/mcp/tools/verify" icon="shield-check">
     Re-check one claim before acting on it.
   </Card>
-  <Card title="get_workspace_facts" href="/mcp/tools/get-workspace-facts" icon="book">
-    The user's own playbook — ICP, market, pricing, competitors.
+  <Card title="get_gtm_profile" href="/mcp/tools/get-gtm-profile" icon="book">
+    The user's own GTM profile — ICP, market, pricing, competitors.
   </Card>
 </CardGroup>
 
@@ -146,7 +146,7 @@ The Claude Code plugin uses `userConfig` to prompt for these at install and stor
 3. **Stale-looking fact?** → `verify` before acting on it
 4. **End of session** → `attention` to surface what to work next
 
-`get_workspace_facts` is the meta-tool: any question about the user's own business (ICP, pricing, market) goes here, never to `query`/`get_account`.
+`get_gtm_profile` is the meta-tool: any question about the user's own business (ICP, pricing, market) goes here, never to `query`/`get_account`.
 
 ## Source + versioning
 

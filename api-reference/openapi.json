@@ -496,7 +496,7 @@
       "get": {
         "summary": "Get workspace facts",
         "description": "Workspace-level facts the user has recorded about their own business: ICP, target market, product, pricing, competitors, playbook. Read-only.",
-        "tags": ["Workspace Facts"],
+        "tags": ["GTM Profile"],
         "parameters": [
           { "name": "categories", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list (e.g. 'ICP,Market'). Omit for all." },
           { "name": "limit",      "in": "query", "schema": { "type": "number", "default": 50, "maximum": 500 } }
