@@ -1,6 +1,6 @@
 # Nous Docs
 
-Source for [docs.opennous.cloud](https://docs.opennous.cloud) — the public documentation for **Nous**, the context layer GTM agents run on.
+Source for [docs.opennous.cloud](https://docs.opennous.cloud), the public documentation for **Nous**, the customer graph for GTM agents.
 
 Published via [Mintlify](https://mintlify.com). Pushes to `main` deploy automatically.
 

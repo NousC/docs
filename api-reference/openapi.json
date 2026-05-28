@@ -246,7 +246,7 @@
     "/v2/observations": {
       "post": {
         "summary": "Record observations",
-        "description": "Append events or state observations. The substrate derives the new claims and tells you which were recomputed.",
+        "description": "Append events or state observations. The graph derives the new facts and tells you which were recomputed.",
         "tags": ["Observations"],
         "requestBody": {
           "required": true,

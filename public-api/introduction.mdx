@@ -3,9 +3,9 @@ title: "REST API"
 description: "The deterministic surface for workflow runtimes. Call it from n8n, Make, Zapier, or any backend. Parameters are known up front; responses are stable rows."
 ---
 
-The REST API is one of two ways Nous exposes the v2 substrate. Reach for it when the caller already knows what to read or write — a workflow runtime fetching a filtered list of people, a form intake creating a lead, a daily job patching `sent_at` mid-loop.
+The REST API is one of two ways Nous exposes the v2 customer graph. Reach for it when the caller already knows what to read or write, a workflow runtime fetching a filtered list of people, a form intake creating a lead, a daily job patching `sent_at` mid-loop.
 
-For agent-time decisions where the right action is reasoned at runtime — semantic exploration, intent-shaped context, recording an observation from open text — use the [MCP server](/mcp/introduction) instead. Both surfaces sit on the same evidence substrate, so a write through one is visible to the other.
+For agent-time decisions where the right action is reasoned at runtime (semantic exploration, intent-shaped context, recording an observation from open text), use the [MCP server](/mcp/introduction) instead. Both surfaces sit on the same customer graph, so a write through one is visible to the other.
 
 ## Base URL
 
@@ -82,16 +82,16 @@ Keys are workspace-scoped, so no separate workspace ID is required.
   </Card>
 </CardGroup>
 
-## Two write shapes, one substrate
+## Two write shapes, one graph
 
-Both write paths land in the same evidence substrate.
+Both write paths land in the same customer graph.
 
 | Path | What it writes | When to use |
 |---|---|---|
 | `POST /v2/observations` | An immutable event or state observation; Nous re-derives the claim from the full history | The agent has just seen something happen; an integration is mirroring activity from another system |
 | `PATCH /v2/people` / `PATCH /v2/leads` | An asserted claim (sticky, confidence 1.0) directly on the entity; the derivation engine will not overwrite it | A workflow runtime is setting a field as ground truth (enrichment result, manual edit, form value) |
 
-The asserted-claim path is the deterministic shape n8n needs. The observation path is how the substrate self-heals as new evidence arrives. They coexist.
+The asserted-claim path is the deterministic shape n8n needs. The observation path is how the graph self-heals as new signals arrive. They coexist.
 
 ## Identifiers are universal
 

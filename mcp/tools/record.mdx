@@ -3,7 +3,7 @@ title: "record"
 description: "Record what happened or what you learned. You observe — Nous derives the updated facts. The only write verb."
 ---
 
-Agents never overwrite. They observe. `record` appends one or more observations to the immutable spine; the substrate re-derives the affected claims and tells you which ones changed.
+Agents never overwrite. They observe. `record` appends one or more observations to the customer graph, which re-derives the affected facts and tells you which ones changed.
 
 ## Parameters
 
@@ -74,7 +74,7 @@ Facts updated: job_title.
 
 Two reasons agents observe instead of update:
 
-1. **The substrate self-heals** — a new observation contradicts an old one and the claim derivation re-runs, pulling the belief back toward truth. Nothing is "lost."
+1. **The graph self-heals.** A new observation contradicts an old one and the affected facts recompute, pulling the belief back toward truth. Nothing is "lost."
 2. **Every claim is auditable** — `epistemic_class` + `sources` on every claim trace back to the observations that produced it.
 
 ## Backed by

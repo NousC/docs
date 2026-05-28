@@ -3,7 +3,7 @@ title: "verify"
 description: "Re-check a specific fact before you act on it. The calibration check."
 ---
 
-A claim might be in the substrate but stale. `verify` re-derives one claim from the **current** observation set and tells you whether to trust it.
+A fact might be in the graph but stale. `verify` re-derives one fact from the **current** observation set and tells you whether to trust it.
 
 ## Parameters
 
@@ -41,7 +41,7 @@ record a new observation or re-enrich to confirm.
 - **Before sending a personalised email** ("is the title still VP Sales?")
 - **When a claim's freshness is `suspect` or `expired`** in a `get_context` or `get_account` response
 
-If you act on every claim without verifying, you're trusting the substrate's last-observation timestamp. For most workflows that's fine. For ones that matter, verify first.
+If you act on every fact without verifying, you're trusting the graph's last-observation timestamp. For most workflows that's fine. For ones that matter, verify first.
 
 ## Backed by
 

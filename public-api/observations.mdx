@@ -4,7 +4,7 @@ api: "POST https://api.opennous.cloud/v2/observations"
 description: "Record what happened. You observe; Nous derives the claims."
 ---
 
-The only write verb in the substrate. Agents never overwrite — they record observations. Nous derives the new claims automatically from the full observation history and tells you which were recomputed.
+The only write verb in the customer graph. Agents never overwrite, they record observations. Nous derives the new facts automatically from the full observation history and tells you which were recomputed.
 
 ## Request
 
@@ -81,9 +81,9 @@ curl -X POST https://api.opennous.cloud/v2/observations \
 
 ## The observation model
 
-You're appending to an immutable spine. Two reasons:
+You're appending to an immutable, append-only customer graph. Two reasons:
 
-1. **The substrate self-heals** — when a new observation contradicts an old one, the claim derivation re-runs and the belief shifts. Nothing is ever "lost."
+1. **The graph self-heals.** When a new observation contradicts an old one, the affected facts recompute and the belief shifts. Nothing is ever "lost."
 2. **Every claim is auditable** — `epistemic_class` + `sources` on every claim let your agent (and your audit log) see exactly which observations support it.
 
 Use `null` value on a `state` observation to assert the fact ended — they left the company, the deal closed-lost, the email bounced.

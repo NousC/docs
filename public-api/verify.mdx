@@ -4,7 +4,7 @@ api: "POST https://api.opennous.cloud/v2/verify"
 description: "Re-check one claim against current observations. The calibration check before any high-stakes action."
 ---
 
-A claim might be in the substrate but stale. `verify` re-derives it from the **current** observation set and reports before vs after — so your agent knows whether to trust it before acting.
+A fact might be in the graph but stale. `verify` re-derives it from the **current** observation set and reports before vs after, so your agent knows whether to trust it before acting.
 
 ## Request
 
@@ -62,4 +62,4 @@ Same shape as other endpoints:
 - **Before sending a personalised email** ("is the title still VP Sales?")
 - **When a claim's `freshness` is `suspect` or `expired`** in the response of `/v2/context` or `/v2/accounts/:id`
 
-If you act on every claim without verifying, you're trusting the substrate's last-observation timestamp. For most workflows that's fine. For ones that matter, verify first.
+If you act on every fact without verifying, you're trusting the graph's last-observation timestamp. For most workflows that's fine. For ones that matter, verify first.

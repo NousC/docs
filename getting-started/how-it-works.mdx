@@ -1,11 +1,11 @@
 ---
 title: "How it works"
-description: "The Nous architecture — evidence substrate, identity resolution, claim derivation, and the Mind loop."
+description: "The Nous architecture. Ingestion, identity resolution, and how every signal becomes part of the customer graph."
 ---
 
 ## Architecture
 
-Nous is one stack: an evidence substrate, a claim-derivation engine, and a thin Context API. Connectors push observations in; agents read engineered context and write more observations. The substrate derives every fact.
+Nous is one stack. Connectors push signals from your GTM tools into Nous, identity resolution matches every signal to one person and one company, and the customer graph holds the result. Your agent reads it back over MCP or REST.
 
 ```mermaid theme={null}
 flowchart LR
@@ -18,15 +18,13 @@ flowchart LR
     mail["Gmail / Outlook / SMTP"]:::source
     li["LinkedIn"]:::source
     meet["Meetings (Fireflies, Fathom)"]:::source
-    web["Webhooks (RB2B, Signalbase, custom)"]:::source
+    web["Webhooks (RB2B, custom)"]:::source
 
-    ingest["Ingestion · normalise to observations"]:::core
+    ingest["Ingestion"]:::core
     resolve["Identity Resolution"]:::core
-    obs[("Observation Spine")]:::core
-    claims["Claim Derivation"]:::core
-    mind["The Mind · scoring + learning loop"]:::core
+    graph[("The Customer Graph")]:::core
 
-    api["REST API (/v2/*)"]:::output
+    api["REST API"]:::output
     mcp["MCP Server"]:::output
     agent["Your Agent"]:::output
 
@@ -38,84 +36,63 @@ flowchart LR
     web --> ingest
 
     ingest --> resolve
-    resolve --> obs
-    obs --> claims
-    claims --> mind
+    resolve --> graph
 
-    obs --> api
-    claims --> api
-    mind --> api
-
+    graph --> api
+    graph --> mcp
     api --> agent
-    api --> mcp
     mcp --> agent
 ```
 
-The five pieces:
+The three pieces.
 
-* [**Ingestion**](#ingestion) — every signal source becomes a stream of observations (events + state) with `source`, `method`, and `observed_at`. Nothing is overwritten.
-* [**Identity Resolution**](#identity-resolution) — every observation is matched to a single entity using email, LinkedIn URL, domain, phone, and name+company fallback.
-* [**Observation Spine**](#observation-spine) — the immutable, append-only record of everything that ever happened. The source of truth.
-* [**Claim Derivation**](#claim-derivation) — claims (the facts you query) are computed from the observation spine. Every claim carries `freshness`, `confidence`, `epistemic_class`, and the `sources` that produced it.
-* [**The Mind**](#the-mind) — predictions stake on claims, the substrate watches what closes, the Scorecard learns. The compounding loop that makes the system sharper every cycle.
+* [**Ingestion**](#ingestion). Every signal source becomes a stream of events and states with `source`, `method`, and `observed_at`. Nothing is overwritten.
+* [**Identity Resolution**](#identity-resolution). Every signal is matched to one person and one company using email, LinkedIn URL, domain, phone, and a name plus company fallback.
+* [**The Customer Graph**](#the-customer-graph). The append-only record of every person, conversation, and touchpoint at an account. Every fact carries freshness, confidence, and the sources that produced it.
 
-The output surfaces — the REST API and the MCP server — are thin wrappers around the substrate. The substrate is the product.
+The output surfaces, the REST API and the MCP server, are thin wrappers around the graph.
 
 ---
 
 ### Ingestion
 
-Connectors normalise every signal into an **observation** with a few fixed shapes:
+Connectors normalise every signal into a fixed shape.
 
-- `kind: 'event'` — an interaction happened (`interaction.email_sent`, `interaction.call_held`, etc.)
-- `kind: 'state'` — a fact was observed (`title`, `stage`, `intent`, etc.)
+- `kind: 'event'`. An interaction happened (`interaction.email_sent`, `interaction.call_held`, and so on).
+- `kind: 'state'`. A fact was observed (`title`, `stage`, `intent`, and so on).
 
-Sources include CRMs (HubSpot, Pipedrive, Attio), outbound platforms (Instantly, Lemlist), Gmail/Outlook/SMTP, LinkedIn (Unipile), meeting capture (Fireflies, Fathom), web identity (RB2B, Signalbase), and any HTTP source via HMAC-signed custom webhooks.
+Sources include CRMs (HubSpot, Pipedrive, Attio), outbound platforms (Instantly, Lemlist), Gmail, Outlook, SMTP, LinkedIn via Unipile, meeting capture (Fireflies, Fathom), web identity (RB2B), and any HTTP source via HMAC-signed custom webhooks.
 
-Agents themselves are signal sources too — any [`POST /v2/observations`](/public-api/observations) call adds to the same spine.
+Agents themselves are signal sources too. Any [`POST /v2/observations`](/public-api/observations) call adds to the same graph.
 
 ### Identity Resolution
 
-Identity resolution is what makes Nous a substrate rather than another data store. Every inbound observation is resolved to a single entity using:
+Identity resolution is what makes Nous a graph rather than another data store. Every inbound signal is resolved to one person and one company using.
 
 * Entity UUID (if you have one)
 * Email address
 * LinkedIn profile URL
 * Domain (for companies)
 * Phone number
-* Name + company as a fallback (returns ambiguous when not unique)
+* Name plus company as a fallback (returns ambiguous when not unique)
 
-The same person in Apollo, HubSpot, and Gmail becomes one entity — not three. Resolve a focus once at API boundary; the substrate handles the rest.
+The same person in Apollo, HubSpot, and Gmail becomes one entity, not three. Resolve once at the API boundary and the graph handles the rest.
 
-### Observation Spine
+### The Customer Graph
 
-Every observation is **append-only**. Nothing is ever updated, nothing is ever deleted. A state observation with `value: null` asserts that a fact ended — the person left the company, the deal closed lost — without overwriting the history.
+The graph is **append-only**. Nothing is ever updated, nothing is ever deleted. A state with `value: null` asserts that a fact ended (the person left the company, the deal closed lost) without overwriting history.
 
-Two consequences:
+Two consequences.
 
-1. **The substrate self-heals.** When a new observation contradicts an older one, the claim derivation re-runs and the belief shifts toward truth.
-2. **Every claim is auditable.** Trace any claim back to the observations that produced it.
+1. **The graph self-heals.** When a new signal contradicts an older one, derived facts recompute and the belief shifts toward truth.
+2. **Every fact is auditable.** Trace any fact back to the signals that produced it.
 
-### Claim Derivation
-
-You don't store facts — you derive them. The claim engine recomputes affected claims after every observation insert (via a `claim_jobs` trigger drained by a worker). Each claim carries:
+When your agent reads from the graph, every fact carries metadata.
 
 | Field | Meaning |
 |---|---|
-| `freshness` | `fresh` / `aging` / `suspect` / `expired` — how recently observed |
-| `confidence` | `0.0` – `1.0` — how strongly observations support it |
-| `epistemic_class` | `observed` / `derived` / `asserted` — where the claim came from |
-| `sources` | the connectors that contributed |
+| `freshness` | `fresh` / `aging` / `suspect` / `expired`. How recently observed. |
+| `confidence` | `0.0` – `1.0`. How strongly the underlying signals support the fact. |
+| `sources` | The connectors that contributed. |
 
-Your agent reads these epistemics on every claim — that's what lets it decide whether to act now or call [`/v2/verify`](/public-api/verify) first.
-
-### The Mind
-
-The loop that makes the system compound:
-
-1. **Predict** — every entity with claims gets an `icp_fit` prediction staked on the current Scorecard
-2. **Resolve** — outcomes (replies, pipeline advances, closed-won revenue) flow in as new observations
-3. **Calibrate** — the Mind grades old predictions against the resolved outcomes
-4. **Learn** — the Scorecard re-trains on calibrated outcomes; bad signals lose weight, good ones gain
-
-You never see the loop as a feature — you see the result. The product is the [Context API](/public-api/introduction) and the [MCP tools](/mcp/introduction). The Mind is what makes them get sharper as you use them.
+Your agent reads these on every fact. That's what lets it decide whether to act now or call [`/v2/verify`](/public-api/verify) first.
