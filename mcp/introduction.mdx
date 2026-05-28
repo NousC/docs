@@ -3,7 +3,9 @@ title: "MCP Server"
 description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous Account Record."
 ---
 
-The Nous MCP server is a thin stdio process that exposes the v2 customer graph as **seven tools** any MCP-compatible client can call. Your agent gets engineered, epistemics-tagged context, never raw rows.
+The Nous MCP server exposes the v2 customer graph as **seven tools** any MCP-compatible client can call. Your agent gets engineered, epistemics-tagged context, never raw rows.
+
+It runs two ways on the same code and the same tools. **Locally** as a stdio process (`npx`) for clients on your machine — Claude Code, Claude Desktop, Cursor, Codex, self-hosted n8n. Or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients that can't launch a local process, such as n8n cloud.
 
 The MCP is one of two ways Nous exposes the same customer graph. Reach for it when the right call is reasoned at runtime. Use the [REST API](/public-api/introduction) instead when a workflow runtime already knows the parameters (n8n filtering a list, a form intake creating a lead, a job patching `sent_at` mid-loop). Both surfaces sit on the same customer graph, so a write through one is visible to the other.
 
@@ -63,9 +65,44 @@ env = { NOUS_API_KEY = "YOUR_API_KEY" }
 
 ### Any MCP-compatible client
 
-```bash
-NOUS_API_KEY=YOUR_API_KEY npx -y @opennous/mcp
+```json
+{
+  "mcpServers": {
+    "nous": {
+      "command": "npx",
+      "args": ["-y", "@opennous/mcp"],
+      "env": { "NOUS_API_KEY": "YOUR_API_KEY" }
+    }
+  }
+}
 ```
+
+## Hosted server (remote HTTP)
+
+Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same seven tools, same customer graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
+
+```
+Endpoint   https://mcp.opennous.cloud/mcp
+Auth       Authorization: Bearer YOUR_API_KEY
+```
+
+### n8n cloud
+
+Add an **MCP Client Tool** node and configure it:
+
+- **Server Transport** → `HTTP Streamable`
+- **Endpoint URL** → `https://mcp.opennous.cloud/mcp`
+- **Authentication** → `Bearer Auth`, token = your Nous API key
+
+### Claude Code (remote)
+
+```bash
+claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+<Note>
+Clients that accept only a bare URL with no auth header can pass the key as a query parameter — `https://mcp.opennous.cloud/mcp?key=YOUR_API_KEY` — but prefer the Bearer header, since URLs can land in logs.
+</Note>
 
 ## The seven tools
 
