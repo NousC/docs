@@ -20,8 +20,8 @@ Local preview runs at http://localhost:3000.
 
 ## Related repos
 
-- Product: https://github.com/bennetglinder1/nous
-- Marketing site: https://github.com/bennetglinder1/nous-site (deployed at [opennous.cloud](https://opennous.cloud))
+- Product: https://github.com/NousC/nous
+- Marketing site: https://github.com/NousC/nous-site (deployed at [opennous.cloud](https://opennous.cloud))
 
 ## License
 

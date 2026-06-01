@@ -227,7 +227,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/bennetglinder1/nous",
+          "href": "https://github.com/NousC/nous",
           "icon": "github"
         },
         {
@@ -246,7 +246,7 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/bennetglinder1/nous"
+        "href": "https://github.com/NousC/nous"
       },
       {
         "label": "Discord",
@@ -273,7 +273,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/bennetglinder1/nous"
+      "github": "https://github.com/NousC/nous"
     }
   },
   "redirects": [
