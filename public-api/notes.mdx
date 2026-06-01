@@ -1,0 +1,82 @@
+---
+title: "Save a Note"
+api: "POST https://api.opennous.cloud/v2/notes"
+description: "Attach a meeting brief, transcript, prep, or plain note to a contact's record. Append-only and dated, so a contact builds a history across meetings."
+---
+
+Saves a long-form artifact onto a person or company so it stays on their record. This is for **documents you keep** on a contact — a meeting brief, a transcript, pre-meeting prep, research, or a plain note — not for logging that an interaction happened. For "an email was sent / a meeting happened", use [`POST /v2/observations`](/public-api/observations).
+
+Notes are append-only and dated, so a contact accumulates a record across meetings. Retrieve the relevant passage later with [`POST /v2/notes/search`](/public-api/notes-search).
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/notes \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "focus": "sarah@acme.com",
+    "type": "meeting_brief",
+    "title": "Pre-meeting brief — renewal",
+    "date": "2026-06-01",
+    "content": "Sarah is evaluating for Q3. Budget waiting on close. Proposal at $12k/yr — expect a discount ask. Maria (CFO) is the economic buyer."
+  }'
+```
+
+### Body
+
+<ParamField body="focus" type="string" required>
+  Entity UUID, email, domain, or LinkedIn URL. **Not** a bare name — writes need a precise identifier so the entity can be created if it doesn't exist yet.
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  The full note or document text — a short note or a complete brief/transcript. Kept whole for agents to read.
+</ParamField>
+
+<ParamField body="type" type="string" default="note">
+  One of `note`, `meeting_brief`, `transcript`, `meeting_notes`, `pre_meeting`, `research`.
+</ParamField>
+
+<ParamField body="title" type="string">
+  A short name, e.g. `Pre-meeting brief — renewal` or `Transcript — Jun 1`. Shown in the UI.
+</ParamField>
+
+<ParamField body="date" type="string">
+  The relevant date (e.g. the meeting date), ISO or plain. Defaults to now.
+</ParamField>
+
+## Response
+
+`201 Created`
+
+```json
+{
+  "note": {
+    "id": "9f31c0a2-...",
+    "metadata": {
+      "doc_type": "meeting_brief",
+      "title": "Pre-meeting brief — renewal",
+      "date": "2026-06-01"
+    }
+  },
+  "entity_id": "a1b2c3d4-...",
+  "doc_type": "meeting_brief"
+}
+```
+
+## Notes vs observations
+
+| Path | What it writes | When to use |
+|---|---|---|
+| `POST /v2/notes` | A document kept on the contact (brief, transcript, note) | You produced something durable worth keeping for next time |
+| [`POST /v2/observations`](/public-api/observations) | An immutable event/state; Nous derives the claim | An interaction happened, or a fact changed |
+
+After a meeting, use both: record the meeting via `/v2/observations`, keep the notes via `/v2/notes`.
+
+## Errors
+
+| Status | Error | What to do |
+|---|---|---|
+| 400 | `focus_and_content_required` | `focus` and a non-empty `content` are both required |
+| 400 | `invalid_focus` | Provide an entity id, email, LinkedIn URL, or domain — not a bare name |
+| 401 | `unauthorized` | API key missing or invalid |

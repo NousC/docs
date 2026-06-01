@@ -59,6 +59,46 @@ curl 'https://api.opennous.cloud/v2/workspace/facts?categories=ICP,Market&limit=
 
 When you're writing an agent that drafts personalised outreach, the agent needs BOTH the contact's context (`/v2/context`) AND the user's GTM profile (`/v2/workspace/facts`). The GTM profile tells it how YOU sell; the context tells it about THEM. Combine for natural copy.
 
+## Writing back
+
+`POST` to the same path to keep a **section** of the GTM context current. Each section is a living file: in the default `replace` mode the new content **evolves** that section's belief — the prior version is kept as history, never silently contradicted — so you just write the section's current state. This is the endpoint behind the MCP [`update_gtm_profile`](/mcp/tools/update-gtm-profile) tool.
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/workspace/facts \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "section": "Pricing",
+    "content": "Free self-host. Scale $149/mo. Agency $599/mo.",
+    "mode": "replace"
+  }'
+```
+
+<ParamField body="section" type="string" required>
+  One of `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Positioning` (these feed the ICP scoring model), `GTM Motion`, or `Notes`.
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  The section's current content — one short, current statement, not an essay.
+</ParamField>
+
+<ParamField body="mode" type="string" default="replace">
+  `replace` evolves the section and keeps the prior version as history. `append` logs a new entry without replacing — the default for `Notes`.
+</ParamField>
+
+<ParamField body="supersedes" type="string">
+  Explicit fact id to replace (overrides section matching).
+</ParamField>
+
+```json
+{
+  "fact": { "id": "b8f0...", "category": "Pricing", "content": "Free self-host. Scale $149/mo. Agency $599/mo." },
+  "section": "Pricing",
+  "mode": "replace",
+  "superseded": true
+}
+```
+
 ## How it gets there
 
-The GTM profile is built through the in-app **GTM Context** tab (the guided Playbook setup, or added directly) or via [`POST /v2/observations`](/public-api/observations) with a `note.<uuid>` property on the workspace entity. Both write paths produce the same asserted-claim records this endpoint reads.
+The GTM profile is built through the in-app **GTM Context** tab (the guided Playbook setup, or added directly), through the `POST` write-back above, or via [`POST /v2/observations`](/public-api/observations) with a `note.<uuid>` property on the workspace entity. All write paths produce the same asserted-claim records this endpoint reads.

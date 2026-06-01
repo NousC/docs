@@ -1,0 +1,47 @@
+---
+title: "search_notes"
+description: "Semantic search over the saved notes & documents kept on contacts — pull the relevant passage instead of dumping whole documents into context."
+---
+
+The retrieval counterpart to [`save_note`](/mcp/tools/save-note). Semantically searches the meeting briefs, transcripts, meeting notes, and notes kept on contacts, and returns the matching documents with a snippet — so the agent pulls *the relevant passage* rather than loading whole documents into context.
+
+Pass `focus` to restrict to one person or company, or omit it to search across everyone in the workspace.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `question` | string | ✓ | Natural-language query matched against document content |
+| `focus` | string | | Restrict to one person/company — email, LinkedIn URL, domain, or entity UUID. Omit to search everyone. |
+| `limit` | number | | Max documents to return. Default 8, cap 20. |
+
+## Returns
+
+Ranked documents, each with type, title, date, similarity, and a snippet. Get the full body with [`get_account`](/mcp/tools/get-account).
+
+```
+Documents matching "what did we discuss about pricing":
+
+  meeting notes · Q3 renewal call  (88%)  [2d ago]
+    Sarah pushed back on per-seat — wants a flat platform fee. Maria (CFO) to…
+    (entity_id: a1b2c3d4-...)
+  meeting brief · Pre-meeting brief — renewal  (74%)  [1w ago]
+    Budget waiting on Q3 close; proposal at $12k/yr, expect a discount ask…
+    (entity_id: a1b2c3d4-...)
+```
+
+If nothing matches:
+
+```
+No saved documents matched "what did we discuss about pricing".
+```
+
+## When to call it
+
+- **"What did we discuss about pricing?"** — pull the relevant past notes
+- **"What objections came up in past meetings?"** — across a contact's record
+- **Comparing across meetings** — restrict with `focus` and read the snippets
+
+## Backed by
+
+`POST /v2/notes/search` — see the [HTTP reference](/public-api/notes-search) for the raw JSON shape.

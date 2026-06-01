@@ -158,6 +158,13 @@
             ]
           },
           {
+            "group": "Notes",
+            "pages": [
+              "public-api/notes",
+              "public-api/notes-search"
+            ]
+          },
+          {
             "group": "Triggers",
             "pages": [
               "public-api/triggers/introduction",
@@ -184,7 +191,10 @@
               "mcp/tools/query",
               "mcp/tools/attention",
               "mcp/tools/verify",
-              "mcp/tools/get-gtm-profile"
+              "mcp/tools/get-gtm-profile",
+              "mcp/tools/update-gtm-profile",
+              "mcp/tools/save-note",
+              "mcp/tools/search-notes"
             ]
           }
         ]

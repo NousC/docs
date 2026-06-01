@@ -3,6 +3,22 @@ title: "Changelog"
 description: "New features, improvements, and fixes shipped in Nous."
 ---
 
+<Update label="June 1, 2026" description="Notes & GTM write-back">
+
+## Notes on contacts, and a living GTM profile
+
+The MCP server now exposes **ten tools**. Three are new since the last release:
+
+- **[`save_note`](/mcp/tools/save-note)** — keep a meeting brief, transcript, prep, or plain note on a contact's record. Append-only and dated, so a contact builds a history across meetings. ([`POST /v2/notes`](/public-api/notes))
+- **[`search_notes`](/mcp/tools/search-notes)** — semantic search across saved notes & documents, so an agent pulls the relevant passage instead of loading whole documents. ([`POST /v2/notes/search`](/public-api/notes-search))
+- **[`update_gtm_profile`](/mcp/tools/update-gtm-profile)** — write back a lasting change to a GTM section. The section evolves and the prior version is kept as history, never silently contradicted. ([`POST /v2/workspace/facts`](/public-api/gtm-profile#writing-back))
+
+[`get_context`](/mcp/tools/get-context) now also surfaces a **DOCUMENTS** block — an overview of the notes kept on a contact — alongside the account's ICP fit score.
+
+`save_note` keeps the document itself; [`record`](/mcp/tools/record) still logs that an interaction happened. After a meeting, use both.
+
+</Update>
+
 <Update label="May 22, 2026" description="Week of May 18–22">
 
 ## Rebrand: Proply is now Nous

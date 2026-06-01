@@ -58,6 +58,9 @@ Keys are workspace-scoped, so no separate workspace ID is required.
   <Card title="GET /v2/workspace/facts" href="/public-api/gtm-profile" icon="book">
     The user's own GTM profile. ICP, market, pricing, competitors.
   </Card>
+  <Card title="POST /v2/notes/search" href="/public-api/notes-search" icon="file-magnifying-glass">
+    Semantic search over saved notes & documents. Pull the relevant passage, not the whole document.
+  </Card>
 </CardGroup>
 
 ### Write
@@ -65,6 +68,12 @@ Keys are workspace-scoped, so no separate workspace ID is required.
 <CardGroup cols={2}>
   <Card title="POST /v2/observations" href="/public-api/observations" icon="pen">
     Record what happened. You observe; Nous derives the claims.
+  </Card>
+  <Card title="POST /v2/notes" href="/public-api/notes" icon="note-sticky">
+    Attach a meeting brief, transcript, or note to a contact. Append-only and dated.
+  </Card>
+  <Card title="POST /v2/workspace/facts" href="/public-api/gtm-profile#writing-back" icon="book-open">
+    Write back a GTM section — it evolves, keeping the prior version as history.
   </Card>
   <Card title="POST + PATCH /v2/people" href="/public-api/people/create" icon="user-plus">
     Create a person from a form intake. PATCH asserts fields like email, title, or company directly onto the entity.

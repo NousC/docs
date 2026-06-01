@@ -1,0 +1,38 @@
+---
+title: "update_gtm_profile"
+description: "Write back a lasting change to a section of the user's own GTM context — the section evolves and the prior version is kept as history, never silently contradicted."
+---
+
+The write-back companion to [`get_gtm_profile`](/mcp/tools/get-gtm-profile). Use it whenever the user states, or you learn, a **lasting change to how they go to market** — repriced, moved upmarket, sharpened positioning, changed their motion, won a new segment, or a useful note about how they operate.
+
+Each section is a living file. In the default `replace` mode the section **evolves** — the old version is kept as history, never silently contradicted — so you just write the section's current state. Nous is the source of truth for the GTM context: write back here instead of keeping a local file.
+
+<Note>**Not for prospects.** This is the user's OWN business, not a person or company. For facts about a contact, use [`record`](/mcp/tools/record); to keep a document on a contact, use [`save_note`](/mcp/tools/save-note).</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `section` | enum | ✓ | `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Positioning` (these feed the ICP scoring model), `GTM Motion` (how they sell), or `Notes` (a running log for anything else durable) |
+| `content` | string | ✓ | The section's current content — short and current, a sentence or two, not an essay |
+| `mode` | enum | | `replace` *(default)* evolves the section and keeps the prior version as history. `append` logs a new entry without replacing — the default for `Notes`. |
+| `supersedes` | string | | Optional id of a specific existing fact to replace (overrides section matching) |
+
+## Returns
+
+```
+Updated Pricing: Free self-host. Scale $149/mo. Agency $599/mo.
+```
+
+The verb reflects what happened — `Recorded` (new), `Updated` (evolved an existing section), or `Logged to` (append mode).
+
+## When to call it
+
+- **"We just moved upmarket to 200–1000 employees"** → `section: "ICP"`, replace
+- **"We raised Scale to $149"** → `section: "Pricing"`, replace
+- **"We now lead with the audit-trail angle"** → `section: "Positioning"`, replace
+- **A durable operating note** → `section: "Notes"`, append
+
+## Backed by
+
+`POST /v2/workspace/facts` — the same workspace-facts endpoint [`get_gtm_profile`](/mcp/tools/get-gtm-profile) reads. See the [GTM Profile HTTP reference](/public-api/gtm-profile#writing-back).

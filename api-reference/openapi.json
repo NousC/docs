@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Nous REST API",
-    "description": "The v2 Context API — eight endpoints. The agent reads engineered, epistemics-tagged context and writes observations. Nous derives the rest.",
+    "description": "The v2 Context API. The agent reads engineered, epistemics-tagged context and writes observations; it also keeps long-form notes on contacts and a living GTM profile. Nous derives the rest.",
     "version": "2.0.0"
   },
   "servers": [
@@ -156,6 +156,18 @@
           "content":     { "type": "string" },
           "source":      { "type": "string" },
           "recorded_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Document": {
+        "type": "object",
+        "description": "A note or document kept on a contact — a meeting brief, transcript, prep, research, or plain note.",
+        "properties": {
+          "entity_id":  { "type": "string", "format": "uuid" },
+          "type":       { "type": "string", "enum": ["note", "meeting_brief", "transcript", "meeting_notes", "pre_meeting", "research"] },
+          "title":      { "type": "string", "nullable": true },
+          "date":       { "type": "string", "nullable": true, "description": "The relevant date (e.g. the meeting date)" },
+          "similarity": { "type": "number", "description": "Present in search results — match score 0–1" },
+          "snippet":    { "type": "string", "description": "First ~400 chars of the document body" }
         }
       },
       "Error": {
@@ -517,6 +529,130 @@
               }
             }
           }
+        }
+      },
+      "post": {
+        "summary": "Write back a GTM section",
+        "description": "Keep a section of the user's own GTM context current. In the default 'replace' mode the section evolves — the prior version is kept as history, never silently contradicted. 'append' logs a new entry (the default for Notes).",
+        "tags": ["GTM Profile"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["section", "content"],
+                "properties": {
+                  "section":    { "type": "string", "enum": ["ICP", "Market", "Product", "Pricing", "Competitors", "Positioning", "GTM Motion", "Notes"] },
+                  "content":    { "type": "string", "description": "The section's current content — one short, current statement." },
+                  "mode":       { "type": "string", "enum": ["replace", "append"], "default": "replace" },
+                  "supersedes": { "type": "string", "format": "uuid", "description": "Explicit fact id to replace (overrides section matching)." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The recorded/evolved fact",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fact":       { "$ref": "#/components/schemas/WorkspaceFact" },
+                    "section":    { "type": "string" },
+                    "mode":       { "type": "string", "enum": ["replace", "append"] },
+                    "superseded": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "section_and_content_required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/v2/notes": {
+      "post": {
+        "summary": "Save a note on a contact",
+        "description": "Attach a long-form artifact to a person or company — a meeting brief, transcript, prep, research, or plain note. Append-only and dated. NOT for logging that an interaction happened (use /v2/observations).",
+        "tags": ["Notes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["focus", "content"],
+                "properties": {
+                  "focus":   { "type": "string", "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name." },
+                  "content": { "type": "string", "description": "The full note or document text." },
+                  "type":    { "type": "string", "enum": ["note", "meeting_brief", "transcript", "meeting_notes", "pre_meeting", "research"], "default": "note" },
+                  "title":   { "type": "string", "description": "A short name, e.g. 'Pre-meeting brief — renewal'." },
+                  "date":    { "type": "string", "description": "The relevant date (ISO or plain). Defaults to now." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The saved note",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "note":      { "type": "object" },
+                    "entity_id": { "type": "string", "format": "uuid" },
+                    "doc_type":  { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "focus_and_content_required or invalid_focus", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/v2/notes/search": {
+      "post": {
+        "summary": "Search notes",
+        "description": "Semantic search over the saved notes & documents kept on contacts. Returns matching documents with a snippet. Pass focus to restrict to one contact, or omit it to search everyone.",
+        "tags": ["Notes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["question"],
+                "properties": {
+                  "question": { "type": "string", "description": "Natural-language query matched against document content." },
+                  "focus":    { "type": "string", "description": "Optional — restrict to one person/company. Unresolvable focus falls back to a workspace-wide search." },
+                  "limit":    { "type": "number", "default": 8, "maximum": 20 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked matching documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "documents": { "type": "array", "items": { "$ref": "#/components/schemas/Document" } },
+                    "count":     { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "question required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
     }

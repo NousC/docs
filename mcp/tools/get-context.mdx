@@ -3,7 +3,7 @@ title: "get_context"
 description: "Engineered context for one task about one entity. The headline call before drafting outreach, prepping a meeting, or making any decision about a person or company."
 ---
 
-The most-used tool. Pass who you're working on and what you're about to do — get back a focused, ranked block: facts with confidence + freshness, the recent timeline, the buying-group stakeholders, and any open predictions.
+The most-used tool. Pass who you're working on and what you're about to do — get back a focused, ranked block: the account's ICP fit score, facts with confidence + freshness, the recent timeline, any saved notes & documents on the contact, the buying-group stakeholders, and any open predictions.
 
 ## Parameters
 
@@ -20,6 +20,8 @@ Formatted text — one line per claim, the recent timeline, stakeholders, predic
 ```
 Sarah is evaluating for Q3; primary concern is Salesforce migration.
 
+ICP FIT: 84/100 — strong fit  (matches B2B SaaS, 50–200, already on Apollo)
+
 FACTS (12):
   title: VP Sales                              [92% · fresh]
   stage: evaluating                            [81% · fresh]
@@ -33,6 +35,10 @@ TIMELINE:
   4d ago    linkedin message: Can we reschedule?
   1w ago    proposal sent: Q3 outbound package — $12k/yr
 
+DOCUMENTS (notes & meeting records — use search_notes to search their content):
+  meeting brief · Pre-meeting brief — renewal  [1w ago]
+    Budget waiting on Q3 close; expect a discount ask…
+
 STAKEHOLDERS:
   Maria Lopez — CFO
   James Park — Head of Eng
@@ -42,6 +48,8 @@ PREDICTIONS:
 
 (entity_id: a1b2c3d4-...)
 ```
+
+The **DOCUMENTS** block is an overview (snippets only) of the notes and meeting records kept on the contact via [`save_note`](/mcp/tools/save-note). To pull the relevant content from them, use [`search_notes`](/mcp/tools/search-notes).
 
 ### Ambiguous name
 

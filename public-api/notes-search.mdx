@@ -1,0 +1,77 @@
+---
+title: "Search Notes"
+api: "POST https://api.opennous.cloud/v2/notes/search"
+description: "Semantic search over the saved notes & documents kept on contacts. Pull the relevant passage instead of loading whole documents."
+---
+
+The retrieval counterpart to [`POST /v2/notes`](/public-api/notes). Semantically searches the meeting briefs, transcripts, meeting notes, and notes kept on contacts, and returns the matching documents with a snippet — so a workflow pulls *the relevant passage* rather than the whole document.
+
+Pass `focus` to restrict to one person or company, or omit it to search across everyone in the workspace.
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/notes/search \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "question": "what did we discuss about pricing",
+    "focus": "sarah@acme.com",
+    "limit": 8
+  }'
+```
+
+### Body
+
+<ParamField body="question" type="string" required>
+  Natural-language query matched against document content.
+</ParamField>
+
+<ParamField body="focus" type="string">
+  Restrict to one person/company — entity UUID, email, domain, or LinkedIn URL. Omit to search across everyone. A focus that can't be resolved falls back to a workspace-wide search (it never creates an entity).
+</ParamField>
+
+<ParamField body="limit" type="number" default="8">
+  Max documents to return. Cap 20.
+</ParamField>
+
+## Response
+
+```json
+{
+  "documents": [
+    {
+      "entity_id": "a1b2c3d4-...",
+      "type": "meeting_notes",
+      "title": "Q3 renewal call",
+      "date": "2026-05-30",
+      "similarity": 0.88,
+      "snippet": "Sarah pushed back on per-seat — wants a flat platform fee. Maria (CFO) to…"
+    },
+    {
+      "entity_id": "a1b2c3d4-...",
+      "type": "meeting_brief",
+      "title": "Pre-meeting brief — renewal",
+      "date": "2026-06-01",
+      "similarity": 0.74,
+      "snippet": "Budget waiting on Q3 close; proposal at $12k/yr, expect a discount ask…"
+    }
+  ],
+  "count": 2
+}
+```
+
+`snippet` is truncated to ~400 characters. To read a document in full, fetch the contact with [`GET /v2/accounts/:id`](/public-api/accounts).
+
+## When to call it
+
+- **"What did we discuss about pricing?"** — pull the relevant past notes
+- **"What objections came up in past meetings?"** — across a contact's record
+- **Comparing across a contact's meetings** — set `focus` and read the snippets
+
+## Errors
+
+| Status | Error | What to do |
+|---|---|---|
+| 400 | `question required` | A non-empty `question` is required |
+| 401 | `unauthorized` | API key missing or invalid |
