@@ -125,10 +125,21 @@ Open **Settings → Integrations** and connect at least one signal source to sta
 
 ## Updating
 
+The images are built locally from source, so pull the latest code and rebuild:
+
 ```bash
-docker compose pull
-docker compose up -d
+git pull
+docker compose up -d --build
 ```
+
+`git pull` fetches the new code, `--build` recompiles the images from it, and `-d`
+restarts only the containers that changed (Redis and Caddy are left untouched). The
+frontend is rebuilt too — Vite bakes the UI into a static bundle at build time, so a
+plain restart won't pick up frontend changes.
+
+<Warning>
+  Some updates ship new database migrations under [`supabase/migrations/`](https://github.com/NousC/nous/tree/main/supabase/migrations). These are **not** applied automatically. After pulling, check that folder for files newer than your last update and run any new ones in your Supabase **SQL Editor** before (or right after) rebuilding. Skipping a migration will make the new code error against an outdated schema.
+</Warning>
 
 ## Logs
 
