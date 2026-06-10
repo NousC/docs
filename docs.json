@@ -10,13 +10,6 @@
   "appearance": {
     "default": "light"
   },
-  "background": {
-    "color": {
-      "light": "#f6f1e9",
-      "dark": "#0e0c0b"
-    },
-    "decoration": "gradient"
-  },
   "favicon": "/favicon.svg",
   "openapi": "openapi.json",
   "navigation": {
