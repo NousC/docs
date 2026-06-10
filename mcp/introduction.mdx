@@ -3,11 +3,9 @@ title: "MCP Server"
 description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous Account Record."
 ---
 
-The Nous MCP server exposes the v2 customer graph as **seventeen tools** any MCP-compatible client can call. Your agent gets engineered, epistemics-tagged context, never raw rows — and can set the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, and wire triggers. Nous is operated by the agent; the web app is where you watch it. Call `get_workspace_status` first to see what's set up and what to do next.
+The Nous MCP server exposes the v2 customer graph as **seventeen tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
 
-It runs two ways on the same code and the same tools. **Locally** as a stdio process (`npx`) for clients on your machine — Claude Code, Claude Desktop, Cursor, Codex, self-hosted n8n. Or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients that can't launch a local process, such as n8n cloud.
-
-The MCP is one of two ways Nous exposes the same customer graph. Reach for it when the right call is reasoned at runtime. Use the [REST API](/public-api/introduction) instead when a workflow runtime already knows the parameters (n8n filtering a list, a form intake creating a lead, a job patching `sent_at` mid-loop). Both surfaces sit on the same customer graph, so a write through one is visible to the other.
+It runs two ways on the same tools: **locally** via `npx` (Claude Code, Cursor, Codex, Claude Desktop, self-hosted n8n), or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients (n8n cloud). Prefer the [REST API](/public-api/introduction) when the caller already knows the parameters; both sit on the same graph, so a write through one shows in the other.
 
 ## Install in 30 seconds
 
@@ -18,10 +16,10 @@ The server is published on npm. **No clone, no global install** — `npx` fetche
 ```bash
 /plugin marketplace add NousC/nous
 /plugin install nous@nous-plugins
-/nous-login
+npx @opennous/cli login
 ```
 
-`/nous-login` opens your browser, you approve, and a workspace API key is minted and saved automatically — no copy-paste. (Prefer to paste a key? Create one at Settings → API Keys and set it as the plugin's `NOUS_API_KEY`.) Seventeen tools become callable in every Claude Code session.
+`npx @opennous/cli login` opens your browser, you approve, and a workspace key is minted and saved — no copy-paste; the plugin's MCP picks it up. Then tell your agent **"set me up"**. (Prefer to paste a key? Create one at Settings → API Keys and set the plugin's `NOUS_API_KEY`.) Seventeen tools become callable in every Claude Code session.
 
 ### Codex
 
@@ -179,7 +177,7 @@ The agent sets the workspace up itself. Call `get_workspace_status` first; it re
 | `NOUS_API_KEY` | yes | — | Workspace API key. Create at Settings → API Keys. |
 | `NOUS_API_URL` | no | `https://api.opennous.cloud` | Override for self-hosted. |
 
-The Claude Code plugin's preferred path is `/nous-login` — a browser sign-in that mints a workspace key and saves it for you (no `NOUS_API_KEY` to set). The plugin's `userConfig` field still accepts a pasted key as a fallback, stored in your OS keychain — never in plaintext or shell history.
+The preferred path is `npx @opennous/cli login` — a browser sign-in that mints a workspace key and saves it to `~/.nous/config.json`, which the MCP reads (no `NOUS_API_KEY` to set). The plugin's `userConfig` field still accepts a pasted key as a fallback, stored in your OS keychain — never in plaintext or shell history.
 
 ## How agents typically use it
 
