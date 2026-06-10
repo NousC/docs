@@ -3,9 +3,19 @@
   "theme": "mint",
   "name": "Nous",
   "colors": {
-    "primary": "#1E40AF",
-    "light": "#3B82F6",
-    "dark": "#1E3A8A"
+    "primary": "#bf5630",
+    "light": "#d97757",
+    "dark": "#a8462a"
+  },
+  "appearance": {
+    "default": "light"
+  },
+  "background": {
+    "color": {
+      "light": "#f6f1e9",
+      "dark": "#0e0c0b"
+    },
+    "decoration": "gradient"
   },
   "favicon": "/favicon.svg",
   "openapi": "openapi.json",
