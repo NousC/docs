@@ -1,0 +1,43 @@
+---
+title: "configure_crm_sync"
+description: "Set how Nous keeps a connected CRM in sync — auto-sync, the create policy and ICP threshold, and the hygiene cadence. The same settings as the CRM Sync page."
+---
+
+Configure the CRM sync rules for a connected CRM, the same options as the CRM Sync page. The CRM must already be connected (HubSpot, Pipedrive, or Attio). Send only the fields you want to change; the rest keep their current values.
+
+<Note>CRM sync is a **Growth+** feature. On lower plans this returns `feature_not_in_plan`. Connecting a CRM is not gated — only configuring the sync is.</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `provider` | `"hubspot"` \| `"pipedrive"` \| `"attio"` | yes | Which connected CRM to configure. |
+| `autoSync` | boolean | | Pull contacts/companies/deals daily. |
+| `pushActivities` | boolean | | Push touchpoints (meetings, replies, proposals) back to the CRM. |
+| `createInCrm` | boolean | | Auto-create new records when they earn it. |
+| `createTrigger` | `"any_reply_or_meeting"` \| `"positive_reply_or_meeting"` \| `"meeting_only"` \| `"interested_stage"` | | What earns a new record. |
+| `createRequireIcpFit` | boolean | | Require an ICP-fit score before creating a record. |
+| `createIcpThreshold` | number | | Minimum ICP-fit score to create (0–100). |
+| `hygieneEnabled` | boolean | | Run scheduled hygiene reconciliation. |
+| `hygieneCadence` | `"weekly"` \| `"monthly"` | | How often hygiene runs. |
+
+## Returns
+
+```
+CRM sync configured for hubspot. auto-sync on, create on (positive_reply_or_meeting, ICP ≥ 70), hygiene weekly.
+```
+
+If the CRM isn't connected yet:
+
+```
+hubspot isn't connected yet. Tell the user to connect it on the Integrations page, then configure sync.
+```
+
+## When to call it
+
+- After the CRM is connected, to set the sync, create, and hygiene rules.
+- To adjust the rules later — send only the changed fields.
+
+## Backed by
+
+`POST /v2/workspace/crm-sync` — the agent setup surface, gated to Growth+. Logged to the Ops page.

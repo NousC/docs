@@ -1,0 +1,40 @@
+---
+title: "connect_integration"
+description: "Connect a key-based integration for the user — an enrichment, CRM, or sequencer provider that authenticates with an API key. Verifies the credentials before saving."
+---
+
+Connect a provider that authenticates with an API key or token (e.g. Apollo, Prospeo, Instantly, a HubSpot private-app token, Pipedrive, Attio, Smartlead, HeyReach). Ask the user for the key, then call this — it verifies the credentials against the provider before saving and stores them encrypted.
+
+<Note>Providers that use a browser sign-in (OAuth, e.g. Gmail) **can't** be connected this way — the tool returns guidance to connect those on the Integrations page. That single OAuth click is the only human step left in setup.</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `provider` | string | yes | Provider name, lowercase — e.g. `apollo`, `prospeo`, `instantly`, `hubspot`, `pipedrive`, `attio`. |
+| `credentials` | object | yes | Key/value credentials, e.g. `{ "api_key": "..." }` or `{ "access_token": "..." }`. |
+| `name` | string | | Optional label for the connection. |
+
+## Returns
+
+```
+Connected apollo. Connected to Apollo.io
+```
+
+If the provider uses OAuth, or the key doesn't verify:
+
+```
+apollo uses a browser sign-in, so it can't be connected with a key. Tell the user to connect it on the Integrations page.
+```
+```
+Those credentials didn't verify for apollo. Ask the user to double-check the key and try again.
+```
+
+## When to call it
+
+- When the user gives you an API key for an enrichment, CRM, or sequencer tool.
+- After connecting an enrichment provider, the account record starts filling in.
+
+## Backed by
+
+`POST /v2/workspace/integrations` — the agent setup surface. Logged to the Ops page.

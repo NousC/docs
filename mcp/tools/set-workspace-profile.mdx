@@ -1,0 +1,33 @@
+---
+title: "set_workspace_profile"
+description: "Agent-driven onboarding — set the workspace's name, website, business type, and a sentence on the ideal customer, in conversation instead of a web wizard."
+---
+
+Onboard the workspace by talking to the user, not by clicking through a wizard. Ask for their company name, website, whether they sell a **service** or **software**, and a sentence describing their ideal customer, then write them here. This seeds the GTM context and the ICP scoring model. Call `get_workspace_status` first to see what's already set, and send only the fields you're changing.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | | The company / workspace name. |
+| `website` | string | | The company website — seeds the GTM context. |
+| `business_type` | `"service"` \| `"software"` | | Sets the CRM's buyer terminology and default signup stage. |
+| `plan_model` | `"free_plan"` \| `"free_trial"` \| `"both"` \| `"paid_only"` | | Software only — how they package. |
+| `default_signup_stage` | string | | Stage a new signup lands in (defaults sensibly from `business_type`). |
+| `icp` | string | | A sentence or two describing the ideal customer — seeds the ICP model. |
+
+## Returns
+
+```
+Workspace profile saved. name=Acme · site=acme.com · type=software · ICP recorded.
+Next: call get_workspace_status to see what to set up next (usually the GTM playbook).
+```
+
+## When to call it
+
+- When `get_workspace_status` shows **onboarding incomplete** (a new workspace).
+- To **update** the profile later (the business changed names, moved to software, etc.) — send only the changed fields.
+
+## Backed by
+
+`POST /v2/workspace/onboarding` — the agent setup surface. Logged to the Ops page.

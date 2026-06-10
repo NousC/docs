@@ -1,0 +1,39 @@
+---
+title: "build_scoring_model"
+description: "Build (or rebuild) the ICP scoring model from the GTM context the workspace has recorded — the second half of setting up the GTM playbook."
+---
+
+Turn the recorded GTM context into a weighted set of ICP scoring signals so accounts get scored for fit. This is the second half of building the GTM playbook: first record the ICP and how they sell with [`update_gtm_profile`](/mcp/tools/update-gtm-profile), then call this. If a model already exists it's left alone unless you pass `force: true`. If it reports no GTM context yet, record some first, then call again.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `force` | boolean | | Rebuild even if a model already exists — use when the GTM context has changed. |
+
+## Returns
+
+```
+Built the ICP scoring model — 4 signals:
+  • Company has 11-50 employees (weight 9)
+  • Company is B2B SaaS (weight 10)
+  • Lead is a RevOps leader (weight 9)
+  • Lead has director-level or above seniority (weight 8)
+
+Accounts will now be scored for fit. Check it on the GTM Context page.
+```
+
+If no GTM context is recorded yet:
+
+```
+No GTM context recorded yet. Record the ICP and how they sell with update_gtm_profile first, then build the model.
+```
+
+## When to call it
+
+- After recording the GTM context with `update_gtm_profile`, to create the scoring model.
+- With `force: true` when the GTM context has changed and the model should be rebuilt.
+
+## Backed by
+
+`POST /v2/workspace/scoring-model` — the agent setup surface. Shares its implementation with the web GTM Context page. Logged to the Ops page.

@@ -199,6 +199,18 @@
               "mcp/tools/save-note",
               "mcp/tools/search-notes"
             ]
+          },
+          {
+            "group": "Setup tools",
+            "pages": [
+              "mcp/tools/get-workspace-status",
+              "mcp/tools/set-workspace-profile",
+              "mcp/tools/build-scoring-model",
+              "mcp/tools/connect-integration",
+              "mcp/tools/configure-crm-sync",
+              "mcp/tools/set-trigger",
+              "mcp/tools/list-triggers"
+            ]
           }
         ]
       },

@@ -1,0 +1,42 @@
+---
+title: "get_workspace_status"
+description: "The whole setup state of the workspace in one call — onboarding, GTM playbook, integrations, CRM sync, webhooks, triggers — plus a ranked list of what to set up next."
+---
+
+Nous is operated by the agent, not by a human clicking through the app. This is the **first call** in a session: it tells the agent whether the workspace is onboarded, whether the GTM playbook (ICP scoring model) is built, which integrations are connected, whether CRM sync is configured, and whether any webhooks or triggers are live — and returns a ranked **next steps** list so the agent knows what to set up next without being asked.
+
+## Parameters
+
+None.
+
+## Returns
+
+```
+WORKSPACE: Acme · acme.com · software
+
+SETUP:
+  ✓ Onboarding
+  ✗ GTM playbook
+  ✓ Integrations (1): Apollo
+  ✗ CRM sync
+  ✓ Enrichment: Apollo
+  ✗ Events — 0 webhook(s), 0 trigger(s)
+
+NEXT STEPS:
+  • Build the GTM playbook
+      why: No ICP scoring model exists yet, so accounts cannot be scored for fit.
+      how: Work through the GTM context with the user and record it with update_gtm_profile, then build_scoring_model.
+  • Set up event triggers
+      why: No webhooks or triggers are live, so downstream tools are not notified when the record changes.
+      how: Set up the triggers the user needs for their stack.
+```
+
+## When to call it
+
+- **At the start of a session**, before offering to set anything up — it's the agent's map of what's done and what's missing.
+- **Whenever the user asks "what's set up?"** or "what should I do next?"
+- After a setup action, to confirm it landed and see what's next.
+
+## Backed by
+
+`GET /v2/workspace/status` — the agent setup surface. Every call is logged to the Ops page.

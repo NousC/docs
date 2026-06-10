@@ -1,0 +1,34 @@
+---
+title: "list_triggers"
+description: "List the workspace's outbound event triggers (webhooks) and the catalog of available event names."
+---
+
+See what triggers are wired and the events you can fire on. Pair it with [`set_trigger`](/mcp/tools/set-trigger) — call this first to get valid event names, then create the trigger.
+
+## Parameters
+
+None.
+
+## Returns
+
+```
+TRIGGERS (1):
+  Slack relay → https://hooks.example.com/nous  [interaction.email_received, interaction.meeting_held]
+
+AVAILABLE EVENTS: interaction.email_received, interaction.email_reply, interaction.meeting_held, ...
+```
+
+If none are set up:
+
+```
+No triggers set up yet.
+```
+
+## When to call it
+
+- Before `set_trigger`, to use valid event names.
+- To audit what's already wired.
+
+## Backed by
+
+`GET /v2/workspace/triggers` — the agent setup surface. Logged to the Ops page.

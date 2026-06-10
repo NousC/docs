@@ -3,6 +3,27 @@ title: "Changelog"
 description: "New features, improvements, and fixes shipped in Nous."
 ---
 
+<Update label="June 10, 2026" description="Operated by the agent + browser login">
+
+## Set up Nous from inside your agent
+
+Nous is now operated by the agent. The MCP server exposes **seventeen tools** — seven new ones let the agent set the workspace up itself instead of a human clicking through the app:
+
+- **[`get_workspace_status`](/mcp/tools/get-workspace-status)** — the whole setup state in one call (onboarding, GTM playbook, integrations, CRM sync, triggers) plus a ranked next-steps list. The first call in a session.
+- **[`set_workspace_profile`](/mcp/tools/set-workspace-profile)** — agent-driven onboarding: name, website, business type, and a sentence on the ICP.
+- **[`build_scoring_model`](/mcp/tools/build-scoring-model)** — turn the recorded GTM context into the ICP scoring model.
+- **[`connect_integration`](/mcp/tools/connect-integration)** — connect a key-based integration (Apollo, Prospeo, HubSpot token, …); credentials are verified before saving.
+- **[`configure_crm_sync`](/mcp/tools/configure-crm-sync)** — set the CRM sync rules (auto-sync, create policy, hygiene cadence). Growth+.
+- **[`set_trigger`](/mcp/tools/set-trigger)** / **[`list_triggers`](/mcp/tools/list-triggers)** — wire outbound event triggers for the user's stack.
+
+### Browser login, no copy-paste
+
+The Claude Code plugin gains a **`/nous-login`** command. It opens your browser, you approve, and a workspace API key is minted and saved automatically. Pasting a key still works as a fallback. New sign-ups now go straight from signup to install and let the agent handle onboarding.
+
+Install or update with `@opennous/mcp@0.19.0` and `@opennous/cli@0.4.0`.
+
+</Update>
+
 <Update label="June 1, 2026" description="Notes & GTM write-back">
 
 ## Notes on contacts, and a living GTM profile
