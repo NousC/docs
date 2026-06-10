@@ -21,14 +21,18 @@ npx @opennous/cli login
 
 `npx @opennous/cli login` opens your browser, you approve, and a workspace key is minted and saved — no copy-paste; the plugin's MCP picks it up. Then tell your agent **"set me up"**. (Prefer to paste a key? Create one at Settings → API Keys and set the plugin's `NOUS_API_KEY`.) Seventeen tools become callable in every Claude Code session.
 
+<Note>
+**Every client below can skip the key.** The configs show `NOUS_API_KEY = "YOUR_API_KEY"` only as a fallback — you can drop that `env` line and run **`npx @opennous/cli login`** once. It signs you in via the browser and saves the key to `~/.nous/config.json`, which the server reads automatically. Paste a key only to pin a specific one (create it at Settings → API Keys). Either way, then tell your agent **"set me up"**.
+</Note>
+
 ### Codex
 
 ```toml
-# ~/.codex/config.toml
+# ~/.codex/config.toml — no env key needed; run `npx @opennous/cli login` once
 [mcp_servers.nous]
 command = "npx"
 args = ["-y", "@opennous/mcp"]
-env = { NOUS_API_KEY = "YOUR_API_KEY" }
+# env = { NOUS_API_KEY = "YOUR_API_KEY" }   # optional — pins a specific key
 ```
 
 ### Claude Desktop
