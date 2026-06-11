@@ -3,7 +3,7 @@ title: "Add a new provider"
 description: "How to connect a new integration to your workspace"
 ---
 
-All providers are connected through **Settings → Integrations** in the Nous app. You do not need to edit config files for integrations — they are stored per workspace in the database and encrypted at rest.
+All providers are connected through **Integrations** in the Nous app. You do not need to edit config files for integrations,  they are stored per workspace in the database and encrypted at rest.
 
 ## OAuth providers (LinkedIn, Google Calendar)
 
@@ -15,13 +15,13 @@ All providers are connected through **Settings → Integrations** in the Nous ap
 ## API key providers (Prospeo, Apollo, Signalbase)
 
 1. Get your API key from the provider's dashboard
-2. Open **Settings → Integrations**
+2. Open **Integrations**
 3. Click **Connect** next to the provider and paste the key
 4. Toggle **Use for enrichment** if you want this provider to run on new contacts automatically
 
 ## Webhook providers (RB2B, Fireflies, custom)
 
-1. Open **Settings → Integrations → Webhooks**
+1. Open **Webhooks**
 2. Copy your workspace webhook URL — format: `https://api.yourdomain.com/inbound/<provider>?workspace_id=<id>`
 3. Paste this URL into the provider's dashboard as the webhook destination
 4. Nous verifies the payload and maps the contact automatically

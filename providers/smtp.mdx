@@ -1,6 +1,6 @@
 ---
-title: Custom SMTP / IMAP
-description: Connect your own email server to sync sent and received emails as activity signals.
+title: "Custom SMTP / IMAP"
+description: "Connect your own email server to sync sent and received emails as activity signals."
 ---
 
 ## Overview
@@ -15,16 +15,16 @@ Nous connects to your SMTP/IMAP server and syncs your inbox and sent folder ever
 
 ### 1. Connect in Nous
 
-Go to **Settings → Integrations → SMTP / IMAP** and enter your credentials:
+Go to **Integrations → SMTP / IMAP** and enter your credentials:
 
 | Field | Description |
-|---|---|
+| --- | --- |
 | **Host** | Your SMTP server hostname (e.g. `smtp.hostinger.com`) |
 | **Port** | Usually `587` (STARTTLS) or `465` (SSL) |
 | **Username** | Your email address or SMTP username |
 | **Password** | Your email password or app password |
-| **IMAP host** *(optional)* | Override IMAP hostname if different from SMTP. Nous auto-derives it by replacing `smtp.` → `imap.` if not set. |
-| **IMAP port** *(optional)* | Defaults to `993` |
+| **IMAP host**_(optional)_ | Override IMAP hostname if different from SMTP. Nous auto-derives it by replacing `smtp.` → `imap.` if not set. |
+| **IMAP port**_(optional)_ | Defaults to `993` |
 
 ### 2. Test the connection
 
@@ -33,10 +33,6 @@ Click **Test connection** — Nous will verify your SMTP credentials using a liv
 <Note>
   For Gmail accounts, use [Google OAuth](/providers/google-calendar) instead of SMTP. Google blocks basic auth for Gmail.
 </Note>
-
-<Warning>
-  If you use Outlook / Office 365, set IMAP host explicitly to `outlook.office365.com` — the auto-derive logic handles this automatically, but double-check if sync fails.
-</Warning>
 
 ### 3. Done
 
@@ -58,9 +54,8 @@ Nous **never creates new contacts** from SMTP/IMAP — it only logs activity on 
 ## Provider-specific notes
 
 | Provider | SMTP host | IMAP host | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Hostinger | `smtp.hostinger.com` | `imap.hostinger.com` | Auto-derived correctly |
-| Outlook 365 | `smtp-mail.outlook.com` | `outlook.office365.com` | Auto-derived correctly |
 | Zoho | `smtp.zoho.com` | `imap.zoho.com` | Auto-derived correctly |
 | Custom / self-hosted | Your host | Your IMAP host | Set IMAP host explicitly if different |
 

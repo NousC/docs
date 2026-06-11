@@ -4,22 +4,17 @@ description: "Welcome to Nous documentation"
 ---
 
 <Note>
-  Nous is open source under AGPL v3. Self-host in 10 minutes with [Docker Compose](/installation/docker-compose), or [try Nous Cloud](https://app.opennous.cloud) if you'd rather skip the setup. ⭐ the repo on [GitHub](https://github.com/NousC/nous) to follow along.
+  Nous is open source under AGPL v3. Self-host with [Docker Compose](/installation/docker-compose), or [try Nous](https://app.opennous.cloud) if you'd rather skip the setup. ⭐ the repo on [GitHub](https://github.com/NousC/nous) to follow along.
 </Note>
-
-<Warning>
-  Building an AI agent against Nous? Skip ahead to the [MCP Server](/mcp/introduction) or [REST API](/public-api/introduction).
-</Warning>
 
 ## What is Nous?
 
-Nous is **the GTM Context API**. It unifies fragmented data across your go-to-market tools like Apollo, HubSpot, Smartlead, Gmail, and LinkedIn into one unified customer graph to make agents context-aware about what is happening inside GTM.
+Nous is **the customer graph for GTM agents**. It resolves every person, conversation, and touchpoint across your GTM tool stack (Apollo, HubSpot, Smartlead, Gmail, LinkedIn) into one account record, returned to an agent in a single MCP call.
 
-- **Everything in one place.** Every event, every touchpoint, every conversation, saved in one place.
-- **Built for the terminal.** Run GTM inside the terminal, plug into Claude Code, Codex, or your own agent via MCP.
-- **25+ integrations.** Connects your GTM tools across CRMs, outbound, and LinkedIn.
-- **Always in sync.** Keeps your outbound tools and CRM in sync.
-- **A smarter ICP.** Build a sharper ICP model by analyzing what drives wins and losses over time.
+- **One account record.** Every contact, channel, and touch at an account, merged into a single source of truth.
+- **Agent-ready.** The full account returned in one MCP call as structured context, never a raw data dump.
+- **Live sync.** Outbound tools, communications, and CRM stay in lockstep, bi-directionally.
+- **Open by default.** AGPL v3, self-host free forever, or skip the setup with Nous Cloud.
 
 <CardGroup cols={2}>
   <Card title="Quickstart" icon="rocket" href="/getting-started/quickstart">
@@ -27,6 +22,6 @@ Nous is **the GTM Context API**. It unifies fragmented data across your go-to-ma
   </Card>
 
   <Card title="How it works" icon="diagram-project" href="/getting-started/how-it-works">
-    Identity resolution, signal ingestion, and the Context API.
+    Identity resolution, signal ingestion, and the MCP connector.
   </Card>
 </CardGroup>
