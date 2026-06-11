@@ -1,0 +1,54 @@
+---
+title: "verify_leads"
+description: "Validate email deliverability for leads in a lead list, on the workspace's own MillionVerifier / NeverBounce key. Two steps: a free cost preview, then a confirmed background run."
+---
+
+Validate the deliverability of emails on a lead list using the workspace's own connected verifier (MillionVerifier or NeverBounce — BYOK). Distinct from [`enrich_leads`](/mcp/tools/enrich-leads): enrich *finds* an email, verify *validates* one you already hold. The verifier's verdict upgrades the lead's `email_status` to `VERIFIED`, `RISKY`, or `UNAVAILABLE`. Runs as a background job.
+
+<Note>**Always two steps.** Call it first **without `confirm`** for a free dry-run preview — how many are chargeable, how many were verified recently (free), which verifiers are connected, and the estimated cost. **Report that to the user.** Then call again with `confirm: true` to run it.</Note>
+
+Defaults to verifying every unverified email (has an address, no verdict yet); narrow with `filter` or pass `ids`. If no verifier is connected the tool says so — tell the user to add a MillionVerifier or NeverBounce key in Integrations.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `lead_list_id` | string | yes | The lead list's UUID. |
+| `filter` | object | | Pick leads by attribute. Omit (with no `ids`) to default to all unverified emails. |
+| `ids` | string[] | | Explicit lead ids — an alternative to `filter`. |
+| `provider` | enum | | `millionverifier` or `neverbounce`. Defaults to MillionVerifier, then NeverBounce. |
+| `confirm` | boolean | | Omit or `false` = dry-run cost preview only. `true` = run it as a background job. |
+
+## Returns
+
+Preview (no `confirm`):
+
+```
+VERIFY PREVIEW — list 6149…2c6
+  812 selected · 812 chargeable · 0 recently verified (free) · 48 no email
+  verifier: millionverifier  (connected: millionverifier, neverbounce)
+  estimated cost: ~$3.25
+
+Report this to the user. To run it, call verify_leads again with the same selection and confirm:true.
+```
+
+Confirmed run (`confirm: true`):
+
+```
+Verification started — job 4a1d…, 812 emails queued via millionverifier. It runs in the background; report back to the user.
+```
+
+No verifier connected:
+
+```
+No email verifier is connected. Tell the user to add a MillionVerifier or NeverBounce API key in Integrations, then try again.
+```
+
+## When to call it
+
+- Before pushing a list to a sequencer — verify so risky/undeliverable addresses are filtered out.
+- Always preview first and surface the cost; only run on the user's go-ahead.
+
+## Backed by
+
+`POST /api/lead-lists/:id/verify` — `preview: true` for the dry run, `background: true` for the job. The verdict is written as a `reachability_status` observation, so it shows on the lead's `email_status` and in the Activity tab. 90-day reuse-gate: recently verified leads are free.

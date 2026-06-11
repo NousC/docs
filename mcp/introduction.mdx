@@ -3,7 +3,7 @@ title: "MCP Server"
 description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous customer graph."
 ---
 
-The Nous MCP server exposes the v2 customer graph as **23 tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
+The Nous MCP server exposes the v2 customer graph as **25 tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
 
 It runs two ways on the same tools: **locally** via `npx` (Claude Code, Cursor, Codex, Claude Desktop, self-hosted n8n), or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients (n8n cloud). Prefer the [REST API](/public-api/introduction) when the caller already knows the parameters; both sit on the same graph, so a write through one shows in the other.
 
@@ -19,7 +19,7 @@ The server is published on npm. **No clone, no global install** — `npx` fetche
 npx @opennous/cli login
 ```
 
-`npx @opennous/cli login` opens your browser, you approve, and a workspace key is minted and saved — no copy-paste; the plugin's MCP picks it up. Then tell your agent **"set me up"**. (Prefer to paste a key? Create one at Settings → API Keys and set the plugin's `NOUS_API_KEY`.) 23 tools become callable in every Claude Code session.
+`npx @opennous/cli login` opens your browser, you approve, and a workspace key is minted and saved — no copy-paste; the plugin's MCP picks it up. Then tell your agent **"set me up"**. (Prefer to paste a key? Create one at Settings → API Keys and set the plugin's `NOUS_API_KEY`.) 25 tools become callable in every Claude Code session.
 
 <Note>
 **Every client below can skip the key.** The configs show `NOUS_API_KEY = "YOUR_API_KEY"` only as a fallback — you can drop that `env` line and run **`npx @opennous/cli login`** once. It signs you in via the browser and saves the key to `~/.nous/config.json`, which the server reads automatically. Paste a key only to pin a specific one (create it at Settings → API Keys). Either way, then tell your agent **"set me up"**.
@@ -82,7 +82,7 @@ args = ["-y", "@opennous/mcp"]
 
 ## Hosted server (remote HTTP)
 
-Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same 23 tools, same customer graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
+Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same 25 tools, same customer graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
 
 ```
 Endpoint   https://mcp.opennous.cloud/mcp
@@ -107,7 +107,7 @@ claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Au
 Clients that accept only a bare URL with no auth header can pass the key as a query parameter — `https://mcp.opennous.cloud/mcp?key=YOUR_API_KEY` — but prefer the Bearer header, since URLs can land in logs.
 </Note>
 
-## The 23 tools
+## The 25 tools
 
 ### Read and write the customer graph
 
@@ -172,8 +172,21 @@ The agent sets the workspace up itself. Call `get_workspace_status` first; it re
   </Card>
 </CardGroup>
 
+### Lead lists (cloud)
+
+Build and work lead lists on the workspace's own BYOK keys. Both `enrich_leads` and `verify_leads` are **two-step**: call without `confirm` for a free cost preview, report it to the user, then call again with `confirm: true` to run as a background job.
+
+<CardGroup cols={2}>
+  <Card title="enrich_leads" href="/mcp/tools/enrich-leads" icon="envelope">
+    Find missing emails for a list, on the workspace's Prospeo/Apollo key. Preview the cost, then run.
+  </Card>
+  <Card title="verify_leads" href="/mcp/tools/verify-leads" icon="envelope-circle-check">
+    Validate email deliverability with MillionVerifier / NeverBounce. Verdict upgrades each lead's status.
+  </Card>
+</CardGroup>
+
 <Note>
-Also callable: **`record_closed_deals`** (train the ICP model on real closed-won/lost deals — contrastive lift), **`get_routing_preferences`** (Claude Code routing defaults so GTM work defaults to Nous), and the lead tools **`lead_list_operations`**, **`check_leads`**, **`lead_coverage`** (cloud-only — Lead Lists). Plus `get_workspace_facts`, a back-compat alias of `get_gtm_profile` — new integrations should call `get_gtm_profile`.
+Also callable: **`record_closed_deals`** (train the ICP model on real closed-won/lost deals — contrastive lift), **`get_routing_preferences`** (Claude Code routing defaults so GTM work defaults to Nous), and the lead-coverage tools **`lead_list_operations`**, **`check_leads`**, **`lead_coverage`** (cloud-only — Lead Lists). Plus `get_workspace_facts`, a back-compat alias of `get_gtm_profile` — new integrations should call `get_gtm_profile`.
 </Note>
 
 ## Environment
@@ -207,5 +220,5 @@ Day to day:
 The server lives at [`apps/mcp` in NousC/nous](https://github.com/NousC/nous/tree/main/apps/mcp). Each release is published to npm as `@opennous/mcp@<semver>` — pin a version in your config if you need reproducible installs:
 
 ```bash
-NOUS_API_KEY=... npx -y @opennous/mcp@0.19.0
+NOUS_API_KEY=... npx -y @opennous/mcp@0.28.0
 ```
