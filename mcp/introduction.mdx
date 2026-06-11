@@ -1,6 +1,6 @@
 ---
 title: "MCP Server"
-description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous Account Record."
+description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous customer graph."
 ---
 
 The Nous MCP server exposes the v2 customer graph as **23 tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
@@ -109,14 +109,14 @@ Clients that accept only a bare URL with no auth header can pass the key as a qu
 
 ## The 23 tools
 
-### Read & write the account record
+### Read and write the customer graph
 
 <CardGroup cols={2}>
   <Card title="get_context" href="/mcp/tools/get-context" icon="brain">
     Engineered context for a task about one entity — the headline call before drafting outreach or prepping a meeting.
   </Card>
   <Card title="get_account" href="/mcp/tools/get-account" icon="user">
-    The full Account Record — every claim with epistemics + recent timeline.
+    The full account — every claim with epistemics + recent timeline.
   </Card>
   <Card title="record" href="/mcp/tools/record" icon="pen">
     Record what happened. You observe; Nous derives the claims.

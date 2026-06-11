@@ -3,7 +3,7 @@ title: "Triggers"
 description: "Outbound webhooks. Nous POSTs to your URL the moment a tracked interaction happens, so your workflow runs without polling and without a webhook subscription on the upstream tool."
 ---
 
-A trigger is a subscription. You give Nous a URL and a list of events; whenever one of those events happens on the Account Record, Nous POSTs a signed payload to your URL.
+A trigger is a subscription. You give Nous a URL and a list of events; whenever one of those events happens on an account, Nous POSTs a signed payload to your URL.
 
 The point is the same as the rest of the platform. Your workflow runtime (n8n, Make, a Claude routine, a custom backend) does not need to subscribe to Smartlead, HeyReach, Instantly, Gmail, LinkedIn, Calendly, Fireflies, and Fathom separately. Nous already ingests all of them, resolves them to one person, and emits a unified event stream. You subscribe once.
 
