@@ -211,6 +211,13 @@
               "mcp/tools/set-trigger",
               "mcp/tools/list-triggers"
             ]
+          },
+          {
+            "group": "Lead list tools",
+            "pages": [
+              "mcp/tools/enrich-leads",
+              "mcp/tools/verify-leads"
+            ]
           }
         ]
       },
