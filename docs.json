@@ -208,6 +208,7 @@
               "mcp/tools/build-scoring-model",
               "mcp/tools/connect-integration",
               "mcp/tools/configure-crm-sync",
+              "mcp/tools/sync-crm-now",
               "mcp/tools/set-trigger",
               "mcp/tools/list-triggers"
             ]
