@@ -1,11 +1,11 @@
 ---
 title: "How it works"
-description: "The Nous architecture. Ingestion, identity resolution, and how every signal becomes part of the customer graph."
+description: "The Nous architecture. Ingestion, identity resolution, and how every signal becomes part of the context graph."
 ---
 
 ## Architecture
 
-Nous is one stack. Connectors push signals from your GTM tools into Nous, identity resolution matches every signal to one person and one company, and the customer graph holds the result. Your agent reads it back over MCP or REST.
+Nous is one stack. Connectors push signals from your GTM tools into Nous, identity resolution matches every signal to one person and one company, and the context graph holds the result. Your agent reads it back over MCP or REST.
 
 ```mermaid theme={null}
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
 
     ingest["Ingestion"]:::core
     resolve["Identity Resolution"]:::core
-    cg[("The Customer Graph")]:::core
+    cg[("The Context Graph")]:::core
 
     api["REST API"]:::output
     mcp["MCP Server"]:::output
@@ -48,7 +48,7 @@ The three pieces.
 
 * [**Ingestion**](#ingestion). Every signal source becomes a stream of events and states with `source`, `method`, and `observed_at`. Nothing is overwritten.
 * [**Identity Resolution**](#identity-resolution). Every signal is matched to one person and one company using email, LinkedIn URL, domain, phone, and a name plus company fallback.
-* [**The Customer Graph**](#the-customer-graph). The append-only record of every person, conversation, and touchpoint at an account. Every fact carries freshness, confidence, and the sources that produced it.
+* [**The Context Graph**](#the-context-graph). The append-only record of every person, conversation, and touchpoint at an account. Every fact carries freshness, confidence, and the sources that produced it.
 
 The output surfaces, the REST API and the MCP server, are thin wrappers around the graph.
 
@@ -78,7 +78,7 @@ Identity resolution is what makes Nous a graph rather than another data store. E
 
 The same person in Apollo, HubSpot, and Gmail becomes one entity, not three. Resolve once at the API boundary and the graph handles the rest.
 
-### The Customer Graph
+### The Context Graph
 
 The graph is **append-only**. Nothing is ever updated, nothing is ever deleted. A state with `value: null` asserts that a fact ended (the person left the company, the deal closed lost) without overwriting history.
 

@@ -1,9 +1,9 @@
 ---
 title: "MCP Server"
-description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous customer graph."
+description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous context graph."
 ---
 
-The Nous MCP server exposes the v2 customer graph as **25 tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
+The Nous MCP server exposes the v2 context graph as **25 tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
 
 It runs two ways on the same tools: **locally** via `npx` (Claude Code, Cursor, Codex, Claude Desktop, self-hosted n8n), or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients (n8n cloud). Prefer the [REST API](/public-api/introduction) when the caller already knows the parameters; both sit on the same graph, so a write through one shows in the other.
 
@@ -82,7 +82,7 @@ args = ["-y", "@opennous/mcp"]
 
 ## Hosted server (remote HTTP)
 
-Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same 25 tools, same customer graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
+Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same 25 tools, same context graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
 
 ```
 Endpoint   https://mcp.opennous.cloud/mcp
@@ -109,7 +109,7 @@ Clients that accept only a bare URL with no auth header can pass the key as a qu
 
 ## The 25 tools
 
-### Read and write the customer graph
+### Read and write the context graph
 
 <CardGroup cols={2}>
   <Card title="get_context" href="/mcp/tools/get-context" icon="brain">

@@ -3,9 +3,9 @@ title: "REST API"
 description: "The deterministic surface for workflow runtimes. Call it from n8n, Make, Zapier, or any backend. Parameters are known up front; responses are stable rows."
 ---
 
-The REST API is one of two ways Nous exposes the v2 customer graph. Reach for it when the caller already knows what to read or write, a workflow runtime fetching a filtered list of people, a form intake creating a lead, a daily job patching `sent_at` mid-loop.
+The REST API is one of two ways Nous exposes the v2 context graph. Reach for it when the caller already knows what to read or write, a workflow runtime fetching a filtered list of people, a form intake creating a lead, a daily job patching `sent_at` mid-loop.
 
-For agent-time decisions where the right action is reasoned at runtime (semantic exploration, intent-shaped context, recording an observation from open text), use the [MCP server](/mcp/introduction) instead. Both surfaces sit on the same customer graph, so a write through one is visible to the other.
+For agent-time decisions where the right action is reasoned at runtime (semantic exploration, intent-shaped context, recording an observation from open text), use the [MCP server](/mcp/introduction) instead. Both surfaces sit on the same context graph, so a write through one is visible to the other.
 
 ## Base URL
 
@@ -93,7 +93,7 @@ Keys are workspace-scoped, so no separate workspace ID is required.
 
 ## Two write shapes, one graph
 
-Both write paths land in the same customer graph.
+Both write paths land in the same context graph.
 
 | Path | What it writes | When to use |
 |---|---|---|
