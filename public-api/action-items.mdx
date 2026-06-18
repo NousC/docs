@@ -1,0 +1,71 @@
+---
+title: "Action Items"
+api: "GET https://api.opennous.cloud/v2/action-items"
+description: "Commitments extracted from meetings and emails — what you owe each account, and what they owe you. Structured, queryable, grouped by account."
+---
+
+Returns the action items captured from meeting transcripts (and emails) as structured records on each account. Defaults to the founder's own open commitments, so you can answer "what are my action items today?" without digging through notes.
+
+## Request
+
+```bash
+curl 'https://api.opennous.cloud/v2/action-items?owner=me&status=open' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+### Query params
+
+<ParamField query="owner" type="string" default="me">
+  `me` — your commitments. `prospect` — theirs. `all` — both.
+</ParamField>
+
+<ParamField query="status" type="string" default="open">
+  `open`, `done`, or `all`.
+</ParamField>
+
+<ParamField query="focus" type="string">
+  Scope to one account — an email or entity UUID.
+</ParamField>
+
+<ParamField query="due" type="string" default="all">
+  `today` / `week` limit to items that carry a due date inside the window.
+</ParamField>
+
+## Response
+
+```json
+{
+  "items": [
+    {
+      "id": "action_item.fireflies_01KV63..._0",
+      "entity_id": "0580d1b1-...",
+      "account": "Muhammad Taimoor Ali",
+      "account_email": "taimoor@7xgtm.com",
+      "company": "7x GTM",
+      "title": "Share the MVP within ~2 weeks",
+      "owner_kind": "user",
+      "status": "open",
+      "due_at": null,
+      "source_type": "fireflies",
+      "source_id": "01KV63...",
+      "recorded_at": "2026-06-16T..."
+    }
+  ],
+  "count": 1
+}
+```
+
+### `owner_kind` values
+
+| Value | Meaning |
+|---|---|
+| `user` | Your commitment — something you owe the account |
+| `prospect` | The prospect's commitment — something they owe you |
+
+## When to call it
+
+- **Daily** — "what are my action items today?"
+- **Pre-outreach** — scope to an account with `focus`
+- **As a brief** — pipe open commitments into a task queue
+
+Action items are write-captured by the worker from meeting transcripts; this endpoint is read-only. They also surface in [`attention`](/public-api/attention) as `open_commitment` items.

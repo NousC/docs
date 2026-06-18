@@ -150,6 +150,7 @@
             "pages": [
               "public-api/query",
               "public-api/attention",
+              "public-api/action-items",
               "public-api/verify",
               "public-api/dedup"
             ]
@@ -193,6 +194,7 @@
               "mcp/tools/record",
               "mcp/tools/query",
               "mcp/tools/attention",
+              "mcp/tools/get-action-items",
               "mcp/tools/verify",
               "mcp/tools/get-gtm-profile",
               "mcp/tools/update-gtm-profile",

@@ -1,0 +1,48 @@
+---
+title: "get_action_items"
+description: "Your open action items and commitments — pulled from meetings and emails, grouped by account. What you owe each account, and what they owe you."
+---
+
+Answers "what are my action items?" without re-reading transcripts. Action items are extracted automatically from meeting notes and email threads into structured records, so the agent can retrieve exactly what's outstanding per account. Defaults to **your** open commitments across all accounts, grouped by account.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `owner` | string | | `me` (default — your commitments), `prospect` (theirs), or `all`. |
+| `status` | string | | `open` (default), `done`, or `all`. |
+| `focus` | string | | Scope to one account — an email or entity UUID. |
+| `due` | string | | `today`, `week`, or `all` (default). `today`/`week` only return items that carry a due date. |
+
+## Returns
+
+```
+3 action items:
+
+Muhammad Taimoor Ali:
+  [you] Share the MVP within ~2 weeks
+  [you] Schedule the July follow-up
+  [them] Send the calendar link
+```
+
+If nothing matches:
+
+```
+No matching action items.
+```
+
+`[you]` is your commitment to the account; `[them]` is the prospect's.
+
+## How items are captured
+
+Action items are extracted from meeting transcripts (Fireflies / Fathom) at ingest — never typed by hand. Each is tagged with its owner and attached to the meeting's account. They live in the substrate for agents to read; they are **not** shown as a separate tab in the app.
+
+## When to call it
+
+- **At the start of your day** — "what are my action items?"
+- **Before reaching out** — "what do I owe this account?" (`focus`)
+- **As a recurring brief** — surface open commitments into Slack or a task queue
+
+## Backed by
+
+`GET /v2/action-items` — see the [HTTP reference](/public-api/action-items) for the raw JSON shape.
