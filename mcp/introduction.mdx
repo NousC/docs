@@ -157,10 +157,10 @@ The agent sets the workspace up itself. Call `get_workspace_status` first, becau
   <Card title="record_closed_deals" href="/mcp/tools/record-closed-deals" icon="trophy">
     Train the ICP model on real closed-won and closed-lost deals (contrastive lift).
   </Card>
-  <Card title="get_icp" href="/mcp/tools/get-icp" icon="file-import">
+  <Card title="sync_icp" href="/mcp/tools/sync-icp" icon="file-import">
     Sync the user's ICP and context files into the graph (file to graph).
   </Card>
-  <Card title="get_icp_model" href="/mcp/tools/get-icp-model" icon="file-export">
+  <Card title="export_icp_model" href="/mcp/tools/export-icp-model" icon="file-export">
     Get the learned ICP model as a block to write back into the ICP file (graph to file).
   </Card>
   <Card title="sync_playbook" href="/mcp/tools/sync-playbook" icon="rotate">
@@ -188,7 +188,7 @@ The preferred path is `npx @opennous/cli login` — a browser sign-in that mints
 
 ## How agents typically use it
 
-**Setting up a new workspace** → `get_workspace_status` to see what's missing, then `set_workspace_profile` (onboard), `get_icp` to sync the user's ICP and context files into the graph, `build_scoring_model` (or `record_closed_deals` to train the model on real won and lost deals), `get_icp_model` to write the learned model back into their ICP file, `sync_playbook` for any edited policy files, then `connect_integration` (key-based tools) and `set_trigger`. The agent does the setup, the user just confirms. OAuth tools (Gmail) stay a one-click browser step on the Integrations page.
+**Setting up a new workspace** → `get_workspace_status` to see what's missing, then `set_workspace_profile` (onboard), `sync_icp` to sync the user's ICP and context files into the graph, `build_scoring_model` (or `record_closed_deals` to train the model on real won and lost deals), `export_icp_model` to write the learned model back into their ICP file, `sync_playbook` for any edited policy files, then `connect_integration` (key-based tools) and `set_trigger`. The agent does the setup, the user just confirms. OAuth tools (Gmail) stay a one-click browser step on the Integrations page.
 
 Day to day:
 
@@ -199,7 +199,7 @@ Day to day:
 5. **Need a past detail?** → `search_notes` to pull the relevant passage instead of dumping whole documents
 6. **End of session** → `attention` to surface what to work next
 
-`get_playbook` is the policy read: any question about the user's own rules (how they write, who they target, how they position) goes here, never to `query` or `get_account`. When a policy file changes, `sync_playbook` pushes it back so every agent obeys the same rules, and when the ICP or context files change, `get_icp` re-syncs them so the scoring stays current.
+`get_playbook` is the policy read: any question about the user's own rules (how they write, who they target, how they position) goes here, never to `query` or `get_account`. When a policy file changes, `sync_playbook` pushes it back so every agent obeys the same rules, and when the ICP or context files change, `sync_icp` re-syncs them so the scoring stays current.
 
 <Note>**`record` vs `save_note`.** `record` logs that *something happened* (an email, a meeting, a state change) — Nous derives claims from it. `save_note` keeps the *document itself* (a brief, a transcript, prep) on the contact, append-only and dated. Use both: `record` the meeting happened, `save_note` the notes you took.</Note>
 

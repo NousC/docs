@@ -1,11 +1,11 @@
 ---
-title: "get_icp"
+title: "sync_icp"
 description: "Sync the user's existing ICP and context files into the graph (file to graph). Despite the name it is a sync, not a read."
 ---
 
-Syncs the user's existing ICP and positioning files into Nous, instead of making them re-author their ICP in a second place. The name reads like a getter, but honestly it is a **sync**: you read the user's own markdown files with your file tools and push each one into the graph. Nous keeps a served copy of the prose, rebuilds the ICP scoring model from it, and remembers each file's path so [`get_icp_model`](/mcp/tools/get-icp-model) can later write the learned model back into the same file.
+Syncs the user's existing ICP and positioning files into Nous, instead of making them re-author their ICP in a second place. The name reads like a getter, but honestly it is a **sync**: you read the user's own markdown files with your file tools and push each one into the graph. Nous keeps a served copy of the prose, rebuilds the ICP scoring model from it, and remembers each file's path so [`export_icp_model`](/mcp/tools/export-icp-model) can later write the learned model back into the same file.
 
-<Note>Direction is **file to graph**. The user's files stay the source of truth for the prose. Nous owns the learned scoring half. The reverse direction (graph to file) is [`get_icp_model`](/mcp/tools/get-icp-model).</Note>
+<Note>Direction is **file to graph**. The user's files stay the source of truth for the prose. Nous owns the learned scoring half. The reverse direction (graph to file) is [`export_icp_model`](/mcp/tools/export-icp-model).</Note>
 
 ## Parameters
 
@@ -27,7 +27,7 @@ Synced 3 sections from the user's files:
   • Pricing      ← context/pricing.md
 
 Built the ICP scoring model (4 signals).
-Next: if the user can name a few closed-won + closed-lost domains, call record_closed_deals to sharpen it on real outcomes, then call get_icp_model to write the learned model back into their ICP file.
+Next: if the user can name a few closed-won + closed-lost domains, call record_closed_deals to sharpen it on real outcomes, then call export_icp_model to write the learned model back into their ICP file.
 ```
 
 If there's nothing valid to sync:
@@ -41,7 +41,7 @@ Nothing to sync. Read the user's ICP/positioning file(s) first and pass each as 
 - **During onboarding** → find the project's existing GTM files (`context/`, `gtm/`, files named `icp*`, `positioning*`, `pricing*`, `competitors*`), read them, and sync them
 - **Whenever an ICP or context file changes** → re-sync in the same turn, because the edit does not change the score, the exclusions, or the model until you do
 
-To write the learned model back into the file, use [`get_icp_model`](/mcp/tools/get-icp-model). To sharpen the model on real outcomes, use [`record_closed_deals`](/mcp/tools/record-closed-deals).
+To write the learned model back into the file, use [`export_icp_model`](/mcp/tools/export-icp-model). To sharpen the model on real outcomes, use [`record_closed_deals`](/mcp/tools/record-closed-deals).
 
 ## Backed by
 

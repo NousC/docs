@@ -5,7 +5,7 @@ description: "Build or train the ICP model from real closed-won and closed-lost 
 
 Builds (or sharpens) the ICP scoring model from the user's **real** closed deals. Pass closed-won customer domains and closed-lost domains. Nous enriches each, links the contacts you already have there, and runs contrastive lift (what's true of winners but not losers) to discover the signals that actually predict revenue, then re-scores open accounts.
 
-<Note>This is the strongest way to build the playbook, because a model trained on who actually bought beats one inferred from a description. Even a handful of each helps (3 to 5 won and 3 to 5 lost). After it runs, call [`get_icp_model`](/mcp/tools/get-icp-model) to write the sharpened model back into the ICP file.</Note>
+<Note>This is the strongest way to build the playbook, because a model trained on who actually bought beats one inferred from a description. Even a handful of each helps (3 to 5 won and 3 to 5 lost). After it runs, call [`export_icp_model`](/mcp/tools/export-icp-model) to write the sharpened model back into the ICP file.</Note>
 
 ## Parameters
 
@@ -37,10 +37,10 @@ Give me at least one closed-won or closed-lost domain to learn from.
 
 ## When to call it
 
-- **After [`get_icp`](/mcp/tools/get-icp)** → sharpen the seeded model on real outcomes when the user can name a few closed deals
+- **After [`sync_icp`](/mcp/tools/sync-icp)** → sharpen the seeded model on real outcomes when the user can name a few closed deals
 - **Whenever new deals close** → re-run with the latest won and lost domains so the model tracks reality
 
-Follow it with [`get_icp_model`](/mcp/tools/get-icp-model) to write the trained model back into the user's ICP file.
+Follow it with [`export_icp_model`](/mcp/tools/export-icp-model) to write the trained model back into the user's ICP file.
 
 ## Backed by
 

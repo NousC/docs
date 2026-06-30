@@ -206,8 +206,8 @@
               "mcp/tools/set-workspace-profile",
               "mcp/tools/build-scoring-model",
               "mcp/tools/record-closed-deals",
-              "mcp/tools/get-icp",
-              "mcp/tools/get-icp-model",
+              "mcp/tools/sync-icp",
+              "mcp/tools/export-icp-model",
               "mcp/tools/sync-playbook",
               "mcp/tools/connect-integration",
               "mcp/tools/set-trigger",
@@ -305,7 +305,7 @@
   },
   "redirects": [
     { "source": "/public-api/workspace-facts", "destination": "/public-api/gtm-profile" },
-    { "source": "/mcp/tools/get-workspace-facts", "destination": "/mcp/tools/get-gtm-profile" },
+    { "source": "/mcp/tools/get-workspace-facts", "destination": "/mcp/tools/get-playbook" },
     { "source": "/public-api/api-keys/list-api-keys", "destination": "/public-api/introduction" },
     { "source": "/public-api/api-keys/create-api-key", "destination": "/public-api/introduction" },
     { "source": "/public-api/api-keys/delete-api-key", "destination": "/public-api/introduction" }
