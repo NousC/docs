@@ -1,0 +1,48 @@
+---
+title: "get_icp"
+description: "Sync the user's existing ICP and context files into the graph (file to graph). Despite the name it is a sync, not a read."
+---
+
+Syncs the user's existing ICP and positioning files into Nous, instead of making them re-author their ICP in a second place. The name reads like a getter, but honestly it is a **sync**: you read the user's own markdown files with your file tools and push each one into the graph. Nous keeps a served copy of the prose, rebuilds the ICP scoring model from it, and remembers each file's path so [`get_icp_model`](/mcp/tools/get-icp-model) can later write the learned model back into the same file.
+
+<Note>Direction is **file to graph**. The user's files stay the source of truth for the prose. Nous owns the learned scoring half. The reverse direction (graph to file) is [`get_icp_model`](/mcp/tools/get-icp-model).</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `sections` | object[] | ✓ | One entry per ICP or positioning file (or section) you read. |
+| `sections[].section` | enum | ✓ | Which section this maps to: `ICP`, `Market`, `Product`, `Pricing`, `Competitors`, `Positioning`, `GTM Motion`, or `Notes`. |
+| `sections[].content` | string | ✓ | The section's content, read from the file (trimmed prose, not the whole repo). |
+| `sections[].source_path` | string | | The file this came from, relative to the project root, e.g. `context/icp.md`. Required on the ICP section so the learned model can be written back. |
+
+Map granularly: one file to the single section it best fits (`icp.md` to ICP, `positioning.md` to Positioning, `pricing.md` to Pricing), one entry per file. If one file holds several sections under headers, split it by header into multiple entries. Keep any "not a fit" exclusions inside the ICP section, because Nous turns each stated exclusion into a hard disqualifier that caps those accounts below Not-ICP.
+
+## Returns
+
+```
+Synced 3 sections from the user's files:
+  • ICP          ← context/icp.md
+  • Positioning  ← context/positioning.md
+  • Pricing      ← context/pricing.md
+
+Built the ICP scoring model (4 signals).
+Next: if the user can name a few closed-won + closed-lost domains, call record_closed_deals to sharpen it on real outcomes, then call get_icp_model to write the learned model back into their ICP file.
+```
+
+If there's nothing valid to sync:
+
+```
+Nothing to sync. Read the user's ICP/positioning file(s) first and pass each as a section (ICP, Positioning, Pricing, …) with its source_path.
+```
+
+## When to call it
+
+- **During onboarding** → find the project's existing GTM files (`context/`, `gtm/`, files named `icp*`, `positioning*`, `pricing*`, `competitors*`), read them, and sync them
+- **Whenever an ICP or context file changes** → re-sync in the same turn, because the edit does not change the score, the exclusions, or the model until you do
+
+To write the learned model back into the file, use [`get_icp_model`](/mcp/tools/get-icp-model). To sharpen the model on real outcomes, use [`record_closed_deals`](/mcp/tools/record-closed-deals).
+
+## Backed by
+
+`POST /v2/workspace/icp/import`. The agent setup surface. Shares its implementation with the web GTM Context page.

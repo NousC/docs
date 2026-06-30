@@ -1,0 +1,47 @@
+---
+title: "get_icp_model"
+description: "Get the learned ICP model as a block to write back into the ICP file (graph to file). The payoff of the file-and-graph symbiosis."
+---
+
+Gets the **learned** ICP scoring model (which signals predict a win, their weight, lift, and the calibration gap) as a ready-to-write markdown block, so you can write it back into the user's own ICP file. This is the payoff of the symbiosis: their file keeps the words, Nous keeps the model, and this writes the model under their words.
+
+<Note>Direction is **graph to file**, the reverse of [`get_icp`](/mcp/tools/get-icp). Call this after [`get_icp`](/mcp/tools/get-icp) or [`record_closed_deals`](/mcp/tools/record-closed-deals), then write the block back into the file.</Note>
+
+## Parameters
+
+None. The tool reads the current model and the recorded write-back path.
+
+## Returns
+
+The model as a block plus the file to write it into:
+
+```
+Write the block below into context/icp.md with your file editor. Replace any existing block
+between the nous:icp markers, or append it if there's none (create the file/section if absent).
+Leave everything outside the markers untouched. This model is trained on real closed deals
+(lift + calibration shown).
+
+<!-- nous:icp start -->
+## ICP scoring model
+- Company is B2B SaaS (weight 10, lift 2.1x)
+- Company has 11-50 employees (weight 9, lift 1.8x)
+- Lead is a RevOps leader (weight 9, lift 1.6x)
+<!-- nous:icp end -->
+```
+
+If there's no model yet:
+
+```
+No ICP scoring model yet. Sync the user's ICP file with get_icp first (or build one with build_scoring_model / record_closed_deals), then call this to write it back.
+```
+
+## When to call it
+
+- **After [`get_icp`](/mcp/tools/get-icp)** → write the seeded model back under the user's words
+- **After [`record_closed_deals`](/mcp/tools/record-closed-deals)** → refresh the file with the model trained on real outcomes
+
+When you write the block, replace whatever sits between the `<!-- nous:icp start -->` and `<!-- nous:icp end -->` markers, and never edit inside the markers by hand, because this tool regenerates them. Everything outside the markers is the user's, so leave it untouched.
+
+## Backed by
+
+`GET /v2/workspace/icp/model`. The agent setup surface. The server renders the block so the format stays controlled centrally.

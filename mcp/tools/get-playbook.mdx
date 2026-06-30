@@ -1,0 +1,57 @@
+---
+title: "get_playbook"
+description: "Read a playbook, the user's policy and rules for a kind of action (voice, outreach, icp, positioning). Rules to obey before you act, not facts about a contact."
+---
+
+Reads a **playbook**: the user's own rules for how to act. Where [`get_context`](/mcp/tools/get-context) tells you what's true about a contact, a playbook tells you how the user wants the work done. There are four kinds (`voice`, `outreach`, `icp`, `positioning`) and you read the relevant one **before** you act, because these are rules to obey, not facts. This is the "our GTM" read.
+
+<Note>Playbooks are the policy layer. They govern behaviour (how to write, who to target, how to position). Facts about a person or company live on the account ([`get_context`](/mcp/tools/get-context), [`get_account`](/mcp/tools/get-account)).</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `kind` | enum | | `voice`, `outreach`, `icp`, or `positioning`. Omit to list all four. |
+
+## Returns
+
+With a `kind`, the full playbook body:
+
+```
+# Outreach rules, outreach playbook (v4, mirrors context/outreach.md)
+
+> Earn the reply, not the meeting. Sound like a peer.
+
+- Lead with one specific signal, never a feature
+- Three emails max, then stop
+- No links in the first touch
+```
+
+Omit `kind` to list what exists:
+
+```
+The user's playbooks (read one with get_playbook(kind)):
+  voice        Bennet's voice  (context/voice.md)
+  outreach     Outreach rules  (context/outreach.md)
+  icp          Who we sell to  (stored in Nous)
+  positioning  How we position (context/positioning.md)
+```
+
+If none are set up yet:
+
+```
+No playbooks set up yet. The user can set them up on the Playbooks page or in their context files.
+```
+
+## When to call it
+
+- **Before writing outreach** → read `voice` and `outreach`
+- **Before scoring or qualifying a lead** → read `icp`
+- **Before writing messaging or a pitch** → read `positioning`
+- **Whenever your agent needs the user's rules** for a kind of action, ahead of doing it
+
+For facts about a specific contact, use [`get_context`](/mcp/tools/get-context). To push an edited playbook file back into Nous, use [`sync_playbook`](/mcp/tools/sync-playbook).
+
+## Backed by
+
+`GET /v2/playbooks`. The policy surface, separate from the per-entity context graph.

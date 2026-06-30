@@ -1,0 +1,33 @@
+---
+title: "sync_playbook"
+description: "Push a playbook's content into Nous so the graph mirrors the edited file and every agent obeys the same rules. The write counterpart to get_playbook."
+---
+
+Pushes a playbook's content into Nous so the graph stays current with the file you edited. You **must** call this in the same turn whenever you edit a policy file in the repo (a voice file, outreach rules, positioning), passing the file's new content and its path, so Nous mirrors it and every other agent reads the same rules.
+
+<Note>An edited playbook file that isn't synced is silently inert. Other agents keep reading the old rules until you call this. For the ICP and context files specifically, [`get_icp`](/mcp/tools/get-icp) is the sync, so use that one for those.</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `kind` | enum | ✓ | Which playbook to update: `voice`, `outreach`, `icp`, or `positioning`. |
+| `body_md` | string | ✓ | The full markdown content of the playbook (a `# Title`, a `> ` one-paragraph lede, an optional `Key: value` block, a `---` divider, then `## Title-case` sections with plain `- ` bullets). |
+| `file_path` | string | | The repo file this mirrors, e.g. `context/outreach.md`. Pass it when syncing a Claude Code file so the source is recorded as the file. |
+
+## Returns
+
+```
+Synced the outreach playbook into Nous (v5). Other agents now read the same rules.
+```
+
+## When to call it
+
+- **Right after you edit a policy file** (voice, outreach, positioning) in the repo, in the same turn
+- **Whenever the user changes how they want work done** and that change lives in a playbook file
+
+For the ICP and context files, use [`get_icp`](/mcp/tools/get-icp) instead. To read a playbook, use [`get_playbook`](/mcp/tools/get-playbook).
+
+## Backed by
+
+`POST /v2/playbooks/:kind`. The policy surface, separate from the per-entity context graph.
