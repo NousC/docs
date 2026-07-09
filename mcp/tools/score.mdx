@@ -1,0 +1,59 @@
+---
+title: "score"
+description: "Score a lead against your live ICP model and intent, and write the result into the context graph. Built for a list you keep somewhere else."
+---
+
+Score any person or company against your workspace's ICP model and current intent, then write the result back into the context graph so every other agent reads the same number. Built for a list you keep somewhere else, a spreadsheet, a Clay table, a CRM export. The list stays where it is. Nous returns the score.
+
+Pass one identifier, or up to 100 at once. Each call returns the ICP fit score and tier plus the intent score and band, and stakes the fit prediction onto the account so [`get_context`](/mcp/tools/get-context) and [`query`](/mcp/tools/query) surface it too.
+
+<Note>
+`score` needs a scoring model. Build one first with [`build_scoring_model`](/mcp/tools/build-scoring-model) (or train it on real deals with [`record_closed_deals`](/mcp/tools/record-closed-deals)).
+</Note>
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `identifier` | string | | One lead. An email, domain, LinkedIn URL, or entity UUID |
+| `identifiers` | string[] | | A batch of leads, max 100 per call. Loop for a larger list |
+| `intent` | string | | Optional note on why you're scoring. Recorded, does not change the score |
+
+Pass either `identifier` or `identifiers`.
+
+## Returns
+
+One line per lead. A scored lead shows its ICP fit and intent:
+
+```
+sarah@acme.com — ICP 84/100 (tier 1) ✓fit · intent 64/100 Warm
+    matches B2B SaaS, 50–200, already on Apollo
+```
+
+A lead Nous already knows but has not enriched yet comes back honestly, so you know to enrich before you act:
+
+```
+tom@globex.io — known, but awaiting enrichment — no scoreable claims yet.
+```
+
+A lead that is not in the graph at all comes back as unknown, so nothing is fabricated:
+
+```
+newlead@unknown-co.com — not in the graph yet — enrich this account first, then score.
+```
+
+## Scores that keep moving
+
+`score` reads the **live** score. When an account has never been scored, it stakes one on demand so you get a number now. After that the score keeps evolving on its own as new signals land, so a weekly re-score always reflects the latest state. Calling `score` again never stacks duplicate predictions.
+
+## When to call it
+
+- **You have a list built somewhere else** and want each row's ICP fit and intent in the graph
+- **Before working a lead** pulled from a spreadsheet or a CRM export
+- **On a cadence** (a weekly job over your sheet) to keep every row's score current
+
+For a whole list in one call, use [`attach_list`](/mcp/tools/attach-list). For the full account behind a score, use [`get_context`](/mcp/tools/get-context).
+
+## Backed by
+
+`POST /v2/score` — see the [HTTP reference](/public-api/score) for the raw JSON shape.

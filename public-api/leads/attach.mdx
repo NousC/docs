@@ -1,0 +1,87 @@
+---
+title: "Attach & Score a List"
+api: "POST https://api.opennous.cloud/v2/lead-lists/attach"
+description: "Score a whole list you built somewhere else in one call. Nous creates the list, resolves every row, and scores each against your ICP model and intent."
+---
+
+Score a whole list you built somewhere else, a Google Sheet, a CRM export, a Clay table, in a single call. Nous creates a lead list, resolves each row to a person or company (deduped against the workspace), and scores every row against your ICP model and current intent. The spreadsheet stays yours. Nous keeps the roster so the scores stay current and every other agent can read them.
+
+This is the batch counterpart to [`/v2/score`](/public-api/score). Send the rows once, get the whole list scored into the graph.
+
+<Note>
+`attach` needs a scoring model. Build one first with [`build_scoring_model`](/mcp/tools/build-scoring-model).
+</Note>
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/lead-lists/attach \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Q3 sheet",
+    "source": "google_sheet",
+    "rows": [
+      { "email": "sarah@acme.com", "name": "Sarah Chen", "company": "Acme" },
+      { "email": "tom@globex.io" }
+    ]
+  }'
+```
+
+### Body
+
+<ParamField body="rows" type="object[]" required>
+  The list rows. Each row needs an `email` or a `linkedin_url`. Max 200 per call. Loop for a larger sheet.
+</ParamField>
+<ParamField body="name" type="string">
+  Name for the new list. Required unless you pass `lead_list_id`.
+</ParamField>
+<ParamField body="lead_list_id" type="string">
+  Add to an existing list instead of creating one.
+</ParamField>
+<ParamField body="source" type="string" default="external">
+  Where the list came from, for example `google_sheet` or `crm_export`.
+</ParamField>
+<ParamField body="import_duplicates" type="boolean" default="false">
+  Force-insert rows already in the list.
+</ParamField>
+
+Each row accepts `email`, `linkedin_url`, `domain`, `company`, and `name`.
+
+## Response
+
+```json
+{
+  "lead_list_id": "06167031-...",
+  "inserted": 187,
+  "duplicate_skipped": 13,
+  "skipped": 13,
+  "scored": 142,
+  "awaiting_enrichment": 45,
+  "unresolved": 0,
+  "results": [
+    { "identifier": "sarah@acme.com", "resolved": true, "scored": true, "icp": { "score": 84, "tier": "tier_1" }, "intent": { "score": 64, "band": "Warm" } },
+    { "identifier": "tom@globex.io", "resolved": true, "scored": false, "reason": "awaiting_enrichment" }
+  ]
+}
+```
+
+## What happens to each row
+
+| Outcome | Meaning |
+|---|---|
+| **scored** | Resolved and scored. The ICP fit and intent are on the account |
+| **awaiting_enrichment** | Resolved, but Nous has no scoreable facts yet. Enrich, then re-attach |
+| **unresolved** | No email or LinkedIn URL on the row, so it could not be added |
+
+Rows are deduped against the workspace, so re-attaching the same sheet reuses existing records instead of forking duplicates. Scoring an already-scored row never stacks duplicate predictions.
+
+## Keep a sheet current
+
+Run this on a cadence, a weekly job over your sheet, and both the roster and every score stay current. Pass the same `lead_list_id` each run to add new rows to the same list. Rows that came back `awaiting_enrichment` will score once you enrich them and re-attach.
+
+## When to call it
+
+- **You built a list somewhere else** and want the whole thing scored into the graph in one pass
+- **On a cadence** over a sheet, so the roster and every score stay current
+- For a single row, use [`/v2/score`](/public-api/score)
