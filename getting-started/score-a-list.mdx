@@ -1,0 +1,88 @@
+---
+title: "Score a list you keep elsewhere"
+description: "Keep your list in a spreadsheet, a Clay table, or a CRM export, and call Nous for the ICP fit and intent. The score lands in the context graph for your agents to act on."
+---
+
+You already keep lists somewhere. A Google Sheet, a Clay table, a CRM export. You do not need to move them into Nous. Keep the list where it is and call Nous for the one thing a spreadsheet cannot give you, a live ICP fit score and intent, computed against your own model and written into the context graph.
+
+The list stays yours. Nous owns the score. And because the score lands in the graph, every agent you run reads the same number through [`get_context`](/mcp/tools/get-context) and [`query`](/public-api/query), and the model sharpens from your own won and lost deals as you record outcomes.
+
+<Note>
+Scoring needs a model. Build one first with [`build_scoring_model`](/mcp/tools/build-scoring-model), or train it on real deals with [`record_closed_deals`](/mcp/tools/record-closed-deals).
+</Note>
+
+## Two verbs
+
+| Verb | Use it for |
+|---|---|
+| [`score`](/public-api/score) | One row at a time. A spreadsheet cell, a Clay column, a per-record workflow step |
+| [`attach_list`](/public-api/leads/attach) | A whole list in one call. Nous creates the list, resolves every row, and scores it |
+
+Both accept an email, a domain, a LinkedIn URL, or an entity UUID, and both write the result into the graph.
+
+## Google Sheets
+
+Add a `=NOUS(A2)` function to any column. In your sheet, open **Extensions → Apps Script**, paste this, and save.
+
+```javascript
+function NOUS(email) {
+  const r = UrlFetchApp.fetch("https://api.opennous.cloud/v2/score", {
+    method: "post",
+    contentType: "application/json",
+    headers: { Authorization: "Bearer YOUR_API_KEY" },
+    payload: JSON.stringify({ identifier: email }),
+    muteHttpExceptions: true
+  });
+  const j = JSON.parse(r.getContentText());
+  if (j.scored) return `${j.icp.score} ${j.icp.tier} / intent ${j.intent.score}`;
+  return j.reason || "n/a";
+}
+```
+
+Then put `=NOUS(A2)` next to your email column and fill down. Each cell calls Nous, shows the score, and writes the judgment into the graph.
+
+## Clay
+
+Add an **HTTP API** enrichment column.
+
+- **Method** `POST`
+- **URL** `https://api.opennous.cloud/v2/score`
+- **Header** `Authorization: Bearer YOUR_API_KEY`
+- **Body** `{ "identifier": "{{Email}}" }`
+
+Map `icp.score`, `icp.tier`, and `intent.score` from the response into columns. Every row now carries a live Nous score, and each call updates the graph.
+
+## A whole list, or a weekly job
+
+To score a list in one pass, send the rows to `attach_list`.
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/lead-lists/attach \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Q3 sheet",
+    "source": "google_sheet",
+    "rows": [
+      { "email": "sarah@acme.com" },
+      { "email": "tom@globex.io" }
+    ]
+  }'
+```
+
+Run that on a cadence from n8n, Make, or a cron job, passing the same `lead_list_id` each time, and both the roster and every score stay current. Send up to 200 rows per call and loop for a larger sheet.
+
+## Rows Nous does not know yet
+
+A row only scores if Nous has facts to score on. A brand-new email with nothing behind it comes back as `awaiting_enrichment` for `attach_list`, or `unknown_identifier` for `score`. Enrich those accounts first, then score them again. Nous never invents a score for an account it has no signal on.
+
+## What you get back
+
+| Field | Meaning |
+|---|---|
+| `icp.score` | ICP fit, `0` to `100` |
+| `icp.tier` | `tier_1` / `tier_2` / `tier_3` / `not_icp`, the class that drives the play |
+| `intent.score` | How warm the account is right now, `0` to `100`, decaying over time |
+| `intent.band` | `Red-hot` / `Hot` / `Warm` / `Aware` / `Dormant` |
+
+For the raw JSON shape, see the [`/v2/score`](/public-api/score) and [`/v2/lead-lists/attach`](/public-api/leads/attach) reference.

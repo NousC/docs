@@ -6,9 +6,16 @@
     "version": "2.0.0"
   },
   "servers": [
-    { "url": "https://api.opennous.cloud", "description": "Nous Cloud" }
+    {
+      "url": "https://api.opennous.cloud",
+      "description": "Nous Cloud"
+    }
   ],
-  "security": [{ "bearerAuth": [] }],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "components": {
     "securitySchemes": {
       "bearerAuth": {
@@ -22,15 +29,28 @@
         "type": "object",
         "description": "Returned when a name matches several candidates. Pick one and re-call with focus = candidate.entity_id.",
         "properties": {
-          "status": { "type": "string", "enum": ["ambiguous"] },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ambiguous"
+            ]
+          },
           "candidates": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "entity_id": { "type": "string", "format": "uuid" },
-                "name":      { "type": "string" },
-                "detail":    { "type": "string", "description": "Short context line — e.g. 'VP Sales @ Acme'" }
+                "entity_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "Short context line — e.g. 'VP Sales @ Acme'"
+                }
               }
             }
           }
@@ -40,27 +60,79 @@
         "type": "object",
         "description": "A derived fact about an entity. Every claim carries its epistemics.",
         "properties": {
-          "property":         { "type": "string", "description": "e.g. 'title', 'stage', 'intent'" },
-          "value":            {},
-          "confidence":       { "type": "number", "minimum": 0, "maximum": 1 },
-          "freshness":        { "type": "string", "enum": ["fresh", "aging", "suspect", "expired"] },
-          "epistemic_class":  { "type": "string", "enum": ["observed", "derived", "asserted"] },
-          "sources":          { "type": "array", "items": { "type": "string" } },
-          "last_observed_at": { "type": "string", "format": "date-time" }
+          "property": {
+            "type": "string",
+            "description": "e.g. 'title', 'stage', 'intent'"
+          },
+          "value": {},
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "freshness": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "aging",
+              "suspect",
+              "expired"
+            ]
+          },
+          "epistemic_class": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "derived",
+              "asserted"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "last_observed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "Observation": {
         "type": "object",
-        "required": ["kind", "property"],
+        "required": [
+          "kind",
+          "property"
+        ],
         "properties": {
-          "kind":        { "type": "string", "enum": ["event", "state"] },
-          "property":    { "type": "string" },
-          "value":       {},
-          "source":      { "type": "string" },
-          "method":      { "type": "string" },
-          "observed_at": { "type": "string", "format": "date-time" },
-          "external_id": { "type": "string" },
-          "raw":         { "type": "object" }
+          "kind": {
+            "type": "string",
+            "enum": [
+              "event",
+              "state"
+            ]
+          },
+          "property": {
+            "type": "string"
+          },
+          "value": {},
+          "source": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "external_id": {
+            "type": "string"
+          },
+          "raw": {
+            "type": "object"
+          }
         }
       },
       "AccountRecord": {
@@ -69,9 +141,20 @@
           "entity": {
             "type": "object",
             "properties": {
-              "id":   { "type": "string", "format": "uuid" },
-              "type": { "type": "string", "enum": ["person", "company"] },
-              "name": { "type": "string" }
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "person",
+                  "company"
+                ]
+              },
+              "name": {
+                "type": "string"
+              }
             }
           },
           "identifiers": {
@@ -79,21 +162,43 @@
             "items": {
               "type": "object",
               "properties": {
-                "kind":  { "type": "string", "enum": ["email", "linkedin_url", "domain", "phone"] },
-                "value": { "type": "string" }
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "email",
+                    "linkedin_url",
+                    "domain",
+                    "phone"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
               }
             }
           },
-          "claims": { "type": "array", "items": { "$ref": "#/components/schemas/Claim" } },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            }
+          },
           "recent_observations": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "kind":        { "type": "string" },
-                "property":    { "type": "string" },
-                "observed_at": { "type": "string", "format": "date-time" },
-                "value":       {}
+                "kind": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": "string"
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "value": {}
               }
             }
           }
@@ -102,77 +207,209 @@
       "DedupItem": {
         "type": "object",
         "properties": {
-          "kind":      { "type": "string", "enum": ["email", "linkedin_url"] },
-          "value":     { "type": "string" },
-          "status":    { "type": "string", "enum": ["net_new", "engaged", "recent", "bounced", "unsubscribed", "suppressed"] },
-          "entity_id": { "type": "string", "format": "uuid" },
-          "reason":    { "type": "string" }
+          "kind": {
+            "type": "string",
+            "enum": [
+              "email",
+              "linkedin_url"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "net_new",
+              "engaged",
+              "recent",
+              "bounced",
+              "unsubscribed",
+              "suppressed"
+            ]
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          }
         }
       },
       "QueryScope": {
         "type": "object",
         "properties": {
-          "kind":       { "type": "string", "enum": ["event", "state"] },
-          "property":   { "type": "string", "description": "Prefix match — 'interaction.email' matches email_sent and email_replied" },
-          "source":     { "type": "string" },
-          "entity_id":  { "type": "string", "format": "uuid" },
-          "since_days": { "type": "number" },
-          "limit":      { "type": "number", "default": 50, "maximum": 200 }
+          "kind": {
+            "type": "string",
+            "enum": [
+              "event",
+              "state"
+            ]
+          },
+          "property": {
+            "type": "string",
+            "description": "Prefix match — 'interaction.email' matches email_sent and email_replied"
+          },
+          "source": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "since_days": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number",
+            "default": 50,
+            "maximum": 200
+          }
         }
       },
       "QueryItem": {
         "type": "object",
         "description": "Returned when request used return='observations' — one row per observation.",
         "properties": {
-          "observation_id": { "type": "string", "format": "uuid" },
-          "entity_id":      { "type": "string", "format": "uuid" },
-          "entity_name":    { "type": "string", "nullable": true },
-          "when":           { "type": "string", "format": "date-time" },
-          "type":           { "type": "string" },
-          "source":         { "type": "string" },
-          "summary":        { "type": "string", "nullable": true },
-          "similarity":     { "type": "number", "description": "Present in semantic mode (when question is set)" }
+          "observation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entity_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "when": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "similarity": {
+            "type": "number",
+            "description": "Present in semantic mode (when question is set)"
+          }
         }
       },
       "QueryEntityItem": {
         "type": "object",
         "description": "Returned when request used return='entities' — one row per entity, ranked by most-recent matching activity.",
         "properties": {
-          "entity_id":           { "type": "string", "format": "uuid" },
-          "entity_name":         { "type": "string", "nullable": true },
-          "matches":             { "type": "integer", "description": "Observations in scope for this entity" },
-          "most_recent_at":      { "type": "string", "format": "date-time" },
-          "most_recent_type":    { "type": "string" },
-          "most_recent_source":  { "type": "string" },
-          "most_recent_summary": { "type": "string", "nullable": true },
-          "most_recent_value":   { "description": "Present for state observations (funnel queries)" }
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entity_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "matches": {
+            "type": "integer",
+            "description": "Observations in scope for this entity"
+          },
+          "most_recent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "most_recent_type": {
+            "type": "string"
+          },
+          "most_recent_source": {
+            "type": "string"
+          },
+          "most_recent_summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "most_recent_value": {
+            "description": "Present for state observations (funnel queries)"
+          }
         }
       },
       "WorkspaceFact": {
         "type": "object",
         "properties": {
-          "id":          { "type": "string", "format": "uuid" },
-          "category":    { "type": "string", "description": "Common: ICP, Market, Product, Pricing, Competitors, Playbook" },
-          "content":     { "type": "string" },
-          "source":      { "type": "string" },
-          "recorded_at": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "description": "Common: ICP, Market, Product, Pricing, Competitors, Playbook"
+          },
+          "content": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "Document": {
         "type": "object",
         "description": "A note or document kept on a contact — a meeting brief, transcript, prep, research, or plain note.",
         "properties": {
-          "entity_id":  { "type": "string", "format": "uuid" },
-          "type":       { "type": "string", "enum": ["note", "meeting_brief", "transcript", "meeting_notes", "pre_meeting", "research"] },
-          "title":      { "type": "string", "nullable": true },
-          "date":       { "type": "string", "nullable": true, "description": "The relevant date (e.g. the meeting date)" },
-          "similarity": { "type": "number", "description": "Present in search results — match score 0–1" },
-          "snippet":    { "type": "string", "description": "First ~400 chars of the document body" }
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "note",
+              "meeting_brief",
+              "transcript",
+              "meeting_notes",
+              "pre_meeting",
+              "research"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "nullable": true,
+            "description": "The relevant date (e.g. the meeting date)"
+          },
+          "similarity": {
+            "type": "number",
+            "description": "Present in search results — match score 0–1"
+          },
+          "snippet": {
+            "type": "string",
+            "description": "First ~400 chars of the document body"
+          }
         }
       },
       "Error": {
         "type": "object",
-        "properties": { "error": { "type": "string" }, "message": { "type": "string" } }
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
       }
     }
   },
@@ -181,18 +418,37 @@
       "post": {
         "summary": "Get engineered context",
         "description": "Engineered context for one task about one entity. Runs the pipeline: retrieve → rank → connect → compress → tag → budget.",
-        "tags": ["Context"],
+        "tags": [
+          "Context"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["focus"],
+                "required": [
+                  "focus"
+                ],
                 "properties": {
-                  "focus":         { "type": "string", "description": "Entity UUID, email, domain, LinkedIn URL, or name" },
-                  "intent":        { "type": "string", "enum": ["account_review", "draft_email", "follow_up", "meeting_prep", "call_prep"], "default": "account_review" },
-                  "budget_tokens": { "type": "number" }
+                  "focus": {
+                    "type": "string",
+                    "description": "Entity UUID, email, domain, LinkedIn URL, or name"
+                  },
+                  "intent": {
+                    "type": "string",
+                    "enum": [
+                      "account_review",
+                      "draft_email",
+                      "follow_up",
+                      "meeting_prep",
+                      "call_prep"
+                    ],
+                    "default": "account_review"
+                  },
+                  "budget_tokens": {
+                    "type": "number"
+                  }
                 }
               }
             }
@@ -208,24 +464,75 @@
                     {
                       "type": "object",
                       "properties": {
-                        "entity":       { "type": "object" },
-                        "summary":      { "type": "string" },
-                        "claims":       { "type": "array", "items": { "$ref": "#/components/schemas/Claim" } },
-                        "workspace":    { "type": "array", "items": { "type": "object" } },
-                        "timeline":     { "type": "array", "items": { "type": "object" } },
-                        "stakeholders": { "type": "array", "items": { "type": "object" } },
-                        "predictions":  { "type": "array", "items": { "type": "object" } },
-                        "meta":         { "type": "object" }
+                        "entity": {
+                          "type": "object"
+                        },
+                        "summary": {
+                          "type": "string"
+                        },
+                        "claims": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Claim"
+                          }
+                        },
+                        "workspace": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "timeline": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "stakeholders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "predictions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "meta": {
+                          "type": "object"
+                        }
                       }
                     },
-                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                    {
+                      "$ref": "#/components/schemas/AmbiguousFocus"
+                    }
                   ]
                 }
               }
             }
           },
-          "400": { "description": "focus_required or invalid_intent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-          "404": { "description": "entity_not_found",                  "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "400": {
+            "description": "focus_required or invalid_intent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "entity_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -233,9 +540,19 @@
       "get": {
         "summary": "Get the full Account Record",
         "description": "Entity + every claim with epistemics + recent observation timeline.",
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "URL-encoded entity UUID, email, domain, LinkedIn URL, or name" }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "URL-encoded entity UUID, email, domain, LinkedIn URL, or name"
+          }
         ],
         "responses": {
           "200": {
@@ -244,14 +561,27 @@
               "application/json": {
                 "schema": {
                   "oneOf": [
-                    { "$ref": "#/components/schemas/AccountRecord" },
-                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                    {
+                      "$ref": "#/components/schemas/AccountRecord"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AmbiguousFocus"
+                    }
                   ]
                 }
               }
             }
           },
-          "404": { "description": "entity_not_found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "404": {
+            "description": "entity_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -259,17 +589,31 @@
       "post": {
         "summary": "Record observations",
         "description": "Append events or state observations. The graph derives the new facts and tells you which were recomputed.",
-        "tags": ["Observations"],
+        "tags": [
+          "Observations"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["focus", "observations"],
+                "required": [
+                  "focus",
+                  "observations"
+                ],
                 "properties": {
-                  "focus":        { "type": "string", "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name." },
-                  "observations": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/Observation" } }
+                  "focus": {
+                    "type": "string",
+                    "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name."
+                  },
+                  "observations": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/components/schemas/Observation"
+                    }
+                  }
                 }
               }
             }
@@ -283,15 +627,34 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "entity_id":         { "type": "string", "format": "uuid" },
-                    "recorded":          { "type": "integer" },
-                    "claims_recomputed": { "type": "array", "items": { "type": "string" } }
+                    "entity_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "recorded": {
+                      "type": "integer"
+                    },
+                    "claims_recomputed": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
             }
           },
-          "400": { "description": "focus_and_observations_required or invalid_focus", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "400": {
+            "description": "focus_and_observations_required or invalid_focus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -299,28 +662,42 @@
       "post": {
         "summary": "Query a corpus of observations",
         "description": "Retrieve + summarise observations across many entities. Three composable powers: return='entities' groups by entity, without subtracts a set, rollups.by_value (when scope.kind='state') gives funnel-style counts.",
-        "tags": ["Query"],
+        "tags": [
+          "Query"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["scope"],
+                "required": [
+                  "scope"
+                ],
                 "properties": {
-                  "scope": { "$ref": "#/components/schemas/QueryScope" },
+                  "scope": {
+                    "$ref": "#/components/schemas/QueryScope"
+                  },
                   "without": {
                     "$ref": "#/components/schemas/QueryScope",
                     "description": "Subtract entities matching this scope from the result. Same shape as scope. Enables 'sent but no reply', 'cooled in N days'."
                   },
                   "return": {
                     "type": "string",
-                    "enum": ["observations", "entities"],
+                    "enum": [
+                      "observations",
+                      "entities"
+                    ],
                     "default": "observations",
                     "description": "observations = one row per observation. entities = one row per entity, ranked by most-recent matching activity."
                   },
-                  "question":      { "type": "string", "description": "Echoed in the response. When set (and `without` not set), enables semantic ranking via embeddings." },
-                  "budget_tokens": { "type": "number" }
+                  "question": {
+                    "type": "string",
+                    "description": "Echoed in the response. When set (and `without` not set), enables semantic ranking via embeddings."
+                  },
+                  "budget_tokens": {
+                    "type": "number"
+                  }
                 }
               }
             }
@@ -334,32 +711,77 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "scope":    { "$ref": "#/components/schemas/QueryScope" },
-                    "without":  { "$ref": "#/components/schemas/QueryScope" },
-                    "mode":     { "type": "string", "enum": ["structured", "semantic"] },
-                    "return":   { "type": "string", "enum": ["observations", "entities"] },
-                    "matched":  { "type": "integer" },
-                    "returned": { "type": "integer" },
-                    "sampled":  { "type": "boolean" },
+                    "scope": {
+                      "$ref": "#/components/schemas/QueryScope"
+                    },
+                    "without": {
+                      "$ref": "#/components/schemas/QueryScope"
+                    },
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "structured",
+                        "semantic"
+                      ]
+                    },
+                    "return": {
+                      "type": "string",
+                      "enum": [
+                        "observations",
+                        "entities"
+                      ]
+                    },
+                    "matched": {
+                      "type": "integer"
+                    },
+                    "returned": {
+                      "type": "integer"
+                    },
+                    "sampled": {
+                      "type": "boolean"
+                    },
                     "items": {
                       "type": "array",
                       "description": "QueryItem[] when return='observations', QueryEntityItem[] when return='entities'",
                       "items": {
                         "oneOf": [
-                          { "$ref": "#/components/schemas/QueryItem" },
-                          { "$ref": "#/components/schemas/QueryEntityItem" }
+                          {
+                            "$ref": "#/components/schemas/QueryItem"
+                          },
+                          {
+                            "$ref": "#/components/schemas/QueryEntityItem"
+                          }
                         ]
                       }
                     },
                     "rollups": {
                       "type": "object",
                       "properties": {
-                        "by_type":   { "type": "object", "additionalProperties": { "type": "integer" } },
-                        "by_source": { "type": "object", "additionalProperties": { "type": "integer" } },
-                        "by_value":  { "type": "object", "additionalProperties": { "type": "integer" }, "description": "Counts entities by current state value. Present only when scope.kind='state'." }
+                        "by_type": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "integer"
+                          }
+                        },
+                        "by_source": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "integer"
+                          }
+                        },
+                        "by_value": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "integer"
+                          },
+                          "description": "Counts entities by current state value. Present only when scope.kind='state'."
+                        }
                       }
                     },
-                    "question": { "type": "string", "nullable": true }
+                    "question": {
+                      "type": "string",
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -372,9 +794,19 @@
       "get": {
         "summary": "What needs attention",
         "description": "Workspace-wide ranked decisions: accounts gone quiet, key facts decayed. Each item ships with a suggested action.",
-        "tags": ["Attention"],
+        "tags": [
+          "Attention"
+        ],
         "parameters": [
-          { "name": "limit", "in": "query", "schema": { "type": "number", "default": 25, "maximum": 100 } }
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "default": 25,
+              "maximum": 100
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -389,12 +821,31 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "entity_id":        { "type": "string", "format": "uuid" },
-                          "entity_name":      { "type": "string" },
-                          "what":             { "type": "string", "enum": ["going_dark", "claim_stale", "prediction_unresolved", "decay_threshold"] },
-                          "headline":         { "type": "string" },
-                          "suggested_action": { "type": "string" },
-                          "score":            { "type": "number" }
+                          "entity_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "entity_name": {
+                            "type": "string"
+                          },
+                          "what": {
+                            "type": "string",
+                            "enum": [
+                              "going_dark",
+                              "claim_stale",
+                              "prediction_unresolved",
+                              "decay_threshold"
+                            ]
+                          },
+                          "headline": {
+                            "type": "string"
+                          },
+                          "suggested_action": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "number"
+                          }
                         }
                       }
                     }
@@ -410,17 +861,26 @@
       "post": {
         "summary": "Verify one claim",
         "description": "Re-derive one claim against current observations. Returns before + after — the calibration check.",
-        "tags": ["Verify"],
+        "tags": [
+          "Verify"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["focus", "property"],
+                "required": [
+                  "focus",
+                  "property"
+                ],
                 "properties": {
-                  "focus":    { "type": "string" },
-                  "property": { "type": "string" }
+                  "focus": {
+                    "type": "string"
+                  },
+                  "property": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -436,20 +896,34 @@
                     {
                       "type": "object",
                       "properties": {
-                        "property": { "type": "string" },
-                        "before":   { "$ref": "#/components/schemas/Claim" },
-                        "after":    { "$ref": "#/components/schemas/Claim" },
-                        "note":     { "type": "string" }
+                        "property": {
+                          "type": "string"
+                        },
+                        "before": {
+                          "$ref": "#/components/schemas/Claim"
+                        },
+                        "after": {
+                          "$ref": "#/components/schemas/Claim"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
                       }
                     },
-                    { "$ref": "#/components/schemas/AmbiguousFocus" }
+                    {
+                      "$ref": "#/components/schemas/AmbiguousFocus"
+                    }
                   ]
                 }
               }
             }
           },
-          "400": { "description": "focus_and_property_required" },
-          "404": { "description": "claim_not_found or entity_not_found" }
+          "400": {
+            "description": "focus_and_property_required"
+          },
+          "404": {
+            "description": "claim_not_found or entity_not_found"
+          }
         }
       }
     },
@@ -457,7 +931,9 @@
       "post": {
         "summary": "Classify cold-outbound identifiers",
         "description": "Cross-list dedup: net_new / engaged / recent / bounced / unsubscribed / suppressed. Up to 50,000 of each kind per call.",
-        "tags": ["Dedup"],
+        "tags": [
+          "Dedup"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -465,8 +941,20 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "emails":        { "type": "array", "items": { "type": "string", "format": "email" } },
-                  "linkedin_urls": { "type": "array", "items": { "type": "string", "format": "uri" } }
+                  "emails": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  },
+                  "linkedin_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
                 },
                 "description": "At least one of emails or linkedin_urls required"
               }
@@ -481,17 +969,36 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "results": { "type": "array", "items": { "$ref": "#/components/schemas/DedupItem" } },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DedupItem"
+                      }
+                    },
                     "summary": {
                       "type": "object",
                       "properties": {
-                        "net_new":      { "type": "integer" },
-                        "engaged":      { "type": "integer" },
-                        "recent":       { "type": "integer" },
-                        "bounced":      { "type": "integer" },
-                        "unsubscribed": { "type": "integer" },
-                        "suppressed":   { "type": "integer" },
-                        "total":        { "type": "integer" }
+                        "net_new": {
+                          "type": "integer"
+                        },
+                        "engaged": {
+                          "type": "integer"
+                        },
+                        "recent": {
+                          "type": "integer"
+                        },
+                        "bounced": {
+                          "type": "integer"
+                        },
+                        "unsubscribed": {
+                          "type": "integer"
+                        },
+                        "suppressed": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
                       }
                     }
                   }
@@ -499,8 +1006,12 @@
               }
             }
           },
-          "400": { "description": "identifiers_required" },
-          "413": { "description": "too_many (max 50,000 per kind per call)" }
+          "400": {
+            "description": "identifiers_required"
+          },
+          "413": {
+            "description": "too_many (max 50,000 per kind per call)"
+          }
         }
       }
     },
@@ -508,10 +1019,27 @@
       "get": {
         "summary": "Get workspace facts",
         "description": "Workspace-level facts the user has recorded about their own business: ICP, target market, product, pricing, competitors, playbook. Read-only.",
-        "tags": ["GTM Profile"],
+        "tags": [
+          "GTM Profile"
+        ],
         "parameters": [
-          { "name": "categories", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list (e.g. 'ICP,Market'). Omit for all." },
-          { "name": "limit",      "in": "query", "schema": { "type": "number", "default": 50, "maximum": 500 } }
+          {
+            "name": "categories",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list (e.g. 'ICP,Market'). Omit for all."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "default": 50,
+              "maximum": 500
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -521,9 +1049,21 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "facts":       { "type": "array", "items": { "$ref": "#/components/schemas/WorkspaceFact" } },
-                    "count":       { "type": "integer" },
-                    "by_category": { "type": "object", "additionalProperties": { "type": "integer" } }
+                    "facts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkspaceFact"
+                      }
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "by_category": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    }
                   }
                 }
               }
@@ -534,19 +1074,50 @@
       "post": {
         "summary": "Write back a GTM section",
         "description": "Keep a section of the user's own GTM context current. In the default 'replace' mode the section evolves — the prior version is kept as history, never silently contradicted. 'append' logs a new entry (the default for Notes).",
-        "tags": ["GTM Profile"],
+        "tags": [
+          "GTM Profile"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["section", "content"],
+                "required": [
+                  "section",
+                  "content"
+                ],
                 "properties": {
-                  "section":    { "type": "string", "enum": ["ICP", "Market", "Product", "Pricing", "Competitors", "Positioning", "GTM Motion", "Notes"] },
-                  "content":    { "type": "string", "description": "The section's current content — one short, current statement." },
-                  "mode":       { "type": "string", "enum": ["replace", "append"], "default": "replace" },
-                  "supersedes": { "type": "string", "format": "uuid", "description": "Explicit fact id to replace (overrides section matching)." }
+                  "section": {
+                    "type": "string",
+                    "enum": [
+                      "ICP",
+                      "Market",
+                      "Product",
+                      "Pricing",
+                      "Competitors",
+                      "Positioning",
+                      "GTM Motion",
+                      "Notes"
+                    ]
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The section's current content — one short, current statement."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "replace",
+                      "append"
+                    ],
+                    "default": "replace"
+                  },
+                  "supersedes": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Explicit fact id to replace (overrides section matching)."
+                  }
                 }
               }
             }
@@ -560,16 +1131,37 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "fact":       { "$ref": "#/components/schemas/WorkspaceFact" },
-                    "section":    { "type": "string" },
-                    "mode":       { "type": "string", "enum": ["replace", "append"] },
-                    "superseded": { "type": "boolean" }
+                    "fact": {
+                      "$ref": "#/components/schemas/WorkspaceFact"
+                    },
+                    "section": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "replace",
+                        "append"
+                      ]
+                    },
+                    "superseded": {
+                      "type": "boolean"
+                    }
                   }
                 }
               }
             }
           },
-          "400": { "description": "section_and_content_required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "400": {
+            "description": "section_and_content_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -577,20 +1169,48 @@
       "post": {
         "summary": "Save a note on a contact",
         "description": "Attach a long-form artifact to a person or company — a meeting brief, transcript, prep, research, or plain note. Append-only and dated. NOT for logging that an interaction happened (use /v2/observations).",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["focus", "content"],
+                "required": [
+                  "focus",
+                  "content"
+                ],
                 "properties": {
-                  "focus":   { "type": "string", "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name." },
-                  "content": { "type": "string", "description": "The full note or document text." },
-                  "type":    { "type": "string", "enum": ["note", "meeting_brief", "transcript", "meeting_notes", "pre_meeting", "research"], "default": "note" },
-                  "title":   { "type": "string", "description": "A short name, e.g. 'Pre-meeting brief — renewal'." },
-                  "date":    { "type": "string", "description": "The relevant date (ISO or plain). Defaults to now." }
+                  "focus": {
+                    "type": "string",
+                    "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The full note or document text."
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "note",
+                      "meeting_brief",
+                      "transcript",
+                      "meeting_notes",
+                      "pre_meeting",
+                      "research"
+                    ],
+                    "default": "note"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "A short name, e.g. 'Pre-meeting brief — renewal'."
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "The relevant date (ISO or plain). Defaults to now."
+                  }
                 }
               }
             }
@@ -604,15 +1224,31 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "note":      { "type": "object" },
-                    "entity_id": { "type": "string", "format": "uuid" },
-                    "doc_type":  { "type": "string" }
+                    "note": {
+                      "type": "object"
+                    },
+                    "entity_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "doc_type": {
+                      "type": "string"
+                    }
                   }
                 }
               }
             }
           },
-          "400": { "description": "focus_and_content_required or invalid_focus", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "400": {
+            "description": "focus_and_content_required or invalid_focus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -620,18 +1256,32 @@
       "post": {
         "summary": "Search notes",
         "description": "Semantic search over the saved notes & documents kept on contacts. Returns matching documents with a snippet. Pass focus to restrict to one contact, or omit it to search everyone.",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["question"],
+                "required": [
+                  "question"
+                ],
                 "properties": {
-                  "question": { "type": "string", "description": "Natural-language query matched against document content." },
-                  "focus":    { "type": "string", "description": "Optional — restrict to one person/company. Unresolvable focus falls back to a workspace-wide search." },
-                  "limit":    { "type": "number", "default": 8, "maximum": 20 }
+                  "question": {
+                    "type": "string",
+                    "description": "Natural-language query matched against document content."
+                  },
+                  "focus": {
+                    "type": "string",
+                    "description": "Optional — restrict to one person/company. Unresolvable focus falls back to a workspace-wide search."
+                  },
+                  "limit": {
+                    "type": "number",
+                    "default": 8,
+                    "maximum": 20
+                  }
                 }
               }
             }
@@ -645,14 +1295,152 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "documents": { "type": "array", "items": { "$ref": "#/components/schemas/Document" } },
-                    "count":     { "type": "integer" }
+                    "documents": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Document"
+                      }
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
                   }
                 }
               }
             }
           },
-          "400": { "description": "question required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "400": {
+            "description": "question required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/score": {
+      "post": {
+        "summary": "Score a lead against the ICP model and intent",
+        "description": "Resolve an identifier, score it against the workspace ICP model and current intent, and stake the fit prediction into the graph. Pass `identifier` for one lead or `identifiers` for a batch (max 100). Returns `unknown_identifier` when the account is not in the graph and `awaiting_enrichment` when it is known but has no scoreable facts yet.",
+        "tags": [
+          "Scoring"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "description": "One lead. An email, domain, LinkedIn URL, or entity UUID. Required unless identifiers is set."
+                  },
+                  "identifiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A batch of leads, max 100. Response is a results array in order."
+                  },
+                  "intent": {
+                    "type": "string",
+                    "description": "Optional note on why you are scoring. Recorded, does not change the score."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The lead score. For a batch, a results array of the same objects each carrying its identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resolved": {
+                      "type": "boolean"
+                    },
+                    "scored": {
+                      "type": "boolean"
+                    },
+                    "entity_id": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "unknown_identifier",
+                        "awaiting_enrichment",
+                        "ambiguous",
+                        "identifier_required"
+                      ]
+                    },
+                    "icp": {
+                      "type": "object",
+                      "properties": {
+                        "score": {
+                          "type": "number",
+                          "description": "ICP fit, 0 to 100"
+                        },
+                        "fit": {
+                          "type": "boolean"
+                        },
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "tier_1",
+                            "tier_2",
+                            "tier_3",
+                            "not_icp"
+                          ]
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "scored_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "intent": {
+                      "type": "object",
+                      "properties": {
+                        "score": {
+                          "type": "number",
+                          "description": "Intent, 0 to 100, decaying"
+                        },
+                        "band": {
+                          "type": "string",
+                          "enum": [
+                            "Red-hot",
+                            "Hot",
+                            "Warm",
+                            "Aware",
+                            "Dormant"
+                          ]
+                        }
+                      }
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "Present for batch requests. One entry per identifier."
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

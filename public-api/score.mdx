@@ -1,0 +1,103 @@
+---
+title: "Score"
+api: "POST https://api.opennous.cloud/v2/score"
+description: "Score a lead against your live ICP model and intent, and write the result into the context graph. The thin verb an external list calls per row."
+---
+
+Score any person or company against your workspace's ICP model and current intent, then write the result into the context graph so every other agent reads the same number. Built for a list you keep somewhere else, a spreadsheet, a Clay column, a CRM export. The list stays where it is. Nous returns the score.
+
+This is the leaner counterpart to [`/v2/context`](/public-api/context). Where context returns the whole account, `score` returns just the ICP fit and intent, so it fits a spreadsheet cell or a Clay column.
+
+<Note>
+`score` needs a scoring model. Build one first with [`build_scoring_model`](/mcp/tools/build-scoring-model), then this endpoint returns live scores.
+</Note>
+
+## Request
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/score \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "identifier": "sarah@acme.com" }'
+```
+
+### Body
+
+<ParamField body="identifier" type="string">
+  One lead. Accepts an **email**, **domain**, **LinkedIn URL**, or **entity UUID**. Required unless you pass `identifiers`.
+</ParamField>
+<ParamField body="identifiers" type="string[]">
+  A batch of leads, max 100 per call. The response is a `results` array in the same order.
+</ParamField>
+<ParamField body="intent" type="string">
+  Optional note on why you're scoring. Recorded, does not change the score.
+</ParamField>
+
+## Response
+
+A scored lead returns the ICP fit and intent, and the fit prediction is staked onto the account:
+
+```json
+{
+  "resolved": true,
+  "scored": true,
+  "entity_id": "a1b2c3d4-...",
+  "icp": {
+    "score": 84,
+    "fit": true,
+    "tier": "tier_1",
+    "reason": "matches B2B SaaS, 50–200, already on Apollo",
+    "scored_at": "2026-07-09T12:00:00Z"
+  },
+  "intent": { "score": 64, "band": "Warm" }
+}
+```
+
+A lead Nous already knows but has not enriched yet returns `awaiting_enrichment`, so you know to enrich before acting:
+
+```json
+{ "resolved": true, "scored": false, "reason": "awaiting_enrichment", "entity_id": "..." }
+```
+
+A lead that is not in the graph returns `unknown_identifier`, so nothing is fabricated:
+
+```json
+{ "resolved": false, "reason": "unknown_identifier" }
+```
+
+### Batch
+
+With `identifiers`, each result carries its own `identifier` alongside the same fields:
+
+```json
+{
+  "results": [
+    { "identifier": "sarah@acme.com", "resolved": true, "scored": true, "icp": { "score": 84, "tier": "tier_1" }, "intent": { "score": 64, "band": "Warm" } },
+    { "identifier": "tom@globex.io", "resolved": true, "scored": false, "reason": "awaiting_enrichment" }
+  ]
+}
+```
+
+## Fields
+
+| Field | Values | Meaning |
+|---|---|---|
+| `icp.score` | `0` – `100` | ICP fit score |
+| `icp.tier` | `tier_1` / `tier_2` / `tier_3` / `not_icp` | The actionable class that drives the play |
+| `icp.fit` | boolean | `true` when the score is 70 or above |
+| `intent.score` | `0` – `100` | How warm the account is right now. Decays over time |
+| `intent.band` | `Red-hot` / `Hot` / `Warm` / `Aware` / `Dormant` | Intent as a band |
+
+## Scores that keep moving
+
+`score` reads the **live** score. When an account has never been scored, it stakes one on demand, so you get a number now. After that the score keeps evolving on its own as new signals land, so a weekly re-score reflects the latest state. Calling `score` again never stacks duplicate predictions.
+
+## Call it from a spreadsheet
+
+Because the request is one row in and a small object out, you can call `score` straight from a sheet with a short script. Point the fetch at this endpoint, pass the cell as `identifier`, and read back `icp.score`, `icp.tier`, and `intent.score`. Clay, n8n, and Make can call it the same way, one row per record.
+
+## When to call it
+
+- **You have a list built somewhere else** and want each row's ICP fit and intent in the graph
+- **On a cadence** over your sheet to keep every score current
+- For a whole list in one call, use [`/v2/lead-lists/attach`](/public-api/leads/attach)

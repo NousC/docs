@@ -28,7 +28,7 @@ Locked positioning (updated June 18 2026). Match it in any new or edited page.
 - ❌ "Customer graph for GTM agents," retired headline noun (replaced by "context graph" June 18 2026).
 - ❌ "The context layer GTM agents run on," retired positioning (replaced May 28 2026).
 - ❌ "Drop-in context infrastructure," retired marketing-site sub-line.
-- ❌ "The Mind," "evidence substrate," "observation spine," "claim derivation," "a self-learning loop," "it gets smarter." The internal mechanism is never a marketed capability. Document what the product does today: resolve, unify, serve.
+- ❌ "The Mind," "evidence substrate," "observation spine," "claim derivation." The internal mechanism is never named as a marketed capability. You **may** state the concrete outcome the manifesto markets. The graph self-heals as new signals arrive, and the ICP model sharpens from your own won and lost deals. Do not dress that up as a vague "self-learning loop" or "it gets smarter."
 - ❌ "one record per human / per person" as the headline unit. The headline noun is the **context graph**; the product noun is the **account record**. Person-level identity resolution is the *mechanism*, and may be described as such on technical (architecture / API / MCP) pages.
 - ❌ "Personalization touchpoint" as marketing copy. Use "touchpoint" alone.
 - ❌ Narrowing to a single agent vendor ("built for Claude").
@@ -57,5 +57,5 @@ Locked positioning (updated June 18 2026). Match it in any new or edited page.
 ## Content boundaries
 
 - Document what is built and shipping. If a capability is roadmap, do not document it as present.
-- Do not document any internal scoring or learning loop as a user-facing feature.
+- Document scoring as a concrete surface. An ICP fit score and intent an endpoint returns, a model trained on your own won and lost deals. Do not narrate the internal learning mechanism or imply autonomous intelligence.
 - Do not document lead scraping, copywriting, or sending. Out of scope by design.

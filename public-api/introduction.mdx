@@ -46,6 +46,9 @@ Keys are workspace-scoped, so no separate workspace ID is required.
   <Card title="POST /v2/query" href="/public-api/query" icon="magnifying-glass">
     Retrieve and summarise a corpus of observations across many entities.
   </Card>
+  <Card title="POST /v2/score" href="/public-api/score" icon="gauge-high">
+    Score a lead against your ICP model and intent, written into the graph. The thin verb a spreadsheet or Clay column calls per row.
+  </Card>
   <Card title="GET /v2/attention" href="/public-api/attention" icon="bell">
     Workspace-wide. Accounts gone quiet, facts decayed, ranked decisions.
   </Card>
@@ -80,6 +83,9 @@ Keys are workspace-scoped, so no separate workspace ID is required.
   </Card>
   <Card title="POST + PATCH /v2/leads" href="/public-api/leads/create" icon="square-plus">
     Add leads to a list. PATCH a row mid-workflow to record progress before the async webhook arrives.
+  </Card>
+  <Card title="POST /v2/lead-lists/attach" href="/public-api/leads/attach" icon="table-list">
+    Score a whole list you built somewhere else in one call. Nous creates the list, resolves every row, and scores it.
   </Card>
 </CardGroup>
 

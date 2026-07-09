@@ -22,7 +22,8 @@
             "pages": [
               "getting-started/introduction",
               "getting-started/how-it-works",
-              "getting-started/quickstart"
+              "getting-started/quickstart",
+              "getting-started/score-a-list"
             ]
           },
           {
@@ -123,6 +124,13 @@
             ]
           },
           {
+            "group": "Scoring",
+            "pages": [
+              "public-api/score",
+              "public-api/leads/attach"
+            ]
+          },
+          {
             "group": "Observations",
             "pages": [
               "public-api/observations"
@@ -192,6 +200,8 @@
               "mcp/tools/get-context",
               "mcp/tools/get-account",
               "mcp/tools/query",
+              "mcp/tools/score",
+              "mcp/tools/attach-list",
               "mcp/tools/attention",
               "mcp/tools/record",
               "mcp/tools/save-note",
