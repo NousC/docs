@@ -80,7 +80,7 @@ GOOGLE_CLIENT_SECRET=
 
 Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/NousC/nous/blob/main/supabase/schema.sql).
 
-This creates all tables, RLS policies, indexes, and enables `vector` and `uuid-ossp`.
+This one file is the complete schema — every table, view, function, trigger, RLS policy, and index, plus the `pgcrypto` and `vector` extensions it depends on. A fresh install needs only this file; do **not** also run the files in `supabase/migrations/` (those are the incremental history and are only used when updating an existing install — see Updating below).
 
 ## Step 4: Point your DNS
 
