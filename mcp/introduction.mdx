@@ -7,23 +7,37 @@ The Nous MCP server exposes the v2 context graph as a focused set of tools — e
 
 It runs two ways on the same tools: **locally** via `npx` (Claude Code, Cursor, Codex, Claude Desktop, self-hosted n8n), or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients (n8n cloud). Prefer the [REST API](/public-api/introduction) when the caller already knows the parameters; both sit on the same graph, so a write through one shows in the other.
 
-## Install in 30 seconds
+## Get started
 
-The server is published on npm. **No clone, no global install** — `npx` fetches it on first use.
-
-### Claude Code (recommended)
+One command. It installs the CLI, signs you in (creating your account if you don't have one), and registers the MCP with the coding agent on your machine — no key to paste, no plugin to install.
 
 ```bash
-/plugin marketplace add NousC/nous
-/plugin install nous@nous-plugins
-npx @opennous/cli login
+curl -fsSL https://get.opennous.cloud | sh
 ```
 
-`npx @opennous/cli login` opens your browser, you approve, and a workspace key is minted and saved — no copy-paste; the plugin's MCP picks it up. Then tell your agent **"set me up"**. (Prefer to paste a key? Create one at Settings → API Keys and set the plugin's `NOUS_API_KEY`.) The full tool set becomes callable in every Claude Code session.
+Then tell your agent **"set up my Nous workspace"**. It reads your project, finds your ICP (or drafts one from your website), and syncs it — that's onboarding.
+
+Prefer to run it yourself, or already have the CLI?
+
+```bash
+npx @opennous/cli init
+```
+
+`init` opens your browser to sign in, saves a workspace key to `~/.nous/config.json`, and runs `claude mcp add` for you. The full tool set becomes callable in every session.
 
 <Note>
-**Every client below can skip the key.** The configs show `NOUS_API_KEY = "YOUR_API_KEY"` only as a fallback — you can drop that `env` line and run **`npx @opennous/cli login`** once. It signs you in via the browser and saves the key to `~/.nous/config.json`, which the server reads automatically. Paste a key only to pin a specific one (create it at Settings → API Keys). Either way, then tell your agent **"set me up"**.
+**No key to copy anywhere.** `init` (or `npx @opennous/cli login` on its own) signs you in via the browser and saves the key to `~/.nous/config.json`, which the server reads automatically. The manual configs below show `NOUS_API_KEY = "YOUR_API_KEY"` only as a fallback for clients you wire by hand — drop that `env` line and run `login` once, or paste a key from Settings → API Keys to pin a specific one.
 </Note>
+
+## Wire it up by hand
+
+`init` handles Claude Code. For other clients, or if you'd rather write the config yourself, add the server directly. Run `npx @opennous/cli login` once so the key is on disk, then:
+
+### Claude Code
+
+```bash
+claude mcp add nous -- npx -y @opennous/mcp
+```
 
 ### Codex
 
@@ -79,6 +93,10 @@ args = ["-y", "@opennous/mcp"]
   }
 }
 ```
+
+<Note>
+**Optional: the Claude Code plugin.** On top of the MCP server, the [Nous plugin](https://github.com/NousC/nous/tree/main/plugins/nous) adds hooks that make Claude reach for Nous automatically on GTM work — no `CLAUDE.md` edits. It's a power-up, not a requirement; the one command above already gives you every tool. Add it with `/plugin marketplace add NousC/nous` then `/plugin install nous@nous-plugins`.
+</Note>
 
 ## Hosted server (remote HTTP)
 
