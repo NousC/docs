@@ -7,7 +7,7 @@ Find the missing emails for leads in a lead list, using the workspace's own conn
 
 <Note>**Always two steps.** Call it first **without `confirm`** to get a free dry-run cost preview — how many leads are chargeable, how many already have an email on file (free), the provider, and the estimated cost. **Report that to the user and get their go-ahead.** Then call again with `confirm: true` to actually run it. Nothing is spent on the preview.</Note>
 
-Select leads with `filter` rather than listing ids — `filter` is resolved server-side across the whole list, not just one page. With neither `filter` nor `ids`, it defaults to every lead missing an email (the usual case). Call [`lead_list_operations`](/mcp/tools/lead-list-operations) with no id first to find the list's UUID.
+Select leads with `filter` rather than listing ids — `filter` is resolved server-side across the whole list, not just one page. With neither `filter` nor `ids`, it defaults to every lead missing an email (the usual case). Call `lead_list_operations` with no id first to find the list's UUID.
 
 ## Parameters
 

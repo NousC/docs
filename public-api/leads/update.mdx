@@ -34,7 +34,7 @@ This is the canonical n8n shape for chasing non-responders.
 
 1. Pull the batch. `GET /v2/leads?list_id=...&sent_before=2d&has_replied=false`.
 2. Loop over each row. Draft the follow-up via your prompt of choice.
-3. Send the email through Smartlead, Lemlist, or Gmail.
+3. Send the email through Smartlead or Gmail.
 4. **Immediately PATCH the row.** `{ "sent_at": "<now>", "status": "sent" }`. The next iteration's filter excludes the row.
 5. Also write an observation against the entity with the upstream `message_id` as `external_id`. The async webhook from your sending tool will arrive minutes later and hit the same `external_id`, so the activity is recorded once.
 

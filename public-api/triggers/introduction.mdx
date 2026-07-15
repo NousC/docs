@@ -5,6 +5,8 @@ description: "Outbound webhooks. Nous POSTs to your URL the moment a tracked int
 
 A trigger is a subscription. You give Nous a URL and a list of events; whenever one of those events happens on an account, Nous POSTs a signed payload to your URL.
 
+<Note>**Nous Cloud only.** Triggers are a Nous Cloud feature. On a self-hosted instance, Lead Lists, CRM Sync, Triggers, and Reports are Cloud-only; everything else — including the ICP scoring model — is open.</Note>
+
 The point is the same as the rest of the platform. Your workflow runtime (n8n, Make, a Claude routine, a custom backend) does not need to subscribe to Smartlead, HeyReach, Instantly, Gmail, LinkedIn, Calendly, Fireflies, and Fathom separately. Nous already ingests all of them, resolves them to one person, and emits a unified event stream. You subscribe once.
 
 ## The event catalog
@@ -13,7 +15,7 @@ Six events ship in v1. All are interactions — the moments that drive a workflo
 
 | Event | Fired when |
 |---|---|
-| `interaction.email_received` | A reply lands (Instantly, Smartlead, EmailBison, Lemlist, Gmail) |
+| `interaction.email_received` | A reply lands (Instantly, Smartlead, EmailBison, Gmail) |
 | `interaction.email_bounced` | A bounce or unsubscribe |
 | `interaction.linkedin_connection_accepted` | A connection request was accepted |
 | `interaction.linkedin_message_received` | A reply on LinkedIn |

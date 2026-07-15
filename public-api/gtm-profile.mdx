@@ -61,7 +61,7 @@ When you're writing an agent that drafts personalised outreach, the agent needs 
 
 ## Writing back
 
-`POST` to the same path to keep a **section** of the GTM context current. Each section is a living file: in the default `replace` mode the new content **evolves** that section's belief — the prior version is kept as history, never silently contradicted — so you just write the section's current state. This is the endpoint behind the MCP [`update_gtm_profile`](/mcp/tools/update-gtm-profile) tool.
+`POST` to the same path to keep a **section** of the GTM context current. Each section is a living file: in the default `replace` mode the new content **evolves** that section's belief — the prior version is kept as history, never silently contradicted — so you just write the section's current state. This is the endpoint behind the MCP [`set_workspace_profile`](/mcp/tools/set-workspace-profile) tool.
 
 ```bash
 curl -X POST https://api.opennous.cloud/v2/workspace/facts \

@@ -14,7 +14,7 @@ flowchart LR
     classDef output fill:#059669,color:white,stroke:#fff
 
     crm["CRM (HubSpot, Pipedrive, Attio)"]:::source
-    out["Outbound (Instantly, Lemlist)"]:::source
+    out["Outbound (Instantly, Smartlead)"]:::source
     mail["Gmail / Outlook / SMTP"]:::source
     li["LinkedIn"]:::source
     meet["Meetings (Fireflies, Fathom)"]:::source
@@ -61,7 +61,7 @@ Connectors normalise every signal into a fixed shape.
 - `kind: 'event'`. An interaction happened (`interaction.email_sent`, `interaction.call_held`, and so on).
 - `kind: 'state'`. A fact was observed (`title`, `stage`, `intent`, and so on).
 
-Sources include CRMs (HubSpot, Pipedrive, Attio), outbound platforms (Instantly, Lemlist), Gmail, Outlook, SMTP, LinkedIn via Unipile, meeting capture (Fireflies, Fathom), web identity (RB2B), and any HTTP source via HMAC-signed custom webhooks.
+Sources include CRMs (HubSpot, Pipedrive, Attio), outbound platforms (Instantly, Smartlead), Gmail, Outlook, SMTP, LinkedIn via Unipile, meeting capture (Fireflies, Fathom), web identity (RB2B), and any HTTP source via HMAC-signed custom webhooks.
 
 Agents themselves are signal sources too. Any [`POST /v2/observations`](/public-api/observations) call adds to the same graph.
 

@@ -13,7 +13,7 @@ Nous is now operated by the agent. The MCP server exposes **seventeen tools** �
 - **[`set_workspace_profile`](/mcp/tools/set-workspace-profile)** — agent-driven onboarding: name, website, business type, and a sentence on the ICP.
 - **[`build_icp_model`](/mcp/tools/build-icp-model)** — turn the recorded GTM context into the ICP model.
 - **[`connect_integration`](/mcp/tools/connect-integration)** — connect a key-based integration (Apollo, Prospeo, HubSpot token, …); credentials are verified before saving.
-- **[`configure_crm_sync`](/mcp/tools/configure-crm-sync)** — set the CRM sync rules (auto-sync, create policy, hygiene cadence). Growth+.
+- **`configure_crm_sync`** — set the CRM sync rules (auto-sync, create policy, hygiene cadence). Growth+.
 - **[`set_trigger`](/mcp/tools/set-trigger)** / **[`list_triggers`](/mcp/tools/list-triggers)** — wire outbound event triggers for the user's stack.
 
 ### Browser login, no copy-paste
@@ -32,7 +32,7 @@ The MCP server now exposes **ten tools**. Three are new since the last release:
 
 - **[`save_note`](/mcp/tools/save-note)** — keep a meeting brief, transcript, prep, or plain note on a contact's record. Append-only and dated, so a contact builds a history across meetings. ([`POST /v2/notes`](/public-api/notes))
 - **[`search_notes`](/mcp/tools/search-notes)** — semantic search across saved notes & documents, so an agent pulls the relevant passage instead of loading whole documents. ([`POST /v2/notes/search`](/public-api/notes-search))
-- **[`update_gtm_profile`](/mcp/tools/update-gtm-profile)** — write back a lasting change to a GTM section. The section evolves and the prior version is kept as history, never silently contradicted. ([`POST /v2/workspace/facts`](/public-api/gtm-profile#writing-back))
+- **[`set_workspace_profile`](/mcp/tools/set-workspace-profile)** — write back a lasting change to a GTM section. The section evolves and the prior version is kept as history, never silently contradicted. ([`POST /v2/workspace/facts`](/public-api/gtm-profile#writing-back))
 
 [`get_context`](/mcp/tools/get-context) now also surfaces a **DOCUMENTS** block — an overview of the notes kept on a contact — alongside the account's ICP fit score.
 
@@ -57,7 +57,7 @@ If you're on Nous Cloud or self-hosting, update your integrations this week.
 
 ### What stays the same
 
-- Your workspace, contacts, memories, and provider connections.
+- Your workspace, contacts, context, and provider connections.
 - All [REST API](/public-api/introduction) and [MCP](/mcp/introduction) endpoints, request shapes, and response formats.
 - Pricing and plans on Nous Cloud.
 

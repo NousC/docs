@@ -3,7 +3,7 @@ title: "build_icp_model"
 description: "Build (or rebuild) the ICP scoring model from the GTM context the workspace has recorded — the second half of setting up the GTM playbook."
 ---
 
-Turn the recorded GTM context into a weighted set of ICP scoring signals so accounts get scored for fit. This is the second half of building the GTM playbook: first record the ICP and how they sell with [`update_gtm_profile`](/mcp/tools/update-gtm-profile), then call this. If a model already exists it's left alone unless you pass `force: true`. If it reports no GTM context yet, record some first, then call again.
+Turn the recorded GTM context into a weighted set of ICP scoring signals so accounts get scored for fit. This is the second half of building the GTM playbook: first record the ICP and how they sell with [`set_workspace_profile`](/mcp/tools/set-workspace-profile), then call this. If a model already exists it's left alone unless you pass `force: true`. If it reports no GTM context yet, record some first, then call again.
 
 ## Parameters
 
@@ -26,12 +26,12 @@ Accounts will now be scored for fit. Check it on the GTM Context page.
 If no GTM context is recorded yet:
 
 ```
-No GTM context recorded yet. Record the ICP and how they sell with update_gtm_profile first, then build the model.
+No GTM context recorded yet. Record the ICP and how they sell with set_workspace_profile first, then build the model.
 ```
 
 ## When to call it
 
-- After recording the GTM context with `update_gtm_profile`, to create the scoring model.
+- After recording the GTM context with `set_workspace_profile`, to create the scoring model.
 - With `force: true` when the GTM context has changed and the model should be rebuilt.
 
 ## Backed by

@@ -5,7 +5,7 @@ description: "Keep a meeting brief, transcript, prep, or plain note on a contact
 
 Saves a long-form artifact onto a person or company so it stays on their record: a meeting brief you wrote, a transcript, pre-meeting prep, research, or a plain note. Notes are **append-only and dated**, so a contact accumulates a record across meetings — later you can read the last few and see what changed, or pull a passage with [`search_notes`](/mcp/tools/search-notes).
 
-<Note>**Not the same as `record`.** [`record`](/mcp/tools/record) logs that an *interaction happened* (an email was sent, a call was held) and Nous derives claims from it. `save_note` keeps the *document itself*. After a meeting, do both: `record` the meeting, `save_note` the notes. For the user's own GTM profile, use [`update_gtm_profile`](/mcp/tools/update-gtm-profile), not this.</Note>
+<Note>**Not the same as `record`.** [`record`](/mcp/tools/record) logs that an *interaction happened* (an email was sent, a call was held) and Nous derives claims from it. `save_note` keeps the *document itself*. After a meeting, do both: `record` the meeting, `save_note` the notes. For the user's own GTM profile, use [`set_workspace_profile`](/mcp/tools/set-workspace-profile), not this.</Note>
 
 ## Parameters
 
@@ -34,7 +34,7 @@ Saved Pre-meeting brief — renewal to sarah@acme.com.
 ## When NOT to call it
 
 - An interaction happened (email sent, meeting held) → [`record`](/mcp/tools/record) with an `interaction.*` event
-- A change to the user's own GTM (repriced, moved upmarket) → [`update_gtm_profile`](/mcp/tools/update-gtm-profile)
+- A change to the user's own GTM (repriced, moved upmarket) → [`set_workspace_profile`](/mcp/tools/set-workspace-profile)
 
 ## Backed by
 
