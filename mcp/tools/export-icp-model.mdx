@@ -5,7 +5,7 @@ description: "Get the learned ICP model as a block to write back into the ICP fi
 
 Gets the **learned** ICP scoring model (which signals predict a win, their weight, lift, and the calibration gap) as a ready-to-write markdown block, so you can write it back into the user's own ICP file. This is the payoff of the symbiosis: their file keeps the words, Nous keeps the model, and this writes the model under their words.
 
-<Note>Direction is **graph to file**, the reverse of [`sync_icp`](/mcp/tools/sync-icp). Call this after [`sync_icp`](/mcp/tools/sync-icp) or [`record_closed_deals`](/mcp/tools/record-closed-deals), then write the block back into the file.</Note>
+<Note>Direction is **graph to file**, the reverse of [`sync_icp`](/mcp/tools/sync-icp). Call this after [`sync_icp`](/mcp/tools/sync-icp) or [`train_icp_model`](/mcp/tools/train-icp-model), then write the block back into the file.</Note>
 
 ## Parameters
 
@@ -32,13 +32,13 @@ Leave everything outside the markers untouched. This model is trained on real cl
 If there's no model yet:
 
 ```
-No ICP scoring model yet. Sync the user's ICP file with sync_icp first (or build one with build_scoring_model / record_closed_deals), then call this to write it back.
+No ICP scoring model yet. Sync the user's ICP file with sync_icp first (or build one with build_icp_model / train_icp_model), then call this to write it back.
 ```
 
 ## When to call it
 
 - **After [`sync_icp`](/mcp/tools/sync-icp)** → write the seeded model back under the user's words
-- **After [`record_closed_deals`](/mcp/tools/record-closed-deals)** → refresh the file with the model trained on real outcomes
+- **After [`train_icp_model`](/mcp/tools/train-icp-model)** → refresh the file with the model trained on real outcomes
 
 When you write the block, replace whatever sits between the `<!-- nous:icp start -->` and `<!-- nous:icp end -->` markers, and never edit inside the markers by hand, because this tool regenerates them. Everything outside the markers is the user's, so leave it untouched.
 

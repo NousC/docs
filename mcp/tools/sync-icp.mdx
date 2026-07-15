@@ -27,7 +27,7 @@ Synced 3 sections from the user's files:
   • Pricing      ← context/pricing.md
 
 Built the ICP scoring model (4 signals).
-Next: if the user can name a few closed-won + closed-lost domains, call record_closed_deals to sharpen it on real outcomes, then call export_icp_model to write the learned model back into their ICP file.
+Next: if the user can name a few closed-won + closed-lost domains, call train_icp_model to sharpen it on real outcomes, then call export_icp_model to write the learned model back into their ICP file.
 ```
 
 If there's nothing valid to sync:
@@ -41,7 +41,7 @@ Nothing to sync. Read the user's ICP/positioning file(s) first and pass each as 
 - **During onboarding** → find the project's existing GTM files (`context/`, `gtm/`, files named `icp*`, `positioning*`, `pricing*`, `competitors*`), read them, and sync them
 - **Whenever an ICP or context file changes** → re-sync in the same turn, because the edit does not change the score, the exclusions, or the model until you do
 
-To write the learned model back into the file, use [`export_icp_model`](/mcp/tools/export-icp-model). To sharpen the model on real outcomes, use [`record_closed_deals`](/mcp/tools/record-closed-deals).
+To write the learned model back into the file, use [`export_icp_model`](/mcp/tools/export-icp-model). To sharpen the model on real outcomes, use [`train_icp_model`](/mcp/tools/train-icp-model).
 
 ## Backed by
 
