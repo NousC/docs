@@ -200,13 +200,13 @@
               "mcp/tools/get-context",
               "mcp/tools/get-account",
               "mcp/tools/query",
-              "mcp/tools/score",
-              "mcp/tools/attach-list",
               "mcp/tools/attention",
               "mcp/tools/record",
               "mcp/tools/save-note",
               "mcp/tools/search-notes",
-              "mcp/tools/get-playbook"
+              "mcp/tools/get-playbook",
+              "mcp/tools/get-action-items",
+              "mcp/tools/verify"
             ]
           },
           {
@@ -221,7 +221,9 @@
               "mcp/tools/sync-playbook",
               "mcp/tools/connect-integration",
               "mcp/tools/set-trigger",
-              "mcp/tools/list-triggers"
+              "mcp/tools/list-triggers",
+              "mcp/tools/enrich-leads",
+              "mcp/tools/verify-leads"
             ]
           }
         ]
