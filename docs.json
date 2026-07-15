@@ -22,8 +22,7 @@
             "pages": [
               "getting-started/introduction",
               "getting-started/how-it-works",
-              "getting-started/quickstart",
-              "getting-started/score-a-list"
+              "getting-started/quickstart"
             ]
           },
           {
@@ -121,13 +120,6 @@
             "pages": [
               "public-api/context",
               "public-api/accounts"
-            ]
-          },
-          {
-            "group": "Scoring",
-            "pages": [
-              "public-api/score",
-              "public-api/leads/attach"
             ]
           },
           {
