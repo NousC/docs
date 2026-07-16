@@ -24,7 +24,7 @@ Docker Compose brings up 5 containers:
 Clone the repo or download just the production files:
 
 ```bash
-git clone https://github.com/NousC/nous.git
+git clone https://github.com/NousC/opennous.git
 cd nous
 ```
 
@@ -78,7 +78,7 @@ GOOGLE_CLIENT_SECRET=
   Required before first boot. Skip this and the app will start but nothing will work.
 </Warning>
 
-Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/NousC/nous/blob/main/supabase/schema.sql).
+Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/NousC/opennous/blob/main/supabase/schema.sql).
 
 This one file is the complete schema — every table, view, function, trigger, RLS policy, and index, plus the `pgcrypto` and `vector` extensions it depends on. A fresh install needs only this file; do **not** also run the files in `supabase/migrations/` (those are the incremental history and are only used when updating an existing install — see Updating below).
 
@@ -121,7 +121,7 @@ Nous is set up *by your agent*, not by clicking through the app. Point your agen
 **Claude Code**
 
 ```
-/plugin marketplace add NousC/nous
+/plugin marketplace add NousC/opennous
 /plugin install nous@nous-plugins
 ```
 
@@ -185,7 +185,7 @@ frontend is rebuilt too — Vite bakes the UI into a static bundle at build time
 plain restart won't pick up frontend changes.
 
 <Warning>
-  Some updates ship new database migrations under [`supabase/migrations/`](https://github.com/NousC/nous/tree/main/supabase/migrations). These are **not** applied automatically. After pulling, check that folder for files newer than your last update and run any new ones in your Supabase **SQL Editor** before (or right after) rebuilding. Skipping a migration will make the new code error against an outdated schema.
+  Some updates ship new database migrations under [`supabase/migrations/`](https://github.com/NousC/opennous/tree/main/supabase/migrations). These are **not** applied automatically. After pulling, check that folder for files newer than your last update and run any new ones in your Supabase **SQL Editor** before (or right after) rebuilding. Skipping a migration will make the new code error against an outdated schema.
 </Warning>
 
 ## Logs

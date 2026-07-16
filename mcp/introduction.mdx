@@ -57,7 +57,7 @@ No `NOUS_API_KEY` needed once you've run `login` — the server reads `~/.nous/c
 </Note>
 
 <Note>
-**Optional: the [Claude Code plugin](https://github.com/NousC/nous/tree/main/plugins/nous).** Adds hooks that make Claude reach for Nous automatically on GTM work. A power-up, not a requirement — the command above already gives you every tool. `/plugin marketplace add NousC/nous` then `/plugin install nous@nous-plugins`.
+**Optional: the [Claude Code plugin](https://github.com/NousC/opennous/tree/main/plugins/nous).** Adds hooks that make Claude reach for Nous automatically on GTM work. A power-up, not a requirement — the command above already gives you every tool. `/plugin marketplace add NousC/opennous` then `/plugin install nous@nous-plugins`.
 </Note>
 
 ## Hosted server (remote HTTP)
@@ -167,4 +167,4 @@ The agent sets the workspace up itself. `get_workspace_status` first — it retu
 | `NOUS_API_KEY` | if not signed in via CLI | — | Workspace key. Create at Settings → API Keys. |
 | `NOUS_API_URL` | no | `https://api.opennous.cloud` | Override for self-hosted. |
 
-Source lives at [`apps/mcp`](https://github.com/NousC/nous/tree/main/apps/mcp); each release ships to npm as `@opennous/mcp@<semver>`. Pin a version for reproducible installs: `npx -y @opennous/mcp@0.43.0`.
+Source lives at [`apps/mcp`](https://github.com/NousC/opennous/tree/main/apps/mcp); each release ships to npm as `@opennous/mcp@<semver>`. Pin a version for reproducible installs: `npx -y @opennous/mcp@0.43.0`.

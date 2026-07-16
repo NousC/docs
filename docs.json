@@ -250,7 +250,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/NousC/nous",
+          "href": "https://github.com/NousC/opennous",
           "icon": "github"
         },
         {
@@ -269,7 +269,7 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/NousC/nous"
+        "href": "https://github.com/NousC/opennous"
       },
       {
         "label": "Discord",
@@ -296,7 +296,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/NousC/nous"
+      "github": "https://github.com/NousC/opennous"
     }
   },
   "redirects": [
