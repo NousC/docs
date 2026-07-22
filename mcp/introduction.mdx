@@ -172,21 +172,8 @@ The agent sets the workspace up itself. Call `get_workspace_status` first; it re
   </Card>
 </CardGroup>
 
-### Lead lists (cloud)
-
-Build and work lead lists on the workspace's own BYOK keys. Both `enrich_leads` and `verify_leads` are **two-step**: call without `confirm` for a free cost preview, report it to the user, then call again with `confirm: true` to run as a background job.
-
-<CardGroup cols={2}>
-  <Card title="enrich_leads" href="/mcp/tools/enrich-leads" icon="envelope">
-    Find missing emails for a list, on the workspace's Prospeo/Apollo key. Preview the cost, then run.
-  </Card>
-  <Card title="verify_leads" href="/mcp/tools/verify-leads" icon="envelope-circle-check">
-    Validate email deliverability with MillionVerifier / NeverBounce. Verdict upgrades each lead's status.
-  </Card>
-</CardGroup>
-
 <Note>
-Also callable: **`record_closed_deals`** (train the ICP model on real closed-won/lost deals — contrastive lift), **`get_routing_preferences`** (Claude Code routing defaults so GTM work defaults to Nous), and the lead-coverage tools **`lead_list_operations`**, **`check_leads`**, **`lead_coverage`** (cloud-only — Lead Lists). Plus `get_workspace_facts`, a back-compat alias of `get_gtm_profile` — new integrations should call `get_gtm_profile`.
+Also callable: **`record_closed_deals`** (train the ICP model on real closed-won/lost deals — contrastive lift) and **`get_routing_preferences`** (Claude Code routing defaults so GTM work defaults to Nous). Plus `get_workspace_facts`, a back-compat alias of `get_gtm_profile` — new integrations should call `get_gtm_profile`.
 </Note>
 
 ## Environment
