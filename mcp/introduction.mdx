@@ -1,33 +1,33 @@
 ---
 title: "MCP Server"
-description: "@opennous/mcp — one call into the Nous context graph for Claude Code, Codex, Cursor, and any MCP client."
+description: "One call into the Nous context graph, for Claude Code, Cursor, Codex, Hermes, and any MCP client."
 ---
 
-The MCP server gives your agent the Nous context graph as a focused set of tools — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself. **Call `get_workspace_status` first.**
+The MCP server gives your agent the Nous context graph as a focused set of tools. Engineered, sourced context, never raw rows. Your agent can set the workspace up itself, so have it call `get_workspace_status` first.
 
-Runs **locally** via `npx` (Claude Code, Cursor, Codex, Claude Desktop) or **hosted** over HTTP at `https://mcp.opennous.cloud/mcp` (n8n cloud). Both hit the same graph, so a write through one shows in the other. For known-parameter calls, prefer the [REST API](/public-api/introduction).
+Run it locally with `npx`, or use the hosted HTTP endpoint. Both hit the same graph, so a write through one shows in the other. For known-parameter calls, prefer the [REST API](/public-api/introduction).
 
-## Get started
+## Fastest setup
 
-One command — installs the CLI, signs you in, and registers the MCP with your agent:
+One command installs the CLI, signs you in, and registers the MCP with your agent.
 
 ```bash
 curl -fsSL https://api.opennous.cloud/install | sh
 ```
 
-Then tell your agent **"set up my Nous workspace"**. It finds your ICP (or drafts one from your website) and syncs it. That's onboarding.
+Then tell your agent **"set up my Nous workspace"**. It finds your ICP, or drafts one from your website, and syncs it. That is onboarding.
 
-Already have the CLI, or prefer to run it yourself:
+Prefer to run it yourself.
 
 ```bash
 npx @opennous/cli init
 ```
 
-`init` signs you in via the browser, saves a workspace key to `~/.nous/config.json`, and runs `claude mcp add` for you.
+`init` signs you in through the browser, saves a workspace key to `~/.nous/config.json`, and registers the server with your agent.
 
-## Wire it up by hand
+## Connect any client
 
-For other clients, run `npx @opennous/cli login` once (saves the key to `~/.nous/config.json`), then add Nous to your client's MCP config:
+Run `npx @opennous/cli login` once. It saves your key to `~/.nous/config.json`, so no key goes in your config. Then add Nous to your client.
 
 ```json
 {
@@ -37,40 +37,37 @@ For other clients, run `npx @opennous/cli login` once (saves the key to `~/.nous
 }
 ```
 
-| Client | Where |
+| Client | Where to add it |
 |---|---|
 | **Claude Code** | `claude mcp add nous -- npx -y @opennous/mcp` |
 | **Cursor** | `~/.cursor/mcp.json` |
-| **Claude Desktop** | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) · `%APPDATA%\Claude\claude_desktop_config.json` (Windows) |
-| **Codex** | `~/.codex/config.toml` — TOML, see below |
+| **Claude Desktop** | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS). `%APPDATA%\Claude\claude_desktop_config.json` (Windows) |
+| **Codex** | `~/.codex/config.toml`. TOML, shown below |
+| **Hermes** | MCP settings. Set the name to `nous`, then paste the inner object `{ "command": "npx", "args": ["-y", "@opennous/mcp"], "env": {} }` |
 | **Any MCP client** | its `mcpServers` block |
 
 ```toml
-# Codex — ~/.codex/config.toml
+# Codex. ~/.codex/config.toml
 [mcp_servers.nous]
 command = "npx"
 args = ["-y", "@opennous/mcp"]
 ```
 
 <Note>
-No `NOUS_API_KEY` needed once you've run `login` — the server reads `~/.nous/config.json`. To pin a specific key instead, add `"env": { "NOUS_API_KEY": "..." }` (create one at Settings → API Keys).
-</Note>
-
-<Note>
-**Optional: the [Claude Code plugin](https://github.com/NousC/opennous/tree/main/plugins/nous).** Adds hooks that make Claude reach for Nous automatically on GTM work. A power-up, not a requirement — the command above already gives you every tool. `/plugin marketplace add NousC/opennous` then `/plugin install nous@nous-plugins`.
+No API key is needed once you have run `login`. The server reads your key from `~/.nous/config.json`. To pin a specific key instead, add `"env": { "NOUS_API_KEY": "..." }` with a key from **Settings → API Keys**.
 </Note>
 
 ## Hosted server (remote HTTP)
 
-For clients that can't launch a local process (n8n cloud, any remote-URL client). Same tools, same graph. Authenticate per request with your API key as a Bearer token.
+For clients that cannot launch a local process, like n8n cloud or any remote-URL client. Same tools, same graph. Authenticate each request with your API key as a Bearer token.
 
 ```
 Endpoint   https://mcp.opennous.cloud/mcp
 Auth       Authorization: Bearer YOUR_API_KEY
 ```
 
-- **n8n cloud** — MCP Client Tool node → Transport `HTTP Streamable`, Endpoint the URL above, Auth `Bearer`.
-- **Claude Code (remote)** — `claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Authorization: Bearer YOUR_API_KEY"`
+- **n8n cloud**. MCP Client Tool node, Transport `HTTP Streamable`, Endpoint the URL above, Auth `Bearer`.
+- **Claude Code (remote)**. `claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Authorization: Bearer YOUR_API_KEY"`
 
 ## The tools
 
@@ -89,10 +86,10 @@ Read context, record what happened, keep notes, check what to work next.
     Retrieve and summarise activity across many people.
   </Card>
   <Card title="attention" href="/mcp/tools/attention" icon="bell">
-    What needs attention — accounts gone quiet, facts decayed.
+    What needs attention. Accounts gone quiet, facts decayed.
   </Card>
   <Card title="get_action_items" href="/mcp/tools/get-action-items" icon="list-check">
-    Open action items and commitments, grouped by account — what you owe them and what they owe you.
+    Open action items and commitments, grouped by account. What you owe them and what they owe you.
   </Card>
   <Card title="record" href="/mcp/tools/record" icon="pen">
     Record what happened. You observe, Nous derives the claims.
@@ -113,7 +110,7 @@ Read context, record what happened, keep notes, check what to work next.
 
 ### Setup
 
-The agent sets the workspace up itself. `get_workspace_status` first — it returns a ranked next-steps list.
+The agent sets the workspace up itself. Call `get_workspace_status` first. It returns a ranked next-steps list.
 
 <CardGroup cols={2}>
   <Card title="get_workspace_status" href="/mcp/tools/get-workspace-status" icon="gauge">
@@ -129,10 +126,10 @@ The agent sets the workspace up itself. `get_workspace_status` first — it retu
     Train the ICP model on real closed-won and closed-lost deals.
   </Card>
   <Card title="sync_icp" href="/mcp/tools/sync-icp" icon="file-import">
-    Sync the user's ICP and context files into the graph (file → graph).
+    Sync the user's ICP and context files into the graph (file to graph).
   </Card>
   <Card title="export_icp_model" href="/mcp/tools/export-icp-model" icon="file-export">
-    Get the learned ICP model to write back into the ICP file (graph → file).
+    Get the learned ICP model to write back into the ICP file (graph to file).
   </Card>
   <Card title="sync_playbook" href="/mcp/tools/sync-playbook" icon="rotate">
     Push an edited playbook file into Nous so every agent obeys the same rules.
@@ -148,23 +145,23 @@ The agent sets the workspace up itself. `get_workspace_status` first — it retu
   </Card>
 </CardGroup>
 
-<Note>**Nous Cloud only:** `set_trigger` and `list_triggers`. On a self-hosted instance, Lead Lists, CRM Sync, Triggers, and Reports are Cloud-only; everything else — including the ICP scoring model — is open.</Note>
+<Note>**Nous Cloud only.** `set_trigger` and `list_triggers`. On a self-hosted instance, Lead Lists, CRM Sync, Triggers, and Reports are Cloud-only. Everything else, including the ICP scoring model, is open.</Note>
 
 ## The daily loop
 
-1. **Start a task** → `get_context` with the right `intent` for a ranked, budget-fit context block.
-2. **Need the user's rules?** → `get_playbook` (voice, outreach, icp, positioning) — never `query`/`get_account` for this.
-3. **Something happened** → `record` it. Nous derives the claims.
-4. **Made something durable?** → `save_note` the brief or transcript onto the contact.
-5. **End of session** → `attention` for what to work next.
+1. **Start a task.** Call `get_context` with the right `intent` for a ranked, budget-fit context block.
+2. **Need the user's rules.** Call `get_playbook` (voice, outreach, icp, positioning). Never use `query` or `get_account` for this.
+3. **Something happened.** `record` it. Nous derives the claims.
+4. **Made something durable.** `save_note` the brief or transcript onto the contact.
+5. **End of session.** Call `attention` for what to work next.
 
-<Note>**`record` vs `save_note`.** `record` logs that something *happened* (an email, a meeting) and Nous derives claims from it. `save_note` keeps the *document itself* (a brief, a transcript), append-only and dated. Use both.</Note>
+<Note>**`record` versus `save_note`.** `record` logs that something *happened* (an email, a meeting) and Nous derives claims from it. `save_note` keeps the *document itself* (a brief, a transcript), append-only and dated. Use both.</Note>
 
 ## Environment
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
-| `NOUS_API_KEY` | if not signed in via CLI | — | Workspace key. Create at Settings → API Keys. |
+| `NOUS_API_KEY` | if not signed in via CLI | none | Workspace key. Create at Settings, API Keys. |
 | `NOUS_API_URL` | no | `https://api.opennous.cloud` | Override for self-hosted. |
 
-Source lives at [`apps/mcp`](https://github.com/NousC/opennous/tree/main/apps/mcp); each release ships to npm as `@opennous/mcp@<semver>`. Pin a version for reproducible installs: `npx -y @opennous/mcp@0.43.0`.
+Source lives at [`apps/mcp`](https://github.com/NousC/opennous/tree/main/apps/mcp). Each release ships to npm as `@opennous/mcp@<semver>`. Pin a version for reproducible installs with `npx -y @opennous/mcp@0.43.0`.
