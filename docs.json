@@ -262,8 +262,8 @@
     }
   },
   "logo": {
-    "light": "/logo/nous.svg",
-    "dark": "/logo/nous.svg"
+    "light": "/logo/nous-light.svg",
+    "dark": "/logo/nous-dark.svg"
   },
   "navbar": {
     "links": [
