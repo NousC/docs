@@ -3,9 +3,7 @@ title: "MCP Server"
 description: "One call into the Nous context graph, for Claude Code, Cursor, Codex, Hermes, and any MCP client."
 ---
 
-The MCP server gives your agent the Nous context graph as a focused set of tools. Engineered, sourced context, never raw rows. Your agent can set the workspace up itself, so have it call `get_workspace_status` first.
-
-Run it locally with `npx`, or use the hosted HTTP endpoint. Both hit the same graph, so a write through one shows in the other. For known-parameter calls, prefer the [REST API](/public-api/introduction).
+The Nous MCP server gives your agent the context graph as a focused set of tools, engineered and sourced context ready to act on. Have your agent call `get_workspace_status` first. It can set up the workspace itself.
 
 ## Fastest setup
 
@@ -59,15 +57,22 @@ No API key is needed once you have run `login`. The server reads your key from `
 
 ## Hosted server (remote HTTP)
 
-For clients that cannot launch a local process, like n8n cloud or any remote-URL client. Same tools, same graph. Authenticate each request with your API key as a Bearer token.
+For clients that cannot run a local process, like n8n cloud. Create an API key at **Settings → API Keys**, then add Nous with the URL and a Bearer token.
 
-```
-Endpoint   https://mcp.opennous.cloud/mcp
-Auth       Authorization: Bearer YOUR_API_KEY
+```json
+{
+  "mcpServers": {
+    "nous": {
+      "url": "https://mcp.opennous.cloud/mcp",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}
 ```
 
-- **n8n cloud**. MCP Client Tool node, Transport `HTTP Streamable`, Endpoint the URL above, Auth `Bearer`.
-- **Claude Code (remote)**. `claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Authorization: Bearer YOUR_API_KEY"`
+- **n8n cloud**. MCP Client Tool node, Transport `HTTP Streamable`, Endpoint `https://mcp.opennous.cloud/mcp`, Auth `Bearer`.
+- **Claude Code**. `claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Authorization: Bearer YOUR_API_KEY"`
+- **Hermes**. In MCP settings set the name to `nous`, then paste the inner object `{ "url": "https://mcp.opennous.cloud/mcp", "headers": { "Authorization": "Bearer YOUR_API_KEY" } }`.
 
 ## The tools
 
