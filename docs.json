@@ -187,39 +187,53 @@
             ]
           },
           {
-            "group": "Tools",
+            "group": "Retrieve",
             "pages": [
               "mcp/tools/get-context",
               "mcp/tools/get-account",
-              "mcp/tools/record",
               "mcp/tools/query",
-              "mcp/tools/attention",
-              "mcp/tools/get-action-items",
-              "mcp/tools/verify",
-              "mcp/tools/get-gtm-profile",
-              "mcp/tools/update-gtm-profile",
-              "mcp/tools/save-note",
               "mcp/tools/search-notes"
             ]
           },
           {
-            "group": "Setup tools",
+            "group": "Learn",
+            "pages": [
+              "mcp/tools/get-insights"
+            ]
+          },
+          {
+            "group": "Aggregate",
+            "pages": [
+              "mcp/tools/campaign-performance",
+              "mcp/tools/pipeline-intelligence"
+            ]
+          },
+          {
+            "group": "Act",
+            "pages": [
+              "mcp/tools/attention",
+              "mcp/tools/get-action-items"
+            ]
+          },
+          {
+            "group": "Write",
+            "pages": [
+              "mcp/tools/record",
+              "mcp/tools/save-note",
+              "mcp/tools/verify",
+              "mcp/tools/get-gtm-profile",
+              "mcp/tools/update-gtm-profile"
+            ]
+          },
+          {
+            "group": "Setup",
             "pages": [
               "mcp/tools/get-workspace-status",
               "mcp/tools/set-workspace-profile",
               "mcp/tools/build-scoring-model",
               "mcp/tools/connect-integration",
               "mcp/tools/configure-crm-sync",
-              "mcp/tools/sync-crm-now",
-              "mcp/tools/set-trigger",
-              "mcp/tools/list-triggers"
-            ]
-          },
-          {
-            "group": "Lead list tools",
-            "pages": [
-              "mcp/tools/enrich-leads",
-              "mcp/tools/verify-leads"
+              "mcp/tools/sync-crm-now"
             ]
           }
         ]

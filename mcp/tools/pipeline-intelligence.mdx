@@ -1,0 +1,39 @@
+---
+title: "pipeline_intelligence"
+description: "How the pipeline actually converts — stage distribution, stage-to-stage conversion %, median time-to-client and time-in-stage. Where deals leak and how long they take."
+---
+
+Reads the timestamped `pipeline_stage` transitions every account leaves behind and rolls them up into the funnel: where accounts sit now, the rate at which they move from one stage to the next, how long a lead takes to become a client, and how long they sit in each stage. The input to predicting a live account's trajectory.
+
+## Parameters
+
+None. Returns the whole workspace's funnel.
+
+## Returns
+
+```json
+{
+  "accounts": 51,
+  "clients": 4,
+  "current_stage_counts": { "identified": 11, "evaluating": 36, "client": 4 },
+  "stage_conversion": [
+    { "from": "interested", "to": "evaluating", "rate": 0.62, "reached_from": 40, "reached_to": 25 },
+    { "from": "evaluating",  "to": "client",     "rate": 0.16, "reached_from": 25, "reached_to": 4 }
+  ],
+  "median_days_to_client": 41,
+  "median_days_in_stage": { "interested": 6, "evaluating": 22 }
+}
+```
+
+- **current_stage_counts** — the live funnel.
+- **stage_conversion** — of everyone who reached a stage, how many reached the next. Where deals leak.
+- **median_days_to_client** — how long a win actually takes.
+- **median_days_in_stage** — how long deals sit before moving (the stall signal).
+
+<Note>The loop only measures what you close, so the one input it needs is marking accounts **client** / closed-lost (or a Stripe payment / proposal-signed event, which do it automatically). Personal/team contacts are excluded.</Note>
+
+## Examples
+
+- *"How long does it take us to close?"*
+- *"Where are deals stalling?"*
+- *"Report the last 7 days of pipeline activity and what to improve."*

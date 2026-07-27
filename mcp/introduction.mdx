@@ -3,7 +3,7 @@ title: "MCP Server"
 description: "@opennous/mcp — give Claude Code, Codex, Cursor, and any MCP-compatible client one call into the Nous context graph."
 ---
 
-The Nous MCP server exposes the v2 context graph as **25 tools** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the GTM playbook, connect key-based tools, configure CRM sync, wire triggers. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
+The Nous MCP server exposes the v2 context graph as one clean set of tools, grouped by **five verbs — retrieve, learn, aggregate, act, write** — engineered, epistemics-tagged context, never raw rows. The agent also sets the workspace up itself: onboard it, build the ICP model, connect key-based tools, configure CRM sync. Nous is operated by the agent; the web app is where you watch it. **Call `get_workspace_status` first.**
 
 It runs two ways on the same tools: **locally** via `npx` (Claude Code, Cursor, Codex, Claude Desktop, self-hosted n8n), or **hosted** over Streamable HTTP at `https://mcp.opennous.cloud/mcp` for cloud clients (n8n cloud). Prefer the [REST API](/public-api/introduction) when the caller already knows the parameters; both sit on the same graph, so a write through one shows in the other.
 
@@ -13,13 +13,13 @@ The server is published on npm. **No clone, no global install** — `npx` fetche
 
 ### Claude Code (recommended)
 
+One command — the same on macOS, Linux, and Windows (needs [Node 18+](https://nodejs.org)):
+
 ```bash
-/plugin marketplace add NousC/nous
-/plugin install nous@nous-plugins
-npx @opennous/cli login
+npx @opennous/cli@latest init
 ```
 
-`npx @opennous/cli login` opens your browser, you approve, and a workspace key is minted and saved — no copy-paste; the plugin's MCP picks it up. Then tell your agent **"set me up"**. (Prefer to paste a key? Create one at Settings → API Keys and set the plugin's `NOUS_API_KEY`.) 25 tools become callable in every Claude Code session.
+It opens your browser, mints a workspace key to `~/.nous/config.json` (no copy-paste), registers the MCP with Claude Code for you (`claude mcp add`), and hands off. Then tell your agent **"set me up"** and all the tools are callable in every Claude Code session. (Prefer to paste a key instead? Create one at Settings → API Keys — see the note below.)
 
 <Note>
 **Every client below can skip the key.** The configs show `NOUS_API_KEY = "YOUR_API_KEY"` only as a fallback — you can drop that `env` line and run **`npx @opennous/cli login`** once. It signs you in via the browser and saves the key to `~/.nous/config.json`, which the server reads automatically. Paste a key only to pin a specific one (create it at Settings → API Keys). Either way, then tell your agent **"set me up"**.
@@ -82,7 +82,7 @@ args = ["-y", "@opennous/mcp"]
 
 ## Hosted server (remote HTTP)
 
-Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same 25 tools, same context graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
+Cloud clients that can't launch a local process — **n8n cloud** above all, and any client that takes a remote MCP URL — connect to the hosted Nous MCP server over Streamable HTTP. Same tools, same context graph; a write through one transport is visible to the other. Authenticate per request with your workspace API key as a Bearer token.
 
 ```
 Endpoint   https://mcp.opennous.cloud/mcp
@@ -107,46 +107,116 @@ claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Au
 Clients that accept only a bare URL with no auth header can pass the key as a query parameter — `https://mcp.opennous.cloud/mcp?key=YOUR_API_KEY` — but prefer the Bearer header, since URLs can land in logs.
 </Note>
 
-## The 25 tools
+## The tools, by verb
 
-### Read and write the context graph
+Every tool is one of five verbs. Pick the verb, then the tool.
+
+| Verb | When to reach for it | Tools |
+|---|---|---|
+| **Retrieve** | pull what we already know | `get_context` · `get_account` · `query` · `search_notes` |
+| **Learn** | what calls & replies taught us | `get_insights` |
+| **Aggregate** | a metric across the whole workspace | `campaign_performance` · `pipeline_intelligence` |
+| **Act** | what to work next | `attention` · `get_action_items` |
+| **Write** | log what happened / your own GTM | `record` · `save_note` · `verify` · `get_gtm_profile` · `update_gtm_profile` |
+
+### Retrieve — pull what we already know
 
 <CardGroup cols={2}>
   <Card title="get_context" href="/mcp/tools/get-context" icon="brain">
     Engineered context for a task about one entity — the headline call before drafting outreach or prepping a meeting.
   </Card>
   <Card title="get_account" href="/mcp/tools/get-account" icon="user">
-    The full account — every claim with epistemics + recent timeline.
-  </Card>
-  <Card title="record" href="/mcp/tools/record" icon="pen">
-    Record what happened. You observe; Nous derives the claims.
+    The full account — every person, claim with epistemics, and recent timeline.
   </Card>
   <Card title="query" href="/mcp/tools/query" icon="magnifying-glass">
-    Retrieve + summarise a corpus of activity across many people.
-  </Card>
-  <Card title="attention" href="/mcp/tools/attention" icon="bell">
-    What needs your attention — accounts gone quiet, facts decayed.
-  </Card>
-  <Card title="verify" href="/mcp/tools/verify" icon="shield-check">
-    Re-check one claim before acting on it.
-  </Card>
-  <Card title="get_gtm_profile" href="/mcp/tools/get-gtm-profile" icon="book">
-    The user's own GTM profile — ICP, market, pricing, competitors.
-  </Card>
-  <Card title="update_gtm_profile" href="/mcp/tools/update-gtm-profile" icon="book-open">
-    Write back a lasting change to a GTM section — it evolves, keeping history.
-  </Card>
-  <Card title="save_note" href="/mcp/tools/save-note" icon="note-sticky">
-    Keep a meeting brief, transcript, or note on a contact's record.
+    Retrieve + summarise a corpus across many people — replies, meetings, the facts corpus.
   </Card>
   <Card title="search_notes" href="/mcp/tools/search-notes" icon="file-magnifying-glass">
     Semantic search across saved notes & documents — pull the relevant passage.
   </Card>
 </CardGroup>
 
-### Operate the workspace (setup)
+### Learn — what buyers taught us
 
-The agent sets the workspace up itself. Call `get_workspace_status` first; it returns a ranked list of what to do next.
+<CardGroup cols={2}>
+  <Card title="get_insights" href="/mcp/tools/get-insights" icon="lightbulb">
+    What calls and replies taught us about our product, positioning, market, and buyer — grounded in verbatim quotes. The mirror of our own GTM profile.
+  </Card>
+</CardGroup>
+
+### Aggregate — a metric across every account
+
+<CardGroup cols={2}>
+  <Card title="campaign_performance" href="/mcp/tools/campaign-performance" icon="chart-mixed">
+    Outbound feedback loop — reply sentiment, conversions, and the ICP tier of who replied, by campaign and variant. Which copy to scale vs cut.
+  </Card>
+  <Card title="pipeline_intelligence" href="/mcp/tools/pipeline-intelligence" icon="chart-line">
+    How the pipeline converts — stage distribution, stage-to-stage conversion %, median time-to-client and time-in-stage. Where deals leak and how long they take.
+  </Card>
+</CardGroup>
+
+### Act — what to work next
+
+<CardGroup cols={2}>
+  <Card title="attention" href="/mcp/tools/attention" icon="bell">
+    A ranked to-do list — hot-intent accounts to reach out to now, accounts gone quiet, open commitments, upcoming meetings.
+  </Card>
+  <Card title="get_action_items" href="/mcp/tools/get-action-items" icon="list-check">
+    The open commitments extracted from calls and emails — what you owe which account.
+  </Card>
+</CardGroup>
+
+### Write — log outcomes & your own GTM context
+
+<CardGroup cols={2}>
+  <Card title="record" href="/mcp/tools/record" icon="pen">
+    Record what happened. You observe; Nous derives the claims.
+  </Card>
+  <Card title="save_note" href="/mcp/tools/save-note" icon="note-sticky">
+    Keep a meeting brief, transcript, or note on a contact's record — append-only and dated.
+  </Card>
+  <Card title="verify" href="/mcp/tools/verify" icon="shield-check">
+    Re-check one claim before acting on a stale-looking fact.
+  </Card>
+  <Card title="get_gtm_profile" href="/mcp/tools/get-gtm-profile" icon="book">
+    Our own GTM profile — ICP, market, pricing, competitors. Any question about *our* business goes here, never to query.
+  </Card>
+  <Card title="update_gtm_profile" href="/mcp/tools/update-gtm-profile" icon="book-open">
+    Write back a lasting change to a GTM section — it evolves, keeping history.
+  </Card>
+</CardGroup>
+
+## Use cases — try these prompts
+
+Four things teams ask Nous every day. Each maps to the verbs above.
+
+<AccordionGroup>
+  <Accordion title="1. Account research — get_context / get_account" icon="user-magnifying-glass">
+    - *"Give me the full state of \[account] — every person involved, their role, where each stands, and the open objections."*
+    - *"I've got a meeting with \[account] — prep me and tell me what to focus on."*
+    - *"Write a contextual follow-up email to \[account] based on our previous touchpoints."*
+  </Accordion>
+  <Accordion title="2. Pipeline patterns — pipeline_intelligence / attention / query" icon="chart-line">
+    - *"Which accounts have gone quiet that I should re-engage?"*
+    - *"Report the last 7 days of pipeline activity and what we should improve next week."*
+    - *"How long does it take us to follow up on positive replies from our campaigns?"*
+    - *"Who's engaging with us the most, and what does that tell us about our ICP?"*
+  </Accordion>
+  <Accordion title="3. Feedback loops — campaign_performance / query" icon="repeat">
+    - *"Which campaign performs best and why, and what should we double down on?"*
+    - *"What objections and pains show up across everyone who replied to our cold emails?"*
+    - *"How should we improve our cold emails based on the objections people keep raising?"*
+  </Accordion>
+  <Accordion title="4. Insights — get_insights" icon="lightbulb">
+    - *"What have our calls taught us about what to build next?"*
+    - *"What language lands with buyers and what confuses them?"*
+    - *"Who actually buys, and what's the pain that drives the purchase?"*
+  </Accordion>
+</AccordionGroup>
+
+### Setup — the agent operates the workspace
+
+Nous is operated by the agent, not clicked through a UI. Call `get_workspace_status` first; it returns a ranked list of what to do next.
 
 <CardGroup cols={2}>
   <Card title="get_workspace_status" href="/mcp/tools/get-workspace-status" icon="gauge">
@@ -164,30 +234,10 @@ The agent sets the workspace up itself. Call `get_workspace_status` first; it re
   <Card title="configure_crm_sync" href="/mcp/tools/configure-crm-sync" icon="database">
     Set the CRM sync rules — auto-sync, create policy, hygiene cadence.
   </Card>
-  <Card title="set_trigger" href="/mcp/tools/set-trigger" icon="bolt">
-    Create an outbound event trigger (webhook) for the user's stack.
-  </Card>
-  <Card title="list_triggers" href="/mcp/tools/list-triggers" icon="list">
-    List the workspace's triggers + the catalog of available events.
+  <Card title="sync_crm_now" href="/mcp/tools/sync-crm-now" icon="rotate">
+    Run a CRM sync on demand instead of waiting for the schedule.
   </Card>
 </CardGroup>
-
-### Lead lists (cloud)
-
-Build and work lead lists on the workspace's own BYOK keys. Both `enrich_leads` and `verify_leads` are **two-step**: call without `confirm` for a free cost preview, report it to the user, then call again with `confirm: true` to run as a background job.
-
-<CardGroup cols={2}>
-  <Card title="enrich_leads" href="/mcp/tools/enrich-leads" icon="envelope">
-    Find missing emails for a list, on the workspace's Prospeo/Apollo key. Preview the cost, then run.
-  </Card>
-  <Card title="verify_leads" href="/mcp/tools/verify-leads" icon="envelope-circle-check">
-    Validate email deliverability with MillionVerifier / NeverBounce. Verdict upgrades each lead's status.
-  </Card>
-</CardGroup>
-
-<Note>
-Also callable: **`record_closed_deals`** (train the ICP model on real closed-won/lost deals — contrastive lift), **`get_routing_preferences`** (Claude Code routing defaults so GTM work defaults to Nous), and the lead-coverage tools **`lead_list_operations`**, **`check_leads`**, **`lead_coverage`** (cloud-only — Lead Lists). Plus `get_workspace_facts`, a back-compat alias of `get_gtm_profile` — new integrations should call `get_gtm_profile`.
-</Note>
 
 ## Environment
 
@@ -196,11 +246,11 @@ Also callable: **`record_closed_deals`** (train the ICP model on real closed-won
 | `NOUS_API_KEY` | yes | — | Workspace API key. Create at Settings → API Keys. |
 | `NOUS_API_URL` | no | `https://api.opennous.cloud` | Override for self-hosted. |
 
-The preferred path is `npx @opennous/cli login` — a browser sign-in that mints a workspace key and saves it to `~/.nous/config.json`, which the MCP reads (no `NOUS_API_KEY` to set). The plugin's `userConfig` field still accepts a pasted key as a fallback, stored in your OS keychain — never in plaintext or shell history.
+The preferred path is `npx @opennous/cli login` (or `npx @opennous/cli init` on a first run) — a browser sign-in that mints a workspace key and saves it to `~/.nous/config.json`, which the MCP reads (no `NOUS_API_KEY` to set). Pasting a key into the `env` block of any config above still works as a fallback.
 
 ## How agents typically use it
 
-**Setting up a new workspace** → `get_workspace_status` to see what's missing, then `set_workspace_profile` (onboard), `update_gtm_profile` + `build_scoring_model` (the GTM playbook), `connect_integration` (key-based tools), `configure_crm_sync`, and `set_trigger`. The agent does the setup; the user just confirms. OAuth tools (Gmail) stay a one-click browser step on the Integrations page.
+**Setting up a new workspace** → `get_workspace_status` to see what's missing, then `set_workspace_profile` (onboard), `update_gtm_profile` + `build_scoring_model` (the ICP model), `connect_integration` (key-based tools), and `configure_crm_sync`. The agent does the setup; the user just confirms. OAuth tools (Gmail) stay a one-click browser step on the Integrations page.
 
 Day to day:
 
@@ -217,7 +267,7 @@ Day to day:
 
 ## Source + versioning
 
-The server lives at [`apps/mcp` in NousC/nous](https://github.com/NousC/nous/tree/main/apps/mcp). Each release is published to npm as `@opennous/mcp@<semver>` — pin a version in your config if you need reproducible installs:
+The server lives at [`apps/mcp` in NousC/opennous](https://github.com/NousC/opennous/tree/main/apps/mcp). Each release is published to npm as `@opennous/mcp@<semver>` — pin a version in your config if you need reproducible installs:
 
 ```bash
 NOUS_API_KEY=... npx -y @opennous/mcp@0.28.0

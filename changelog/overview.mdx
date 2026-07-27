@@ -14,11 +14,11 @@ Nous is now operated by the agent. The MCP server exposes **seventeen tools** �
 - **[`build_scoring_model`](/mcp/tools/build-scoring-model)** — turn the recorded GTM context into the ICP scoring model.
 - **[`connect_integration`](/mcp/tools/connect-integration)** — connect a key-based integration (Apollo, Prospeo, HubSpot token, …); credentials are verified before saving.
 - **[`configure_crm_sync`](/mcp/tools/configure-crm-sync)** — set the CRM sync rules (auto-sync, create policy, hygiene cadence). Growth+.
-- **[`set_trigger`](/mcp/tools/set-trigger)** / **[`list_triggers`](/mcp/tools/list-triggers)** — wire outbound event triggers for the user's stack.
+- **`set_trigger`** / **`list_triggers`** — wire outbound event triggers for the user's stack. _(internal-only; not exposed to agents as of v0.46.)_
 
 ### Browser login, no copy-paste
 
-Sign in with **`npx @opennous/cli login`** — it opens your browser, you approve, and a workspace API key is minted and saved automatically; the plugin's MCP reads it. No copy-paste. Pasting a key still works as a fallback. New sign-ups go straight from signup to a connect screen and let the agent handle onboarding.
+Sign in with **`npx @opennous/cli login`** — it opens your browser, you approve, and a workspace API key is minted and saved automatically; the MCP reads it. No copy-paste. Pasting a key still works as a fallback. New sign-ups go straight from signup to a connect screen and let the agent handle onboarding.
 
 Install or update with `@opennous/mcp@0.19.0` and `@opennous/cli@0.4.0`.
 
