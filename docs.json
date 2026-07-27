@@ -190,22 +190,45 @@
             ]
           },
           {
-            "group": "Overview tools",
+            "group": "Retrieve",
             "pages": [
               "mcp/tools/get-context",
               "mcp/tools/get-account",
               "mcp/tools/query",
+              "mcp/tools/search-notes",
+              "mcp/tools/get-playbook"
+            ]
+          },
+          {
+            "group": "Learn",
+            "pages": [
+              "mcp/tools/get-insights"
+            ]
+          },
+          {
+            "group": "Aggregate",
+            "pages": [
+              "mcp/tools/campaign-performance",
+              "mcp/tools/pipeline-intelligence"
+            ]
+          },
+          {
+            "group": "Act",
+            "pages": [
               "mcp/tools/attention",
+              "mcp/tools/get-action-items"
+            ]
+          },
+          {
+            "group": "Write",
+            "pages": [
               "mcp/tools/record",
               "mcp/tools/save-note",
-              "mcp/tools/search-notes",
-              "mcp/tools/get-playbook",
-              "mcp/tools/get-action-items",
               "mcp/tools/verify"
             ]
           },
           {
-            "group": "Setup tools",
+            "group": "Setup",
             "pages": [
               "mcp/tools/get-workspace-status",
               "mcp/tools/set-workspace-profile",
@@ -214,11 +237,7 @@
               "mcp/tools/sync-icp",
               "mcp/tools/export-icp-model",
               "mcp/tools/sync-playbook",
-              "mcp/tools/connect-integration",
-              "mcp/tools/set-trigger",
-              "mcp/tools/list-triggers",
-              "mcp/tools/enrich-leads",
-              "mcp/tools/verify-leads"
+              "mcp/tools/connect-integration"
             ]
           }
         ]

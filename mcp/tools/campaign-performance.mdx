@@ -1,0 +1,33 @@
+---
+title: "campaign_performance"
+description: "The outbound feedback loop — reply sentiment, conversions, and the ICP tier of who replied, by campaign and sequence step. Which copy to scale vs cut."
+---
+
+Slices every reply to outreach by **campaign and sequence step**, cross-referenced with the replier's **ICP tier** and their **pipeline outcome**. It answers the question a reply-count can't: *which campaign earns positive replies, from good-fit accounts, that actually convert — and how fast?*
+
+## Parameters
+
+None. Returns the whole workspace's outbound performance.
+
+## Returns
+
+A `campaigns` array (best first) plus `totals`.
+
+Per campaign: reply counts by sentiment, `positive_rate` (positive ÷ replies), `avg_icp_of_positive` and `tier_of_positive` (are the good replies coming from the accounts you want?), `conversions` + `median_days_to_client` (attributed by the contact's first reply), and a per-step breakdown.
+
+```
+26.1.26 Loom OS [V2] Crunchbase
+  52 replies — 35 positive (67%), 15 neutral, 2 negative
+  converted: 4 clients (avg 41d to close), 6 in evaluation
+  positive repliers: avg ICP 71, 22 tier-1/2 of 35
+    step 0_0_1: 7/9 positive (78%)
+    step 0_1_0: 8/11 positive (73%)
+```
+
+<Note>`positive_rate` is positive ÷ **replies** (of those who replied, how many were interested), not ÷ sent — there's no reliable send denominator for backfilled history.</Note>
+
+## Examples
+
+- *"Which campaign performs best and why, and what should we double down on?"*
+- *"Is my best campaign landing on good-fit accounts, or just anyone?"*
+- *"Which variant should I cut?"*

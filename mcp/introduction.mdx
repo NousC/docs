@@ -74,48 +74,111 @@ For clients that cannot run a local process, like n8n cloud. Create an API key a
 - **Claude Code**. `claude mcp add --transport http nous https://mcp.opennous.cloud/mcp --header "Authorization: Bearer YOUR_API_KEY"`
 - **Hermes**. In MCP settings set the name to `nous`, then paste the inner object `{ "url": "https://mcp.opennous.cloud/mcp", "headers": { "Authorization": "Bearer YOUR_API_KEY" } }`.
 
-## The tools
+## The tools, by verb
 
-### Daily
+Every tool is one of five verbs. Pick the verb, then the tool.
 
-Read context, record what happened, keep notes, check what to work next.
+| Verb | When to reach for it | Tools |
+|---|---|---|
+| **Retrieve** | pull what we already know | `get_context` · `get_account` · `query` · `search_notes` · `get_playbook` |
+| **Learn** | what calls & replies taught us | `get_insights` |
+| **Aggregate** | a metric across the whole workspace | `campaign_performance` · `pipeline_intelligence` |
+| **Act** | what to work next | `attention` · `get_action_items` |
+| **Write** | log what happened | `record` · `save_note` · `verify` |
+
+### Retrieve — pull what we already know
 
 <CardGroup cols={2}>
   <Card title="get_context" href="/mcp/tools/get-context" icon="brain">
     Engineered context for a task about one entity. The headline call before outreach or a meeting.
   </Card>
   <Card title="get_account" href="/mcp/tools/get-account" icon="user">
-    The full account, every claim with epistemics plus the recent timeline.
+    The full account, every person and claim with epistemics plus the recent timeline.
   </Card>
   <Card title="query" href="/mcp/tools/query" icon="magnifying-glass">
-    Retrieve and summarise activity across many people.
-  </Card>
-  <Card title="attention" href="/mcp/tools/attention" icon="bell">
-    What needs attention. Accounts gone quiet, facts decayed.
-  </Card>
-  <Card title="get_action_items" href="/mcp/tools/get-action-items" icon="list-check">
-    Open action items and commitments, grouped by account. What you owe them and what they owe you.
-  </Card>
-  <Card title="record" href="/mcp/tools/record" icon="pen">
-    Record what happened. You observe, Nous derives the claims.
-  </Card>
-  <Card title="save_note" href="/mcp/tools/save-note" icon="note-sticky">
-    Keep a meeting brief, transcript, or note on a contact's record.
+    Retrieve and summarise a corpus across many people — replies, meetings, the facts corpus.
   </Card>
   <Card title="search_notes" href="/mcp/tools/search-notes" icon="file-magnifying-glass">
     Semantic search across saved notes and documents.
   </Card>
   <Card title="get_playbook" href="/mcp/tools/get-playbook" icon="book">
-    Read the user's rules (voice, outreach, icp, positioning) before you act.
-  </Card>
-  <Card title="verify" href="/mcp/tools/verify" icon="circle-check">
-    Re-check a specific fact before you act on it. The calibration check.
+    Read the user's own rules (voice, outreach, ICP, positioning) before you act — never `query` for this.
   </Card>
 </CardGroup>
 
-### Setup
+### Learn — what buyers taught us
 
-The agent sets the workspace up itself. Call `get_workspace_status` first. It returns a ranked next-steps list.
+<CardGroup cols={2}>
+  <Card title="get_insights" href="/mcp/tools/get-insights" icon="lightbulb">
+    What calls and replies taught us about our product, positioning, market, and buyer — grounded in verbatim quotes. The mirror of the playbook.
+  </Card>
+</CardGroup>
+
+### Aggregate — a metric across every account
+
+<CardGroup cols={2}>
+  <Card title="campaign_performance" href="/mcp/tools/campaign-performance" icon="chart-mixed">
+    Outbound feedback loop — reply sentiment, conversions, and the ICP tier of who replied, by campaign and variant. Which copy to scale vs cut.
+  </Card>
+  <Card title="pipeline_intelligence" href="/mcp/tools/pipeline-intelligence" icon="chart-line">
+    How the pipeline converts — stage distribution, stage-to-stage conversion %, median time-to-client and time-in-stage. Where deals leak and how long they take.
+  </Card>
+</CardGroup>
+
+### Act — what to work next
+
+<CardGroup cols={2}>
+  <Card title="attention" href="/mcp/tools/attention" icon="bell">
+    A ranked to-do list — hot-intent accounts to reach out to now, accounts gone quiet, open commitments, upcoming meetings.
+  </Card>
+  <Card title="get_action_items" href="/mcp/tools/get-action-items" icon="list-check">
+    Open commitments grouped by account. What you owe them and what they owe you.
+  </Card>
+</CardGroup>
+
+### Write — log what happened
+
+<CardGroup cols={2}>
+  <Card title="record" href="/mcp/tools/record" icon="pen">
+    Record what happened. You observe, Nous derives the claims.
+  </Card>
+  <Card title="save_note" href="/mcp/tools/save-note" icon="note-sticky">
+    Keep a meeting brief, transcript, or note on a contact's record — append-only and dated.
+  </Card>
+  <Card title="verify" href="/mcp/tools/verify" icon="circle-check">
+    Re-check a specific fact before you act on a stale-looking claim.
+  </Card>
+</CardGroup>
+
+## Use cases — try these prompts
+
+Four things teams ask Nous every day. Each maps to the verbs above.
+
+<AccordionGroup>
+  <Accordion title="1. Account research — get_context / get_account" icon="user-magnifying-glass">
+    - *"Give me the full state of \[account] — every person involved, their role, where each stands, and the open objections."*
+    - *"I've got a meeting with \[account] — prep me and tell me what to focus on."*
+    - *"Write a contextual follow-up email to \[account] based on our previous touchpoints."*
+  </Accordion>
+  <Accordion title="2. Pipeline patterns — pipeline_intelligence / attention / query" icon="chart-line">
+    - *"Which accounts have gone quiet that I should re-engage?"*
+    - *"Report the last 7 days of pipeline activity and what we should improve next week."*
+    - *"How long does it take us to follow up on positive replies, and where do deals stall?"*
+  </Accordion>
+  <Accordion title="3. Feedback loops — campaign_performance / query" icon="repeat">
+    - *"Which campaign performs best and why, and what should we double down on?"*
+    - *"What objections and pains show up across everyone who replied to our cold emails?"*
+  </Accordion>
+  <Accordion title="4. Insights — get_insights" icon="lightbulb">
+    - *"What have our calls taught us about what to build next?"*
+    - *"What language lands with buyers and what confuses them?"*
+    - *"Who actually buys, and what's the pain that drives the purchase?"*
+  </Accordion>
+</AccordionGroup>
+
+### Setup — the agent operates the workspace
+
+Nous is operated by the agent, not clicked through a UI. Call `get_workspace_status` first; it returns a ranked next-steps list.
 
 <CardGroup cols={2}>
   <Card title="get_workspace_status" href="/mcp/tools/get-workspace-status" icon="gauge">
@@ -142,15 +205,9 @@ The agent sets the workspace up itself. Call `get_workspace_status` first. It re
   <Card title="connect_integration" href="/mcp/tools/connect-integration" icon="plug">
     Connect a key-based integration (Apollo, Prospeo, HubSpot token, and more).
   </Card>
-  <Card title="set_trigger" href="/mcp/tools/set-trigger" icon="bolt">
-    Create an outbound event trigger (webhook).
-  </Card>
-  <Card title="list_triggers" href="/mcp/tools/list-triggers" icon="list">
-    List the workspace's triggers plus the catalog of available events.
-  </Card>
 </CardGroup>
 
-<Note>**Nous Cloud only.** `set_trigger` and `list_triggers`. On a self-hosted instance, Lead Lists, CRM Sync, Triggers, and Reports are Cloud-only. Everything else, including the ICP scoring model, is open.</Note>
+<Note>**Self-hosted vs Cloud.** Lead Lists, CRM Sync, Triggers, and Reports are Cloud-only backend features (not agent tools). Everything else, including the ICP scoring model, is open on a self-hosted instance.</Note>
 
 ## The daily loop
 
