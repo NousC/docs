@@ -3,6 +3,20 @@ title: "Changelog"
 description: "New features, improvements, and fixes shipped in Nous."
 ---
 
+<Update label="August 17, 2026" description="Layered ICP scoring + cold-lead & list scoring">
+
+## The ICP score is now four layers, and works on leads that aren't in Nous yet
+
+Scoring is no longer one flat number. Every [`score`](/public-api/score) call returns the **layered** read — **Fit · Pain · Intent · Ability** — where any layer you have no evidence for comes back **unknown, never 0**, with a `missing` worklist that tells your agent exactly what to enrich next and a `play` (research / nurture / work now / enrich / suppress). `priority` combines only the layers you actually know, so a partly-observed lead is never dragged down or inflated.
+
+- **Score a cold lead not in Nous** — pass `attributes` (title, company, keywords/headline). Fit and Pain resolve from what you have; **nothing is written to the graph**.
+- **Score a whole external list** — pass `leads` (up to **1000**). All scored inline in one call, the model loaded once, nothing written — triage a big list before you decide which accounts to bring in.
+- **A lead in the graph that's too thin to stake** now returns a `partial` layered read instead of a dead end.
+
+See the [REST reference](/public-api/score) and the [`score`](/mcp/tools/score) tool.
+
+</Update>
+
 <Update label="June 10, 2026" description="Operated by the agent + browser login">
 
 ## Set up Nous from inside your agent

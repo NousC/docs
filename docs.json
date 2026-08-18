@@ -194,6 +194,7 @@
             "pages": [
               "mcp/tools/get-context",
               "mcp/tools/get-account",
+              "mcp/tools/score",
               "mcp/tools/query",
               "mcp/tools/search-notes",
               "mcp/tools/get-playbook"

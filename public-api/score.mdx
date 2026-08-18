@@ -1,12 +1,16 @@
 ---
 title: "Score"
 api: "POST https://api.opennous.cloud/v2/score"
-description: "Score a lead against your live ICP model and intent, and write the result into the context graph. The thin verb an external list calls per row."
+description: "Score a lead against your live ICP model — layered Fit · Pain · Intent · Ability plus an enrichment worklist. Works on accounts in Nous and on cold leads that aren't."
 ---
 
-Score any person or company against your workspace's ICP model and current intent, then write the result into the context graph so every other agent reads the same number. Built for a list you keep somewhere else, a spreadsheet, a Clay column, a CRM export. The list stays where it is. Nous returns the score.
+Return your workspace's own ICP judgment on a lead: a 0–100 ICP fit + tier, a decaying intent score, and the **layered** breakdown — **Fit · Pain · Intent · Ability**. Any layer you have no evidence for comes back **unknown, never 0**, alongside a `missing` worklist that tells your agent exactly what to enrich next.
 
-This is the leaner counterpart to [`/v2/context`](/public-api/context). Where context returns the whole account, `score` returns just the ICP fit and intent, so it fits a spreadsheet cell or a Clay column.
+There are three ways to call it:
+
+- **A lead already in Nous** — pass an `identifier`. It's scored off the resolved claims on that account, the score is staked into the graph, and it keeps evolving on its own afterwards.
+- **One cold lead not in Nous** — pass `attributes`. It's scored inline from what you have (title, company, keywords); **nothing is written to the graph**.
+- **A whole external list** — pass `leads` (up to 1000). All scored inline in one call, the model loaded once, nothing written. Built to triage a big list before you decide which accounts to bring in.
 
 <Note>
 `score` needs a scoring model. Build one first with [`build_icp_model`](/mcp/tools/build-icp-model), then this endpoint returns live scores.
@@ -14,90 +18,166 @@ This is the leaner counterpart to [`/v2/context`](/public-api/context). Where co
 
 ## Request
 
-```bash
+<CodeGroup>
+```bash A lead in Nous
 curl -X POST https://api.opennous.cloud/v2/score \
   -H 'Authorization: Bearer YOUR_API_KEY' \
   -H 'Content-Type: application/json' \
   -d '{ "identifier": "sarah@acme.com" }'
 ```
 
+```bash One cold lead (inline)
+curl -X POST https://api.opennous.cloud/v2/score \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "attributes": {
+      "job_title": "Head of Sales",
+      "company_type": "b2b_saas",
+      "employee_count": 40,
+      "headline": "scaling outbound, our stack is fragmented"
+    }
+  }'
+```
+
+```bash An external list (up to 1000)
+curl -X POST https://api.opennous.cloud/v2/score \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "leads": [
+      { "ref": "row-1", "job_title": "Head of Sales", "company_type": "b2b_saas", "headline": "scaling outbound, fragmented stack" },
+      { "ref": "row-2", "job_title": "Designer", "company_type": "agency" }
+    ]
+  }'
+```
+</CodeGroup>
+
 ### Body
 
 <ParamField body="identifier" type="string">
-  One lead. Accepts an **email**, **domain**, **LinkedIn URL**, or **entity UUID**. Required unless you pass `identifiers`.
+  One lead already in the graph — an **email**, **domain**, **LinkedIn URL**, or **entity UUID**. Scored off its resolved claims and staked.
 </ParamField>
-<ParamField body="identifiers" type="string[]">
-  A batch of leads, max 100 per call. The response is a `results` array in the same order.
+
+<ParamField body="attributes" type="object">
+  A **cold lead not in Nous**, scored inline from what you have — nothing is written. Fields (with friendly aliases): `job_title` (`title`), `seniority`, `company_type` (`type`), `industry`, `employee_count` (`company_size`, `size`), `location` (`country`), and `keywords` **or** `headline` (a raw LinkedIn headline is matched for keyword-based signals). You may also pass any `signal.*` you've already computed. If an `identifier` is given but isn't in the graph, `attributes` is used as the fallback.
 </ParamField>
+
+<ParamField body="leads" type="array">
+  An **external list** scored inline in one call (up to **1000**). Each item is an `attributes` object (same fields as above), optionally with a `ref` (or `id`) that is echoed back so you can match results to your rows. Nothing is written to the graph.
+</ParamField>
+
+<ParamField body="identifiers" type="array">
+  A batch of **graph** leads (emails / domains / LinkedIn URLs / UUIDs), max **100** per call. Each is resolved and scored like `identifier`; the response is a `results` array.
+</ParamField>
+
 <ParamField body="intent" type="string">
-  Optional note on why you're scoring. Recorded, does not change the score.
+  Optional hint about why you're scoring. Recorded; does not change the score.
 </ParamField>
 
 ## Response
 
-A scored lead returns the ICP fit and intent, and the fit prediction is staked onto the account:
+### A scored lead — the layered read
 
 ```json
 {
   "resolved": true,
   "scored": true,
-  "entity_id": "a1b2c3d4-...",
-  "icp": {
-    "score": 84,
-    "fit": true,
-    "tier": "tier_1",
-    "reason": "matches B2B SaaS, 50–200, already on Apollo",
-    "scored_at": "2026-07-09T12:00:00Z"
-  },
-  "intent": { "score": 64, "band": "Warm" }
+  "entity_id": "…",
+  "icp":    { "score": 88, "fit": true, "tier": "tier_1", "reason": "Scorecard: 3 signals fired — …" },
+  "intent": { "score": 0, "band": "Dormant" },
+  "layered": {
+    "priority": 88,
+    "band": "high",
+    "layers":  { "fit": 88 },
+    "missing": ["pain", "intent", "ability"],
+    "play": "research — strong fit; enrich pain and intent before outreach"
+  }
 }
 ```
 
-A lead Nous already knows but has not enriched yet returns `awaiting_enrichment`, so you know to enrich before acting:
+The `layered` block is the important part:
 
-```json
-{ "resolved": true, "scored": false, "reason": "awaiting_enrichment", "entity_id": "..." }
-```
+<ResponseField name="layers" type="object">
+  The resolved layers, `{ fit, pain, intent, ability }` — each 0–100. **A layer with no observed evidence is omitted, not set to 0.** For a cold lead you'll usually see `fit` (and `pain`, if the headline carried the signal) and nothing else yet.
+</ResponseField>
 
-A lead that is not in the graph returns `unknown_identifier`, so nothing is fabricated:
+<ResponseField name="missing" type="array">
+  The layers still **unknown** — your enrichment worklist. `["pain","intent","ability"]` means: resolve these before treating the account as fully judged.
+</ResponseField>
 
-```json
-{ "resolved": false, "reason": "unknown_identifier" }
-```
+<ResponseField name="priority" type="number">
+  The combined 0–100 score — the geometric mean of the **known** layers only. Unknown layers are excluded, never zeroed, so a partly-observed lead is neither dragged down nor inflated. `null` when nothing is resolved.
+</ResponseField>
 
-### Batch
+<ResponseField name="play" type="string">
+  The recommended action from the shape of the resolved hypothesis: `research`, `nurture`, `work now`, `enrich`, or `suppress`.
+</ResponseField>
 
-With `identifiers`, each result carries its own `identifier` alongside the same fields:
+<Note>
+The flat `icp.score` is a single number for back-compat. On a cold lead it reflects **Fit** — it never fabricates a Pain number and an unobserved signal never lowers it. Read `layered.missing` to know **how much** is actually known, not just `icp.score`.
+</Note>
+
+### A cold lead scored inline
+
+Same shape, flagged so you know it isn't in the graph:
 
 ```json
 {
+  "resolved": true, "scored": true,
+  "source": "inline", "persisted": false,
+  "icp": { "score": 88, "fit": true, "tier": "tier_1", "reason": "…" },
+  "intent": { "score": 0, "band": "Dormant" },
+  "layered": { "priority": 88, "layers": { "fit": 88, "pain": 71 }, "missing": ["intent","ability"], "play": "…" }
+}
+```
+
+### An external list
+
+```json
+{
+  "persisted": false,
   "results": [
-    { "identifier": "sarah@acme.com", "resolved": true, "scored": true, "icp": { "score": 84, "tier": "tier_1" }, "intent": { "score": 64, "band": "Warm" } },
-    { "identifier": "tom@globex.io", "resolved": true, "scored": false, "reason": "awaiting_enrichment" }
+    { "ref": "row-1", "scored": true, "persisted": false, "source": "inline",
+      "icp": { "score": 88, "tier": "tier_1", "fit": true },
+      "layered": { "priority": 88, "layers": { "fit": 88, "pain": 71 }, "missing": ["intent","ability"], "play": "…" } },
+    { "ref": "row-2", "scored": false, "source": "inline", "reason": "no_attributes" }
   ]
 }
 ```
 
-## Fields
+### Partial — in the graph but too thin to stake
 
-| Field | Values | Meaning |
+A lead that carries some claims (keywords, company, location) but none of the strict scoreable fields is **not staked** (that protects calibration), yet still resolves what it can:
+
+```json
+{ "resolved": true, "scored": false, "reason": "partial", "entity_id": "…",
+  "layered": { "layers": { "fit": 62 }, "missing": ["pain","intent","ability"], "play": "enrich — resolve pain, intent, ability" } }
+```
+
+### Not resolvable
+
+```json
+{ "resolved": false, "reason": "unknown_identifier" }   // not in the graph and no attributes passed
+{ "resolved": false, "reason": "ambiguous", "candidates": [ … ] }   // a name matched several people
+```
+
+## The layered model
+
+The score isn't one number — it's four independent layers, each resolved on its own evidence:
+
+| Layer | Question | Resolves from |
 |---|---|---|
-| `icp.score` | `0` – `100` | ICP fit score |
-| `icp.tier` | `tier_1` / `tier_2` / `tier_3` / `not_icp` | The actionable class that drives the play |
-| `icp.fit` | boolean | `true` when the score is 70 or above |
-| `intent.score` | `0` – `100` | How warm the account is right now. Decays over time |
-| `intent.band` | `Red-hot` / `Hot` / `Warm` / `Aware` / `Dormant` | Intent as a band |
+| **Fit** | Is this fundamentally our customer? | title, seniority, company type, size, geography |
+| **Pain** | Do they actually have the problem? | fragmented stack, manual CRM, tool sprawl (posts, site, keywords) |
+| **Intent** | Is something happening now? | hiring, funding, stack change, replies |
+| **Ability** | Can they buy and deploy? | maturity, infrastructure |
 
-## Scores that keep moving
-
-`score` reads the **live** score. When an account has never been scored, it stakes one on demand, so you get a number now. After that the score keeps evolving on its own as new signals land, so a weekly re-score reflects the latest state. Calling `score` again never stacks duplicate predictions.
-
-## Call it from a spreadsheet
-
-Because the request is one row in and a small object out, you can call `score` straight from a sheet with a short script. Point the fetch at this endpoint, pass the cell as `identifier`, and read back `icp.score`, `icp.tier`, and `intent.score`. Clay, n8n, and Make can call it the same way, one row per record.
+The score is a **progressively-resolved hypothesis**: a LinkedIn headline resolves **Fit** with real confidence and leaves the rest **unknown** (never 0), with `missing` telling you what to enrich. As enrichment arrives, the layers light up and `priority` becomes the blend of all four. Tune the model on the **ICP** page, or with [`build_icp_model`](/mcp/tools/build-icp-model).
 
 ## When to call it
 
-- **You have a list built somewhere else** and want each row's ICP fit and intent in the graph
-- **On a cadence** over your sheet to keep every score current
-- For a whole list in one call, use [`/v2/lead-lists/attach`](/public-api/leads/attach)
+- **Triage a cold list** before spending on enrichment — `leads`, nothing written.
+- **Score one prospect** from a LinkedIn scrape — `attributes`.
+- **Get the live number** on an account already in Nous — `identifier`.
+- Read `layered.play` to decide the next action; read `missing` to know what to enrich.

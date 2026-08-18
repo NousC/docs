@@ -1,0 +1,54 @@
+---
+title: "score"
+description: "Score a lead against your live ICP model — layered Fit · Pain · Intent · Ability plus an enrichment worklist. Works on accounts in Nous and on cold leads that aren't."
+---
+
+Get your workspace's own ICP judgment on a lead: a 0–100 fit + tier, a decaying intent score, and the **layered** breakdown — **Fit · Pain · Intent · Ability** — where any layer you have no evidence for comes back **unknown, never 0**, with a `missing` worklist telling you what to enrich next.
+
+Three ways to call it:
+
+- **A lead in Nous** — pass an `identifier`. Scored off its claims and staked; keeps evolving.
+- **One cold lead not in Nous** — pass `attributes`. Scored inline; nothing is written.
+- **A whole external list** — pass `leads` (up to 1000). Scored inline in one call; nothing written.
+
+## Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `identifier` | string | | One lead in the graph — email, domain, LinkedIn URL, or entity UUID |
+| `attributes` | object | | A **cold lead not in Nous** — `{ job_title, seniority, company_type, industry, employee_count, keywords or headline, location }`. Scored inline; nothing written |
+| `leads` | array | | An **external list** (up to 1000) — each an `attributes` object, optionally with a `ref` echoed back. Scored inline; nothing written |
+| `identifiers` | array | | A batch of graph leads (max 100); loop for larger lists |
+| `intent` | string | | Optional hint about why you're scoring (recorded, does not change the score) |
+
+## Returns
+
+A known or cold lead — the fit, intent, and the layered read with its worklist:
+
+```
+sarah@acme.com — ICP 88/100 (tier 1) ✓fit · intent 0/100 Dormant
+    layers: fit 88
+    unknown: pain, intent, ability — research — strong fit; enrich pain and intent before outreach
+    Scorecard: 3 signals fired — revenue_owner, b2b_saas, …
+```
+
+A cold lead scored inline is the same, tagged `scored inline (not in the graph)`.
+
+An **external list** returns a summary — how many scored and the tier spread — while the raw per-lead results (each with its `ref`, `icp`, and `layered`) come back over the API:
+
+```
+Scored 812/1000 inline (nothing written). Tiers: tier 2 401 · tier 3 288 · tier 1 96 · not icp 27
+```
+
+## The layered model
+
+The score is four independent layers, each resolved on its own evidence — **Fit** (who they are), **Pain** (do they have the problem), **Intent** (is it the right time), **Ability** (can they buy). A LinkedIn headline resolves **Fit** and leaves the rest **unknown** (never 0); `missing` is the worklist, and `play` is the recommended action (`research` · `nurture` · `work now` · `enrich` · `suppress`). As enrichment lands the layers light up. Tune the model on the **ICP** page or with [`build_icp_model`](/mcp/tools/build-icp-model).
+
+## When to call it
+
+- **Triage a cold list** before enrichment — `leads`, nothing written.
+- **Score one prospect** from a LinkedIn scrape — `attributes`.
+- **Get the live number** on an account in Nous — `identifier`.
+- Only a bare `identifier` that isn't in the graph and has no `attributes` comes back `unknown_identifier`.
+
+For the full request/response shape, see the [REST reference](/public-api/score).
