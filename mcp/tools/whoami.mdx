@@ -1,0 +1,23 @@
+---
+title: "whoami"
+description: "Who this key acts as, and whether the workspace is set up."
+---
+
+Call it first in a session. No parameters.
+
+Returns the workspace, the person the key acts as, their scope, their GTM roles, the key's capability, and the setup state.
+
+| Field | Values |
+|---|---|
+| Scope | `admin` sees the whole workspace. `member` sees their own book plus the shared graph. |
+| Roles | GTM roles such as account executive, SDR, founder. A person can hold several. |
+| Capability | read/write, or read-only |
+| Setup | Whether the workspace is onboarded, how many accounts it has, and whether an ICP is set |
+
+```
+You are acting as Sarah Chen on Acme.
+Scope: MEMBER — you see only your own book plus the shared graph.
+Role(s): account_executive.
+Capability: read/write.
+Setup: onboarded · 412 accounts · ICP set. NEXT → run `focus` for today's worklist.
+```

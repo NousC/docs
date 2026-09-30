@@ -37,7 +37,6 @@
     }
   },
   "favicon": "/favicon.svg",
-  "openapi": "openapi.json",
   "navigation": {
     "tabs": [
       {
@@ -135,6 +134,7 @@
       },
       {
         "tab": "REST API",
+        "openapi": "openapi.json",
         "groups": [
           {
             "group": "Overview",
@@ -143,65 +143,48 @@
             ]
           },
           {
-            "group": "Account Context",
-            "pages": [
-              "public-api/context",
-              "public-api/accounts"
-            ]
-          },
-          {
-            "group": "Observations",
-            "pages": [
-              "public-api/observations"
-            ]
-          },
-          {
             "group": "People",
             "pages": [
               "public-api/people/list",
               "public-api/people/create",
-              "public-api/people/update"
+              "public-api/people/update",
+              "public-api/people/enrich"
             ]
           },
           {
-            "group": "Leads",
+            "group": "Accounts",
             "pages": [
-              "public-api/leads/list",
-              "public-api/leads/create",
-              "public-api/leads/bulk",
-              "public-api/leads/update",
-              "public-api/leads/attach"
+              "public-api/accounts",
+              "public-api/context",
+              "public-api/query"
             ]
           },
           {
-            "group": "Search",
+            "group": "Attention",
             "pages": [
-              "public-api/query",
-              "public-api/attention",
-              "public-api/action-items",
-              "public-api/verify",
-              "public-api/dedup",
-              "public-api/score"
+              "public-api/attention"
             ]
           },
           {
-            "group": "Workspace",
+            "group": "Insights",
             "pages": [
-              "public-api/gtm-profile"
+              "public-api/insights/list",
+              "public-api/insights/record"
+            ]
+          },
+          {
+            "group": "ICP",
+            "pages": [
+              "public-api/score",
+              "public-api/icp/create",
+              "public-api/icp/train"
             ]
           },
           {
             "group": "Notes",
             "pages": [
               "public-api/notes",
-              "public-api/notes-search"
-            ]
-          },
-          {
-            "group": "Triggers",
-            "pages": [
-              "public-api/triggers/introduction",
-              "public-api/triggers/events"
+              "public-api/notes/list"
             ]
           }
         ]
@@ -212,59 +195,47 @@
           {
             "group": "Overview",
             "pages": [
-              "mcp/introduction"
+              "mcp/introduction",
+              "mcp/tools/whoami"
             ]
           },
           {
-            "group": "Retrieve",
+            "group": "People",
             "pages": [
-              "mcp/tools/get-context",
-              "mcp/tools/get-account",
-              "mcp/tools/score",
-              "mcp/tools/query",
-              "mcp/tools/search-notes",
-              "mcp/tools/get-playbook"
+              "mcp/tools/list-people"
             ]
           },
           {
-            "group": "Learn",
+            "group": "Accounts",
+            "pages": [
+              "mcp/tools/get-account",
+              "mcp/tools/get-context",
+              "mcp/tools/query"
+            ]
+          },
+          {
+            "group": "Attention",
+            "pages": [
+              "mcp/tools/attention"
+            ]
+          },
+          {
+            "group": "Insights",
             "pages": [
               "mcp/tools/get-insights"
             ]
           },
           {
-            "group": "Aggregate",
+            "group": "ICP",
             "pages": [
-              "mcp/tools/campaign-performance",
-              "mcp/tools/pipeline-intelligence"
+              "mcp/tools/score",
+              "mcp/tools/set-icp"
             ]
           },
           {
-            "group": "Act",
+            "group": "Notes",
             "pages": [
-              "mcp/tools/attention",
-              "mcp/tools/get-action-items"
-            ]
-          },
-          {
-            "group": "Write",
-            "pages": [
-              "mcp/tools/record",
-              "mcp/tools/save-note",
-              "mcp/tools/verify"
-            ]
-          },
-          {
-            "group": "Setup",
-            "pages": [
-              "mcp/tools/get-workspace-status",
-              "mcp/tools/set-workspace-profile",
-              "mcp/tools/build-icp-model",
-              "mcp/tools/train-icp-model",
-              "mcp/tools/sync-icp",
-              "mcp/tools/export-icp-model",
-              "mcp/tools/sync-playbook",
-              "mcp/tools/connect-integration"
+              "mcp/tools/add-note"
             ]
           }
         ]
@@ -349,19 +320,19 @@
   "redirects": [
     {
       "source": "/public-api/workspace-facts",
-      "destination": "/public-api/gtm-profile"
+      "destination": "/public-api/icp/create"
     },
     {
       "source": "/mcp/tools/get-workspace-facts",
-      "destination": "/mcp/tools/get-playbook"
+      "destination": "/mcp/tools/get-context"
     },
     {
       "source": "/mcp/tools/build-scoring-model",
-      "destination": "/mcp/tools/build-icp-model"
+      "destination": "/mcp/tools/set-icp"
     },
     {
       "source": "/mcp/tools/record-closed-deals",
-      "destination": "/mcp/tools/train-icp-model"
+      "destination": "/public-api/icp/train"
     },
     {
       "source": "/public-api/api-keys/list-api-keys",
@@ -374,6 +345,134 @@
     {
       "source": "/public-api/api-keys/delete-api-key",
       "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/leads",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/list",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/create",
+      "destination": "/public-api/people/create"
+    },
+    {
+      "source": "/public-api/leads/bulk",
+      "destination": "/public-api/people/create"
+    },
+    {
+      "source": "/public-api/leads/update",
+      "destination": "/public-api/people/update"
+    },
+    {
+      "source": "/public-api/leads/attach",
+      "destination": "/public-api/score"
+    },
+    {
+      "source": "/public-api/people",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/observations",
+      "destination": "/public-api/notes"
+    },
+    {
+      "source": "/public-api/action-items",
+      "destination": "/public-api/attention"
+    },
+    {
+      "source": "/public-api/verify",
+      "destination": "/public-api/context"
+    },
+    {
+      "source": "/public-api/dedup",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/gtm-profile",
+      "destination": "/public-api/icp/create"
+    },
+    {
+      "source": "/public-api/notes-search",
+      "destination": "/public-api/notes/list"
+    },
+    {
+      "source": "/public-api/triggers",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/triggers/introduction",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/triggers/events",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/mcp/tools/build-icp-model",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/campaign-performance",
+      "destination": "/mcp/tools/query"
+    },
+    {
+      "source": "/mcp/tools/connect-integration",
+      "destination": "/mcp/introduction"
+    },
+    {
+      "source": "/mcp/tools/export-icp-model",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/get-action-items",
+      "destination": "/mcp/tools/attention"
+    },
+    {
+      "source": "/mcp/tools/get-playbook",
+      "destination": "/mcp/tools/get-context"
+    },
+    {
+      "source": "/mcp/tools/get-workspace-status",
+      "destination": "/mcp/tools/whoami"
+    },
+    {
+      "source": "/mcp/tools/pipeline-intelligence",
+      "destination": "/mcp/tools/query"
+    },
+    {
+      "source": "/mcp/tools/record",
+      "destination": "/mcp/tools/add-note"
+    },
+    {
+      "source": "/mcp/tools/save-note",
+      "destination": "/mcp/tools/add-note"
+    },
+    {
+      "source": "/mcp/tools/search-notes",
+      "destination": "/mcp/tools/query"
+    },
+    {
+      "source": "/mcp/tools/set-workspace-profile",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/sync-icp",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/sync-playbook",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/train-icp-model",
+      "destination": "/public-api/icp/train"
+    },
+    {
+      "source": "/mcp/tools/verify",
+      "destination": "/mcp/tools/get-context"
     }
   ]
 }

@@ -1,74 +1,2848 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Nous REST API",
-    "description": "The v2 Context API. The agent reads engineered, epistemics-tagged context and writes observations; it also keeps long-form notes on contacts and a living GTM profile. Nous derives the rest.",
-    "version": "2.0.0"
+    "title": "OpenNous REST API",
+    "version": "2.0.0",
+    "description": "Read and write the OpenNous context graph over HTTP. Authenticate with a workspace API key."
   },
   "servers": [
     {
       "url": "https://api.opennous.cloud",
-      "description": "Nous Cloud"
+      "description": "OpenNous Cloud"
     }
   ],
   "security": [
     {
       "bearerAuth": []
+    },
+    {
+      "apiKeyHeader": []
     }
   ],
+  "tags": [
+    {
+      "name": "People"
+    },
+    {
+      "name": "Accounts"
+    },
+    {
+      "name": "Attention"
+    },
+    {
+      "name": "Insights"
+    },
+    {
+      "name": "ICP"
+    },
+    {
+      "name": "Notes"
+    }
+  ],
+  "paths": {
+    "/v2/people": {
+      "get": {
+        "tags": [
+          "People"
+        ],
+        "operationId": "listPeople",
+        "summary": "List people",
+        "description": "Filtered, paginated list of people. Unknown query parameters return 400, so a filter is never silently ignored. Teammates, personal contacts, and product signups are excluded. On a closed workspace a member key sees only its own book.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Substring match on email, first name, last name, company, and LinkedIn URL."
+          },
+          {
+            "name": "pipeline_stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "identified",
+                "connected",
+                "interested",
+                "meeting_booked",
+                "discovery",
+                "demo",
+                "negotiation",
+                "closed_won",
+                "closed_lost",
+                "disqualified",
+                "churned"
+              ]
+            },
+            "description": "Exact stage."
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact match on the person's source."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact match on the person's status."
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact email match, case-insensitive."
+          },
+          {
+            "name": "linkedin_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact LinkedIn URL match. Trailing slash and `www` variants match."
+          },
+          {
+            "name": "has_email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Only people with, or without, an email."
+          },
+          {
+            "name": "has_linkedin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Only people with, or without, a LinkedIn URL."
+          },
+          {
+            "name": "icp_fit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Only ICP fits (score 70 or higher), or only non-fits."
+          },
+          {
+            "name": "min_icp_score",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "description": "Minimum ICP score."
+          },
+          {
+            "name": "last_activity_after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+[smhd]$"
+            },
+            "description": "Active within this window, for example `7d`.",
+            "example": "7d"
+          },
+          {
+            "name": "last_activity_before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+[smhd]$"
+            },
+            "description": "Quiet for at least this long, for example `30d`. Includes people with no activity.",
+            "example": "30d"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "last_activity",
+                "last_activity_asc",
+                "icp_score",
+                "icp_score_asc",
+                "recently_added"
+              ],
+              "default": "last_activity"
+            },
+            "description": "Sort order. Unknown values return 400."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Page size."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Rows to skip. Wins over `page`."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "1-based page number. Used when `offset` is not set."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of people.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "people": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Person"
+                      }
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "people": [
+                    {
+                      "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                      "email": "sarah@acme.com",
+                      "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                      "first_name": "Sarah",
+                      "last_name": "Chen",
+                      "job_title": "VP Sales",
+                      "seniority": "vp",
+                      "company": "Acme",
+                      "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                      "pipeline_stage": "discovery",
+                      "source": "hubspot",
+                      "icp_score": 82,
+                      "icp_fit": true,
+                      "first_seen_at": "2026-06-02T09:14:00Z",
+                      "last_activity_at": "2026-09-24T15:02:00Z"
+                    }
+                  ],
+                  "limit": 50,
+                  "offset": 0,
+                  "has_more": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported query parameter or sort.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unknown_param": {
+                    "summary": "unknown_query_param",
+                    "value": {
+                      "error": "unknown_query_param",
+                      "detail": "unsupported query param(s): stage",
+                      "supported": [
+                        "search",
+                        "pipeline_stage",
+                        "..."
+                      ]
+                    }
+                  },
+                  "unknown_sort": {
+                    "summary": "unknown_sort",
+                    "value": {
+                      "error": "unknown_sort",
+                      "detail": "unsupported sort 'name'",
+                      "supported": [
+                        "last_activity",
+                        "last_activity_asc",
+                        "icp_score",
+                        "icp_score_asc",
+                        "recently_added"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "People"
+        ],
+        "operationId": "createPerson",
+        "summary": "Create a person",
+        "description": "Create a person, or update the existing one when an identifier already matches. Safe to call repeatedly. Needs at least one identifier.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonWrite"
+              },
+              "example": {
+                "email": "sarah@acme.com",
+                "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                "first_name": "Sarah",
+                "last_name": "Chen",
+                "job_title": "VP Sales",
+                "company": "Acme"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The person.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "person": {
+                      "$ref": "#/components/schemas/Person"
+                    }
+                  }
+                },
+                "example": {
+                  "person": {
+                    "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "email": "sarah@acme.com",
+                    "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                    "first_name": "Sarah",
+                    "last_name": "Chen",
+                    "job_title": "VP Sales",
+                    "seniority": "vp",
+                    "company": "Acme",
+                    "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                    "pipeline_stage": "discovery",
+                    "source": "hubspot",
+                    "icp_score": 82,
+                    "icp_fit": true,
+                    "first_seen_at": "2026-06-02T09:14:00Z",
+                    "last_activity_at": "2026-09-24T15:02:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No identifier in the body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "identifier_required",
+                  "detail": "pass at least one of: email, linkedin_url, linkedin_member_id, hubspot_id, pipedrive_id, apollo_id, attio_id"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/people/{id}": {
+      "patch": {
+        "tags": [
+          "People"
+        ],
+        "operationId": "updatePerson",
+        "summary": "Update a person",
+        "description": "Attach identifiers and assert facts on an existing person. Asserted facts are sticky. Only the fields you send change.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity UUID, email, LinkedIn URL, or domain.",
+            "example": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonWrite"
+              },
+              "example": {
+                "pipeline_stage": "meeting_booked",
+                "job_title": "CRO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated person, or candidates when the identifier is ambiguous.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "person": {
+                          "$ref": "#/components/schemas/Person"
+                        },
+                        "claims_written": {
+                          "type": "integer",
+                          "description": "Facts written or replaced."
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/Ambiguous"
+                    }
+                  ]
+                },
+                "example": {
+                  "person": {
+                    "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "email": "sarah@acme.com",
+                    "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                    "first_name": "Sarah",
+                    "last_name": "Chen",
+                    "job_title": "CRO",
+                    "seniority": "vp",
+                    "company": "Acme",
+                    "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                    "pipeline_stage": "meeting_booked",
+                    "source": "hubspot",
+                    "icp_score": 82,
+                    "icp_fit": true,
+                    "first_seen_at": "2026-06-02T09:14:00Z",
+                    "last_activity_at": "2026-09-24T15:02:00Z"
+                  },
+                  "claims_written": 2
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/EntityNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/people/{id}/enrich": {
+      "post": {
+        "tags": [
+          "People"
+        ],
+        "operationId": "enrichPerson",
+        "summary": "Enrich a person",
+        "description": "Run the workspace's connected enrichment providers on one person, in order Apollo, Prospeo, Findymail. The first provider that returns data wins. Runs on your own provider keys.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Person entity UUID.",
+            "example": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enrich again even if the person was enriched before."
+                  }
+                }
+              },
+              "example": {
+                "force": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The person after enrichment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "person": {
+                      "$ref": "#/components/schemas/Person"
+                    },
+                    "enriched": {
+                      "type": "boolean",
+                      "description": "True when a provider returned new data."
+                    },
+                    "provider": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "apollo",
+                        "prospeo",
+                        "findymail",
+                        null
+                      ]
+                    },
+                    "fields_added": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "person": {
+                    "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "email": "sarah@acme.com",
+                    "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                    "first_name": "Sarah",
+                    "last_name": "Chen",
+                    "job_title": "VP Sales",
+                    "seniority": "vp",
+                    "company": "Acme",
+                    "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                    "pipeline_stage": "discovery",
+                    "source": "hubspot",
+                    "icp_score": 82,
+                    "icp_fit": true,
+                    "first_seen_at": "2026-06-02T09:14:00Z",
+                    "last_activity_at": "2026-09-24T15:02:00Z",
+                    "phone": "+1 415 555 0142"
+                  },
+                  "enriched": true,
+                  "provider": "apollo",
+                  "fields_added": [
+                    "phone",
+                    "seniority",
+                    "company_size"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "description": "Operations limit reached, or the plan's managed enrichment allowance is used up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "ops": {
+                    "summary": "upgrade_required",
+                    "value": {
+                      "error": "upgrade_required",
+                      "reason": "ops_limit_reached"
+                    }
+                  },
+                  "quota": {
+                    "summary": "enrichment_quota_exhausted",
+                    "value": {
+                      "error": "enrichment_quota_exhausted"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "404": {
+            "description": "No person with that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "person_not_found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "No enrichment provider is connected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "no_enrichment_provider"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/accounts/{id}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "getAccount",
+        "summary": "Get an account",
+        "description": "The full account record for a person or company. Facts with confidence and freshness, durable facts, saved documents, the buying committee, ICP fit, and the timeline.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity UUID, email, LinkedIn URL, or domain.",
+            "example": "sarah@acme.com"
+          },
+          {
+            "name": "intent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft_email",
+                "follow_up",
+                "meeting_prep",
+                "call_prep",
+                "account_review"
+              ]
+            },
+            "description": "Adds `key_activity` and `activity_summary`, ranked for this task."
+          },
+          {
+            "name": "compress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1",
+                "true"
+              ]
+            },
+            "description": "Return only the ranked view and drop `recent_observations`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account record, or candidates when the identifier is ambiguous.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Account"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Ambiguous"
+                    }
+                  ]
+                },
+                "example": {
+                  "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                  "name": "Sarah Chen",
+                  "type": "person",
+                  "claims": {
+                    "job_title": {
+                      "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                      "property": "job_title",
+                      "value": "VP Sales",
+                      "confidence": 0.92,
+                      "epistemic_class": "observed",
+                      "freshness": "fresh",
+                      "decays_at": null,
+                      "observation_count": 3,
+                      "last_observed_at": "2026-09-12T10:00:00Z"
+                    },
+                    "pipeline_stage": {
+                      "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                      "property": "pipeline_stage",
+                      "value": "discovery",
+                      "confidence": 1,
+                      "epistemic_class": "observed",
+                      "freshness": "fresh",
+                      "decays_at": null,
+                      "observation_count": 1,
+                      "last_observed_at": "2026-09-24T15:02:00Z"
+                    }
+                  },
+                  "facts": [
+                    {
+                      "category": "Budget",
+                      "content": "Budget approved for Q4, owned by the CRO.",
+                      "date": "2026-09-24",
+                      "quote": "We have the budget signed off for Q4.",
+                      "speaker": "Sarah Chen",
+                      "source": "fireflies"
+                    }
+                  ],
+                  "documents": [
+                    {
+                      "type": "meeting_brief",
+                      "title": "Discovery prep",
+                      "date": "2026-09-23",
+                      "snippet": "Goals for the call..."
+                    }
+                  ],
+                  "stakeholders": [],
+                  "committee": null,
+                  "icp": {
+                    "score": 82,
+                    "fit": true,
+                    "tier": "tier_1",
+                    "reason": "VP-level buyer, 200-500 employees, B2B SaaS",
+                    "scored_at": "2026-09-20T08:00:00Z",
+                    "history": [],
+                    "outcome_score": null
+                  },
+                  "key_activity": [
+                    {
+                      "what": "Replied to email",
+                      "source": "gmail",
+                      "when": "2026-09-24T15:02:00Z",
+                      "detail": "Thursday works. Can you bring pricing for 40 seats?"
+                    }
+                  ],
+                  "activity_summary": {
+                    "total_observations": 37,
+                    "by_type": {
+                      "interaction.email_replied": 6
+                    },
+                    "first_seen": "2026-06-02T09:14:00Z",
+                    "last_seen": "2026-09-24T15:02:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/EntityNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/context": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "getContext",
+        "summary": "Get context",
+        "description": "Ranked, budget-fit context on one person or company for a specific task. Call it before drafting outreach or preparing for a meeting.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "focus"
+                ],
+                "properties": {
+                  "focus": {
+                    "type": "string",
+                    "description": "Email, LinkedIn URL, domain, or entity UUID."
+                  },
+                  "intent": {
+                    "type": "string",
+                    "enum": [
+                      "draft_email",
+                      "follow_up",
+                      "meeting_prep",
+                      "call_prep",
+                      "account_review"
+                    ],
+                    "default": "account_review"
+                  },
+                  "budget_tokens": {
+                    "type": "integer",
+                    "description": "Approximate token budget for the block."
+                  }
+                }
+              },
+              "example": {
+                "focus": "sarah@acme.com",
+                "intent": "meeting_prep"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The context block, or candidates when `focus` is ambiguous.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Context"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Ambiguous"
+                    }
+                  ]
+                },
+                "example": {
+                  "entity": {
+                    "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "type": "person"
+                  },
+                  "intent": "meeting_prep",
+                  "summary": "Sarah Chen, VP Sales at Acme. In discovery since Sep 24. Budget approved for Q4.",
+                  "claims": [
+                    {
+                      "property": "job_title",
+                      "value": "VP Sales"
+                    },
+                    {
+                      "property": "company_size",
+                      "value": "200-500",
+                      "freshness": "aging",
+                      "since": "2026-04-02"
+                    }
+                  ],
+                  "workspace": [],
+                  "facts": [
+                    {
+                      "category": "Budget",
+                      "content": "Budget approved for Q4, owned by the CRO.",
+                      "date": "2026-09-24"
+                    }
+                  ],
+                  "timeline": [
+                    {
+                      "when": "2026-09-24T15:02:00Z",
+                      "type": "interaction.email_replied",
+                      "tier": "full",
+                      "summary": "Thursday works. Can you bring pricing for 40 seats?"
+                    }
+                  ],
+                  "stakeholders": [],
+                  "committee": null,
+                  "predictions": [],
+                  "documents": [],
+                  "icp": {
+                    "score": 82,
+                    "fit": true,
+                    "tier": "tier_1",
+                    "reason": "VP-level buyer, 200-500 employees, B2B SaaS",
+                    "scored_at": "2026-09-20T08:00:00Z",
+                    "history": [],
+                    "outcome_score": null
+                  },
+                  "meta": {
+                    "token_estimate": 1240,
+                    "claims_total": 41,
+                    "claims_returned": 12,
+                    "facts_total": 9,
+                    "facts_returned": 9,
+                    "timeline_events": 14
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing `focus` or unknown `intent`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "focus_required": {
+                    "summary": "focus_required",
+                    "value": {
+                      "error": "focus_required"
+                    }
+                  },
+                  "invalid_intent": {
+                    "summary": "invalid_intent",
+                    "value": {
+                      "error": "invalid_intent",
+                      "valid_intents": [
+                        "draft_email",
+                        "follow_up",
+                        "meeting_prep",
+                        "call_prep",
+                        "account_review"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/EntityNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/query": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "query",
+        "summary": "Query",
+        "description": "Retrieve activity or facts across many accounts. Nous retrieves and compacts. Your agent finds the pattern.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scope": {
+                    "$ref": "#/components/schemas/QueryScope"
+                  },
+                  "without": {
+                    "$ref": "#/components/schemas/QueryScope",
+                    "description": "Subtract entities matching this scope."
+                  },
+                  "return": {
+                    "type": "string",
+                    "enum": [
+                      "observations",
+                      "entities"
+                    ],
+                    "default": "observations"
+                  },
+                  "question": {
+                    "type": "string",
+                    "description": "What you want to learn. Enables semantic ranking and is echoed back."
+                  }
+                }
+              },
+              "examples": {
+                "no_reply": {
+                  "summary": "Emailed in 5 days, no reply",
+                  "value": {
+                    "scope": {
+                      "property": "interaction.email_sent",
+                      "since_days": 5
+                    },
+                    "without": {
+                      "property": "interaction.email_replied",
+                      "since_days": 5
+                    },
+                    "return": "entities"
+                  }
+                },
+                "funnel": {
+                  "summary": "Funnel by stage",
+                  "value": {
+                    "scope": {
+                      "kind": "state",
+                      "property": "pipeline_stage"
+                    },
+                    "return": "entities"
+                  }
+                },
+                "facts": {
+                  "summary": "Search facts across accounts",
+                  "value": {
+                    "scope": {
+                      "facts": true
+                    },
+                    "question": "Which accounts want to replace Clay?",
+                    "return": "entities"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result. `scope.reporting`, `scope.attention`, and `scope.foundation` return their own shapes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/QueryResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Ambiguous"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  ]
+                },
+                "example": {
+                  "scope": {
+                    "property": "interaction.email_sent",
+                    "since_days": 5
+                  },
+                  "without": {
+                    "property": "interaction.email_replied",
+                    "since_days": 5
+                  },
+                  "mode": "structured",
+                  "return": "entities",
+                  "matched": 23,
+                  "returned": 23,
+                  "sampled": false,
+                  "items": [
+                    {
+                      "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                      "entity_name": "Sarah Chen",
+                      "matches": 2,
+                      "most_recent_at": "2026-09-28T09:00:00Z",
+                      "most_recent_type": "interaction.email_sent",
+                      "most_recent_source": "instantly",
+                      "most_recent_summary": "Follow-up on pricing"
+                    }
+                  ],
+                  "rollups": {
+                    "by_type": {
+                      "interaction.email_sent": 31
+                    },
+                    "by_source": {
+                      "instantly": 31
+                    }
+                  },
+                  "meta": {
+                    "token_estimate": 910
+                  },
+                  "question": null
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/attention": {
+      "get": {
+        "tags": [
+          "Attention"
+        ],
+        "operationId": "getAttention",
+        "summary": "Get attention",
+        "description": "What to work next across the workspace, ranked. Each item carries a suggested action.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Maximum items."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked items and counts per kind.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AttentionItem"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "going_dark": {
+                          "type": "integer"
+                        },
+                        "decayed_facts": {
+                          "type": "integer"
+                        },
+                        "upcoming_meetings": {
+                          "type": "integer"
+                        },
+                        "open_commitments": {
+                          "type": "integer"
+                        },
+                        "hot_intent": {
+                          "type": "integer"
+                        },
+                        "flags": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "items": [
+                    {
+                      "kind": "upcoming_meeting",
+                      "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                      "entity_name": "Sarah Chen",
+                      "what": "Discovery call with Sarah Chen",
+                      "suggested_action": "Prep with get_context intent meeting_prep",
+                      "age_days": 0,
+                      "when": "2026-10-02T15:00:00Z",
+                      "source": "google_calendar"
+                    },
+                    {
+                      "kind": "going_dark",
+                      "entity_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                      "entity_name": "Northwind",
+                      "what": "No activity in 34 days",
+                      "suggested_action": "Send a re-engagement note",
+                      "age_days": 34,
+                      "source": "gmail"
+                    }
+                  ],
+                  "meta": {
+                    "going_dark": 7,
+                    "decayed_facts": 2,
+                    "upcoming_meetings": 3,
+                    "open_commitments": 4,
+                    "hot_intent": 1,
+                    "flags": 0
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/insights": {
+      "get": {
+        "tags": [
+          "Insights"
+        ],
+        "operationId": "listInsights",
+        "summary": "List insights",
+        "description": "What customers told you about your product, sales, success, and market, tied to the account that said it. Filter by lane and subtype.",
+        "parameters": [
+          {
+            "name": "lane",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/InsightLane"
+            },
+            "description": "Who has to act."
+          },
+          {
+            "name": "subtype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/InsightSubtype"
+            },
+            "description": "What kind of work. Must belong to `lane` when both are set."
+          },
+          {
+            "name": "focus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only insights from one account. Email, LinkedIn URL, domain, or entity UUID."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Only insights that occurred at or after this time."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 200
+            },
+            "description": "Page size."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Rows to skip."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of insights and the workspace taxonomy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "insights": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Insight"
+                      }
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "taxonomy": {
+                      "$ref": "#/components/schemas/InsightTaxonomy"
+                    }
+                  }
+                },
+                "example": {
+                  "insights": [
+                    {
+                      "id": "5d0c2b7e-1f3a-4c8d-9e6b-2a7f4c1d8e30",
+                      "lane": "product",
+                      "subtype": "feature",
+                      "content": "Wants CRM sync to write call notes back to HubSpot.",
+                      "quote": "If it doesn't land in HubSpot, my reps won't see it.",
+                      "speaker": "Sarah Chen",
+                      "account": {
+                        "entity_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                        "name": "Acme"
+                      },
+                      "source_ref": "source://fireflies/01J8ZK2",
+                      "occurred_at": "2026-09-24T15:00:00Z",
+                      "tags": [
+                        "CRM integration"
+                      ]
+                    }
+                  ],
+                  "limit": 50,
+                  "offset": 0,
+                  "has_more": false,
+                  "taxonomy": {
+                    "lanes": [
+                      {
+                        "key": "product",
+                        "label": "Product"
+                      },
+                      {
+                        "key": "sales",
+                        "label": "Sales"
+                      },
+                      {
+                        "key": "success",
+                        "label": "Customer success"
+                      },
+                      {
+                        "key": "market",
+                        "label": "Market"
+                      }
+                    ],
+                    "subtypes": [
+                      {
+                        "key": "bug",
+                        "lane": "product",
+                        "label": "Bug",
+                        "definition": "something in our product is broken or fails"
+                      },
+                      {
+                        "key": "friction",
+                        "lane": "product",
+                        "label": "Friction",
+                        "definition": "it works, but it is manual, slow, clunky or confusing to use"
+                      },
+                      {
+                        "key": "feature",
+                        "lane": "product",
+                        "label": "Feature request",
+                        "definition": "they want a capability we do not have"
+                      },
+                      {
+                        "key": "objection",
+                        "lane": "sales",
+                        "label": "Objection",
+                        "definition": "a reason the buyer gives against buying, switching or renewing with us, other than price"
+                      },
+                      {
+                        "key": "pricing",
+                        "lane": "sales",
+                        "label": "Pricing",
+                        "definition": "cost, fees, per-use charges, discounts, value for money"
+                      },
+                      {
+                        "key": "pitch",
+                        "lane": "sales",
+                        "label": "Pitch & messaging",
+                        "definition": "the buyer misunderstood or questioned what we are or do, or reacted to how we framed it"
+                      },
+                      {
+                        "key": "setup",
+                        "lane": "success",
+                        "label": "Setup",
+                        "definition": "getting it running: install, integrations to switch on, logins, access, provisioning"
+                      },
+                      {
+                        "key": "training",
+                        "lane": "success",
+                        "label": "Training & adoption",
+                        "definition": "staff not using it, needing training, materials, champions or follow-up"
+                      },
+                      {
+                        "key": "partners",
+                        "lane": "market",
+                        "label": "Competitors & partners",
+                        "definition": "other vendors and incumbent tools, partners, and the rules they set"
+                      },
+                      {
+                        "key": "buyers",
+                        "lane": "market",
+                        "label": "Who buys",
+                        "definition": "roles, decision makers, customer segments and how customers operate"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown lane or subtype, or a subtype outside the lane.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_lane": {
+                    "summary": "invalid_lane",
+                    "value": {
+                      "error": "invalid_lane"
+                    }
+                  },
+                  "invalid_subtype": {
+                    "summary": "invalid_subtype",
+                    "value": {
+                      "error": "invalid_subtype"
+                    }
+                  },
+                  "subtype_not_in_lane": {
+                    "summary": "subtype_not_in_lane",
+                    "value": {
+                      "error": "subtype_not_in_lane"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Insights"
+        ],
+        "operationId": "recordInsights",
+        "summary": "Record insights",
+        "description": "Record what a call or email taught you about your own business. Workspace-level, with no account. Near-duplicates of existing insights are skipped.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "insights"
+                ],
+                "properties": {
+                  "insights": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "category",
+                        "content"
+                      ],
+                      "properties": {
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "product",
+                            "positioning",
+                            "market",
+                            "buyer"
+                          ],
+                          "description": "Items with any other category are dropped."
+                        },
+                        "content": {
+                          "type": "string",
+                          "minLength": 8,
+                          "description": "The insight in one sentence."
+                        },
+                        "quote": {
+                          "type": "string",
+                          "description": "The verbatim line that supports it."
+                        },
+                        "speaker": {
+                          "type": "string",
+                          "description": "Who said it."
+                        }
+                      }
+                    }
+                  },
+                  "source_label": {
+                    "type": "string",
+                    "description": "Where these came from, for example `Acme discovery call`."
+                  },
+                  "occurred_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "insights": [
+                  {
+                    "category": "product",
+                    "content": "Call notes need to land in HubSpot for reps to use them.",
+                    "quote": "If it doesn't land in HubSpot, my reps won't see it.",
+                    "speaker": "Sarah Chen"
+                  }
+                ],
+                "source_label": "Acme discovery call",
+                "occurred_at": "2026-09-24T15:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "How many were written.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "written": {
+                      "type": "integer",
+                      "description": "Insights written. Lower than `submitted` when some were duplicates or had an unknown category."
+                    },
+                    "submitted": {
+                      "type": "integer",
+                      "description": "Insights that passed validation."
+                    }
+                  }
+                },
+                "example": {
+                  "written": 1,
+                  "submitted": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No insights, or none with content of 8 characters or more.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insights_required": {
+                    "summary": "insights_required",
+                    "value": {
+                      "error": "insights_required"
+                    }
+                  },
+                  "no_valid_insights": {
+                    "summary": "no_valid_insights",
+                    "value": {
+                      "error": "no_valid_insights",
+                      "detail": "each insight needs a category and content (≥8 chars)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/score": {
+      "post": {
+        "tags": [
+          "ICP"
+        ],
+        "operationId": "score",
+        "summary": "Score",
+        "description": "Score a lead against your ICP. Pass one of `identifier`, `identifiers`, `attributes`, or `leads`. Graph leads are scored and the score is kept. Leads scored from attributes are scored inline and nothing is written.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "description": "One lead in the graph. Email, domain, LinkedIn URL, or entity UUID."
+                  },
+                  "identifiers": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 100 graph leads."
+                  },
+                  "attributes": {
+                    "$ref": "#/components/schemas/ScoreAttributes"
+                  },
+                  "leads": {
+                    "type": "array",
+                    "maxItems": 1000,
+                    "items": {
+                      "$ref": "#/components/schemas/ScoreAttributes"
+                    },
+                    "description": "Up to 1000 cold leads, scored inline. Add `ref` or `id` to a lead to get it echoed back. A lead may also be `{ref, attributes}`."
+                  },
+                  "intent": {
+                    "type": "string",
+                    "description": "Why you are scoring. Recorded, does not change the score."
+                  }
+                }
+              },
+              "examples": {
+                "one": {
+                  "summary": "One lead in the graph",
+                  "value": {
+                    "identifier": "sarah@acme.com"
+                  }
+                },
+                "cold": {
+                  "summary": "A cold lead",
+                  "value": {
+                    "attributes": {
+                      "job_title": "VP Sales",
+                      "industry": "Software",
+                      "employee_count": 300
+                    }
+                  }
+                },
+                "list": {
+                  "summary": "An external list",
+                  "value": {
+                    "leads": [
+                      {
+                        "ref": "row-2",
+                        "title": "Head of RevOps",
+                        "headline": "RevOps at a Series B SaaS"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One result, or `{results}` for batches. `leads` batches also return `persisted: false`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ScoreResult"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ScoreResult"
+                          }
+                        },
+                        "persisted": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "resolved": true,
+                  "scored": true,
+                  "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                  "icp": {
+                    "score": 82,
+                    "fit": true,
+                    "tier": "tier_1",
+                    "reason": "VP-level buyer, 200-500 employees, B2B SaaS",
+                    "scored_at": "2026-09-20T08:00:00Z"
+                  },
+                  "intent": {
+                    "score": 64,
+                    "band": "Warm"
+                  },
+                  "layered": {
+                    "priority": 74,
+                    "band": "high",
+                    "layers": {
+                      "fit": 82,
+                      "pain": 70,
+                      "intent": 64
+                    },
+                    "missing": [
+                      "ability"
+                    ],
+                    "play": "work now — high priority"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nothing to score, or a batch is empty or too large.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "identifier_required": {
+                    "summary": "identifier_required",
+                    "value": {
+                      "error": "identifier_required"
+                    }
+                  },
+                  "identifiers_empty": {
+                    "summary": "identifiers_empty",
+                    "value": {
+                      "error": "identifiers_empty"
+                    }
+                  },
+                  "leads_empty": {
+                    "summary": "leads_empty",
+                    "value": {
+                      "error": "leads_empty"
+                    }
+                  },
+                  "batch_too_large": {
+                    "summary": "batch_too_large",
+                    "value": {
+                      "error": "batch_too_large",
+                      "max": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/foundations/icp": {
+      "post": {
+        "tags": [
+          "ICP"
+        ],
+        "operationId": "setIcp",
+        "summary": "Create the ICP",
+        "description": "Set or replace the workspace ICP from markdown. The first time, Nous also builds the scoring model from it, so `score` works right away. An existing model is kept.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "body_md"
+                ],
+                "properties": {
+                  "body_md": {
+                    "type": "string",
+                    "description": "The full ICP as markdown. Who the buyer is, who is not, and the scoring rules."
+                  },
+                  "file_path": {
+                    "type": "string",
+                    "description": "The repo file the ICP lives in, if any."
+                  }
+                }
+              },
+              "example": {
+                "body_md": "# ICP\n\n## Buyer\nVP Sales or CRO at a B2B SaaS company with 50 to 500 employees.\n\n## Not a fit\nAgencies. Companies under 20 people.\n",
+                "file_path": "context/icp.md"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The saved ICP and the model build result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "foundation": {
+                      "$ref": "#/components/schemas/Foundation"
+                    },
+                    "model": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "created",
+                            "exists",
+                            "no_icp_memory",
+                            "translation_failed",
+                            "build_failed"
+                          ]
+                        },
+                        "signals": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "foundation": {
+                    "id": "0b8e3f2a-6c1d-4e9a-b7f5-3d2c1a0e9f84",
+                    "kind": "icp",
+                    "title": "ICP",
+                    "body_md": "# ICP\n\n## Buyer\n...",
+                    "source": "claude_code",
+                    "file_path": "context/icp.md",
+                    "version": 1,
+                    "updated_at": "2026-09-30T10:00:00Z"
+                  },
+                  "model": {
+                    "status": "created",
+                    "signals": [
+                      {
+                        "key": "vp_sales",
+                        "label": "VP Sales or CRO",
+                        "weight": 20
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`body_md` is missing or empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "body_md_required"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/workspace/closed-deals": {
+      "post": {
+        "tags": [
+          "ICP"
+        ],
+        "operationId": "trainIcp",
+        "summary": "Train from closed deals",
+        "description": "Train the ICP model on real won and lost deals. Nous enriches each domain, links the contacts it already has there, learns the signals that separate wins from losses, and rescores open accounts. Up to 40 deals per list.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "won": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClosedDeal"
+                    }
+                  },
+                  "lost": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClosedDeal"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "won": [
+                  "acme.com",
+                  {
+                    "domain": "globex.com",
+                    "amount": 48000,
+                    "currency": "USD",
+                    "closed_at": "2026-08-14"
+                  }
+                ],
+                "lost": [
+                  "initech.com"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "What the model learned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "won": {
+                      "type": "integer"
+                    },
+                    "lost": {
+                      "type": "integer"
+                    },
+                    "enriched": {
+                      "type": "integer",
+                      "description": "Companies enriched."
+                    },
+                    "surfaced": {
+                      "type": "integer",
+                      "description": "New signals added to the model."
+                    },
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "lift",
+                        "winners"
+                      ],
+                      "description": "`lift` compares won against lost. `winners` uses won deals only."
+                    },
+                    "linked": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "domain": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "discovered": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string"
+                          },
+                          "weight": {
+                            "type": "number"
+                          },
+                          "note": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "ok": true,
+                  "won": 2,
+                  "lost": 1,
+                  "enriched": 3,
+                  "surfaced": 2,
+                  "mode": "lift",
+                  "linked": [
+                    {
+                      "domain": "acme.com",
+                      "name": "Sarah Chen"
+                    }
+                  ],
+                  "discovered": [
+                    {
+                      "label": "Employees 200-500",
+                      "weight": 15,
+                      "note": "on 2 of your 2 won deals"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No deals in the body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "need_more_deals",
+                  "message": "Give at least one closed-won or closed-lost domain."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/notes": {
+      "post": {
+        "tags": [
+          "Notes"
+        ],
+        "operationId": "addNote",
+        "summary": "Add a note",
+        "description": "Keep a note, brief, or transcript on a person or company. Append-only and dated. Creates the person or company when the email, LinkedIn URL, or domain is new.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "focus",
+                  "content"
+                ],
+                "properties": {
+                  "focus": {
+                    "type": "string",
+                    "description": "Email, LinkedIn URL, domain, or entity UUID. Never a bare name."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The note text. A line or a full transcript."
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "note",
+                      "meeting_brief",
+                      "transcript",
+                      "meeting_notes",
+                      "pre_meeting",
+                      "research"
+                    ],
+                    "default": "note"
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "The relevant date, for example the meeting date. Defaults to now."
+                  }
+                }
+              },
+              "example": {
+                "focus": "sarah@acme.com",
+                "type": "meeting_brief",
+                "title": "Discovery prep",
+                "content": "Goals: confirm budget owner, map the committee, agree a pilot scope.",
+                "date": "2026-10-02"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The saved note.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "note": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "entity_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "metadata": {
+                          "type": "object"
+                        }
+                      },
+                      "additionalProperties": true
+                    },
+                    "entity_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "doc_type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "note": {
+                    "id": "7a2c9e1f-3b4d-4f6a-8c0e-1d2b3a4c5e6f",
+                    "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                    "category": "Meeting Brief",
+                    "content": "Goals: confirm budget owner, map the committee, agree a pilot scope.",
+                    "source": "agent",
+                    "metadata": {
+                      "doc_type": "meeting_brief",
+                      "title": "Discovery prep",
+                      "date": "2026-10-02"
+                    }
+                  },
+                  "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                  "doc_type": "meeting_brief"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing `focus` or `content`, or `focus` is a bare name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "focus_and_content_required": {
+                    "summary": "focus_and_content_required",
+                    "value": {
+                      "error": "focus_and_content_required"
+                    }
+                  },
+                  "invalid_focus": {
+                    "summary": "invalid_focus",
+                    "value": {
+                      "error": "invalid_focus",
+                      "detail": "provide an entity id, email, LinkedIn URL, or domain — not a bare name"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Notes"
+        ],
+        "operationId": "listNotes",
+        "summary": "List notes",
+        "description": "Saved notes, newest first. Optionally for one person or company.",
+        "parameters": [
+          {
+            "name": "focus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only notes on this person or company. Email, LinkedIn URL, domain, or entity UUID."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Page size."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Rows to skip."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of notes, or candidates when `focus` is ambiguous.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "notes": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/NoteSummary"
+                          }
+                        },
+                        "count": {
+                          "type": "integer"
+                        },
+                        "has_more": {
+                          "type": "boolean",
+                          "description": "True when the page is full."
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/Ambiguous"
+                    }
+                  ]
+                },
+                "example": {
+                  "notes": [
+                    {
+                      "id": "7a2c9e1f-3b4d-4f6a-8c0e-1d2b3a4c5e6f",
+                      "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                      "type": "meeting_brief",
+                      "title": "Discovery prep",
+                      "date": "2026-10-02",
+                      "snippet": "Goals: confirm budget owner, map the committee, agree a pilot scope."
+                    }
+                  ],
+                  "count": 1,
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/EntityNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
   "components": {
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Workspace API key. Create at Settings → API Keys. Workspace-scoped — no separate workspace ID required."
+        "description": "Workspace API key. Create one in **Settings → API keys**."
+      },
+      "apiKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "The same key, sent as a header."
       }
     },
     "schemas": {
-      "AmbiguousFocus": {
+      "Error": {
         "type": "object",
-        "description": "Returned when a name matches several candidates. Pick one and re-call with focus = candidate.entity_id.",
+        "description": "Every error response. `error` is a stable machine code. Some errors add fields such as `detail`, `supported`, `max`, or `reason`.",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Machine-readable error code."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Human-readable explanation, when there is one."
+          }
+        },
+        "additionalProperties": true
+      },
+      "FocusCandidate": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Company or title, to tell candidates apart."
+          },
+          "matched_on": {
+            "type": "string",
+            "description": "How the candidate matched: `exact`, `prefix`, `contains`, or `company`."
+          }
+        }
+      },
+      "Ambiguous": {
+        "type": "object",
+        "description": "Returned with HTTP 200 when the identifier matches more than one record. Pick a candidate and call again with its `entity_id`.",
+        "required": [
+          "status",
+          "candidates"
+        ],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "ambiguous"
-            ]
+            "const": "ambiguous"
           },
           "candidates": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "entity_id": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "detail": {
-                  "type": "string",
-                  "description": "Short context line — e.g. 'VP Sales @ Acme'"
-                }
-              }
+              "$ref": "#/components/schemas/FocusCandidate"
             }
           }
+        },
+        "example": {
+          "status": "ambiguous",
+          "candidates": [
+            {
+              "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+              "name": "Sarah Chen",
+              "detail": "VP Sales at Acme",
+              "matched_on": "exact"
+            },
+            {
+              "entity_id": "c41d9e0a-7b2f-4a61-8e3c-5f9a0b2d6e71",
+              "name": "Sarah Chen",
+              "detail": "Founder at Northwind",
+              "matched_on": "exact"
+            }
+          ]
         }
+      },
+      "Person": {
+        "type": "object",
+        "description": "A person as the People view projects it. Fields are null when unknown. Extra fields may appear.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entity UUID."
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Same as `id`. Present on create, update, and enrich responses."
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "linkedin_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "job_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "seniority": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "department": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The company entity this person works at."
+          },
+          "domain": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "industry": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company_size": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "photo_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pipeline_stage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "identified",
+              "connected",
+              "interested",
+              "meeting_booked",
+              "discovery",
+              "demo",
+              "negotiation",
+              "closed_won",
+              "closed_lost",
+              "disqualified",
+              "churned",
+              null
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "icp_score": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "icp_fit": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "True when `icp_score` is 70 or higher."
+          },
+          "first_seen_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_activity_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "enriched_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": true,
+        "example": {
+          "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+          "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+          "email": "sarah@acme.com",
+          "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+          "first_name": "Sarah",
+          "last_name": "Chen",
+          "job_title": "VP Sales",
+          "seniority": "vp",
+          "company": "Acme",
+          "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+          "pipeline_stage": "discovery",
+          "source": "hubspot",
+          "icp_score": 82,
+          "icp_fit": true,
+          "first_seen_at": "2026-06-02T09:14:00Z",
+          "last_activity_at": "2026-09-24T15:02:00Z"
+        }
+      },
+      "PersonWrite": {
+        "type": "object",
+        "description": "Identifier fields attach to the person. Every other field is written as an asserted fact. Asserted facts are sticky, so incoming activity does not overwrite them.",
+        "properties": {
+          "email": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "One email or a list."
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "personal_email": {
+            "type": "string"
+          },
+          "work_email": {
+            "type": "string"
+          },
+          "secondary_email": {
+            "type": "string"
+          },
+          "other_email": {
+            "type": "string"
+          },
+          "linkedin_url": {
+            "type": "string"
+          },
+          "linkedin_member_id": {
+            "type": "string"
+          },
+          "hubspot_id": {
+            "type": "string"
+          },
+          "pipedrive_id": {
+            "type": "string"
+          },
+          "apollo_id": {
+            "type": "string"
+          },
+          "attio_id": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "job_title": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "pipeline_stage": {
+            "type": "string",
+            "enum": [
+              "identified",
+              "connected",
+              "interested",
+              "meeting_booked",
+              "discovery",
+              "demo",
+              "negotiation",
+              "closed_won",
+              "closed_lost",
+              "disqualified",
+              "churned"
+            ]
+          }
+        },
+        "additionalProperties": true
       },
       "Claim": {
         "type": "object",
-        "description": "A derived fact about an entity. Every claim carries its epistemics.",
         "properties": {
-          "property": {
+          "entity_id": {
             "type": "string",
-            "description": "e.g. 'title', 'stage', 'intent'"
+            "format": "uuid"
+          },
+          "property": {
+            "type": "string"
           },
           "value": {},
           "confidence": {
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          },
+          "epistemic_class": {
+            "type": "string",
+            "description": "`observed`, `asserted`, `inferred`, and so on."
           },
           "freshness": {
             "type": "string",
@@ -79,33 +2853,36 @@
               "expired"
             ]
           },
-          "epistemic_class": {
-            "type": "string",
-            "enum": [
-              "observed",
-              "derived",
-              "asserted"
-            ]
+          "decays_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
-          "sources": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "observation_count": {
+            "type": "integer"
           },
           "last_observed_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
           }
         }
       },
       "Observation": {
         "type": "object",
-        "required": [
-          "kind",
-          "property"
-        ],
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "kind": {
             "type": "string",
             "enum": [
@@ -114,7 +2891,8 @@
             ]
           },
           "property": {
-            "type": "string"
+            "type": "string",
+            "description": "For example `interaction.email_replied`."
           },
           "value": {},
           "source": {
@@ -123,21 +2901,351 @@
           "method": {
             "type": "string"
           },
+          "source_confidence": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "observed_at": {
             "type": "string",
             "format": "date-time"
           },
-          "external_id": {
-            "type": "string"
-          },
-          "raw": {
-            "type": "object"
+          "ingested_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
-      "AccountRecord": {
+      "Fact": {
+        "type": "object",
+        "description": "A durable fact learned about the account.",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quote": {
+            "type": "string",
+            "description": "The verbatim line the fact came from, when there is one."
+          },
+          "speaker": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "source_ref": {
+            "type": "string",
+            "description": "Pointer to the call or message the fact came from."
+          }
+        }
+      },
+      "DocumentPreview": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "snippet": {
+            "type": "string"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "source_ref": {
+            "type": "string"
+          }
+        }
+      },
+      "IcpFit": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "fit": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "True when `score` is 70 or higher."
+          },
+          "tier": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "tier_1",
+              "tier_2",
+              "tier_3",
+              "not_icp",
+              null
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Which signals fired."
+          },
+          "scored_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Earlier scores, newest first."
+          },
+          "outcome_score": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The realised outcome (0 to 1) once the deal has resolved."
+          }
+        }
+      },
+      "Layered": {
+        "type": "object",
+        "description": "The layered ICP read. A layer missing from `layers` is unknown, never zero.",
+        "properties": {
+          "priority": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "band": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              null
+            ]
+          },
+          "layers": {
+            "type": "object",
+            "properties": {
+              "fit": {
+                "type": "number"
+              },
+              "pain": {
+                "type": "number"
+              },
+              "intent": {
+                "type": "number"
+              },
+              "ability": {
+                "type": "number"
+              }
+            }
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Layers with no evidence yet. Enrich these."
+          },
+          "play": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The suggested next move as a short sentence. Starts with `work now`, `work`, `research`, `nurture`, `enrich`, or `suppress`."
+          }
+        },
+        "additionalProperties": true
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "person",
+              "company"
+            ]
+          },
+          "claims": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Claim"
+            },
+            "description": "Current facts keyed by property."
+          },
+          "recent_observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Observation"
+            },
+            "description": "The raw timeline. Omitted when `compress=1`."
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Fact"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentPreview"
+            }
+          },
+          "stakeholders": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "The buying committee."
+          },
+          "committee": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "icp": {
+            "$ref": "#/components/schemas/IcpFit"
+          },
+          "scorecard": {
+            "type": "object",
+            "description": "The latest call scorecard, when the account has one."
+          },
+          "key_activity": {
+            "type": "array",
+            "description": "Present when `intent` or `compress` is set. Activity ranked by how much it tells you.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "what": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "when": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "detail": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "activity_summary": {
+            "type": "object",
+            "description": "Present when `intent` or `compress` is set.",
+            "properties": {
+              "total_observations": {
+                "type": "integer"
+              },
+              "by_type": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "first_seen": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "last_seen": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "description": "Says what was left out, when anything was."
+              }
+            }
+          }
+        }
+      },
+      "ContextClaim": {
+        "type": "object",
+        "description": "A fact with metadata only when something is off. A bare property and value is observed, current, and confident.",
+        "properties": {
+          "property": {
+            "type": "string"
+          },
+          "value": {},
+          "confidence": {
+            "type": "number"
+          },
+          "freshness": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "since": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Context": {
+        "type": "object",
+        "properties": {
+          "meetings": {
+            "type": "object",
+            "description": "Next and last meeting with attendees. Only for `meeting_prep` and `call_prep`."
+          },
           "entity": {
             "type": "object",
             "properties": {
@@ -146,44 +3254,86 @@
                 "format": "uuid"
               },
               "type": {
-                "type": "string",
-                "enum": [
-                  "person",
-                  "company"
-                ]
-              },
-              "name": {
                 "type": "string"
               }
             }
           },
-          "identifiers": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "type": "string",
-                  "enum": [
-                    "email",
-                    "linkedin_url",
-                    "domain",
-                    "phone"
-                  ]
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
-            }
+          "intent": {
+            "type": "string",
+            "enum": [
+              "draft_email",
+              "follow_up",
+              "meeting_prep",
+              "call_prep",
+              "account_review"
+            ]
+          },
+          "summary": {
+            "type": "string"
           },
           "claims": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Claim"
+              "$ref": "#/components/schemas/ContextClaim"
             }
           },
-          "recent_observations": {
+          "workspace": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextClaim"
+            },
+            "description": "Your own ICP and positioning facts that apply to the task."
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Fact"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "when": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "tier": {
+                  "type": "string",
+                  "enum": [
+                    "full",
+                    "brief",
+                    "count"
+                  ]
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "stakeholders": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "committee": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "predictions": {
             "type": "array",
             "items": {
               "type": "object",
@@ -191,49 +3341,50 @@
                 "kind": {
                   "type": "string"
                 },
-                "property": {
-                  "type": "string"
-                },
-                "observed_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "value": {}
+                "value": {},
+                "confidence": {
+                  "type": "number"
+                }
               }
             }
-          }
-        }
-      },
-      "DedupItem": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "email",
-              "linkedin_url"
-            ]
           },
-          "value": {
-            "type": "string"
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentPreview"
+            }
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "net_new",
-              "engaged",
-              "recent",
-              "bounced",
-              "unsubscribed",
-              "suppressed"
-            ]
+          "icp": {
+            "$ref": "#/components/schemas/IcpFit"
           },
-          "entity_id": {
-            "type": "string",
-            "format": "uuid"
+          "layered": {
+            "$ref": "#/components/schemas/Layered"
           },
-          "reason": {
-            "type": "string"
+          "scorecard": {
+            "type": "object"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "token_estimate": {
+                "type": "integer"
+              },
+              "claims_total": {
+                "type": "integer"
+              },
+              "claims_returned": {
+                "type": "integer"
+              },
+              "facts_total": {
+                "type": "integer"
+              },
+              "facts_returned": {
+                "type": "integer"
+              },
+              "timeline_events": {
+                "type": "integer"
+              }
+            }
           }
         }
       },
@@ -249,123 +3400,574 @@
           },
           "property": {
             "type": "string",
-            "description": "Prefix match — 'interaction.email' matches email_sent and email_replied"
+            "description": "Property prefix. `interaction.email` covers sent and replied."
           },
           "source": {
-            "type": "string"
+            "type": "string",
+            "description": "Exact source, for example `gmail`."
           },
           "entity_id": {
             "type": "string",
-            "format": "uuid"
+            "description": "Scope to one person or company."
           },
           "since_days": {
-            "type": "number"
+            "type": "integer",
+            "description": "Only activity in the last N days."
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
           },
           "limit": {
-            "type": "number",
+            "type": "integer",
             "default": 50,
             "maximum": 200
+          },
+          "facts": {
+            "type": "boolean",
+            "description": "Search durable facts instead of activity. Needs `question`."
+          },
+          "reporting": {
+            "type": "string",
+            "enum": [
+              "company",
+              "role"
+            ],
+            "description": "Return distilled objections and themes for a seat."
+          },
+          "role": {
+            "type": "string",
+            "description": "With `reporting: role`, the seat to report for."
+          },
+          "attention": {
+            "type": "string",
+            "enum": [
+              "mine"
+            ],
+            "description": "Return the caller's worklist."
+          },
+          "foundation": {
+            "type": "string",
+            "enum": [
+              "icp"
+            ],
+            "description": "Return the ICP document itself."
           }
         }
       },
-      "QueryItem": {
+      "QueryResult": {
         "type": "object",
-        "description": "Returned when request used return='observations' — one row per observation.",
         "properties": {
-          "observation_id": {
+          "scope": {
+            "$ref": "#/components/schemas/QueryScope"
+          },
+          "without": {
+            "$ref": "#/components/schemas/QueryScope"
+          },
+          "mode": {
             "type": "string",
-            "format": "uuid"
+            "enum": [
+              "structured",
+              "semantic"
+            ]
+          },
+          "return": {
+            "type": "string",
+            "enum": [
+              "observations",
+              "entities"
+            ]
+          },
+          "corpus": {
+            "type": "string",
+            "enum": [
+              "observations",
+              "facts"
+            ]
+          },
+          "matched": {
+            "type": "integer"
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "sampled": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "One row per observation, per entity, or per fact, depending on `return` and `scope.facts`."
+          },
+          "rollups": {
+            "type": "object",
+            "properties": {
+              "by_type": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "by_source": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "by_value": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "description": "Present when `scope.kind` is `state`."
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "token_estimate": {
+                "type": "integer"
+              }
+            }
+          },
+          "question": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "AttentionItem": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "going_dark",
+              "decayed_fact",
+              "upcoming_meeting",
+              "open_commitment",
+              "hot_intent",
+              "flag"
+            ]
           },
           "entity_id": {
             "type": "string",
             "format": "uuid"
           },
           "entity_name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "what": {
+            "type": "string"
+          },
+          "suggested_action": {
+            "type": "string"
+          },
+          "age_days": {
+            "type": "integer"
           },
           "when": {
             "type": "string",
-            "format": "date-time"
-          },
-          "type": {
-            "type": "string"
+            "format": "date-time",
+            "description": "Meeting start or commitment due date."
           },
           "source": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string",
-            "nullable": true
-          },
-          "similarity": {
-            "type": "number",
-            "description": "Present in semantic mode (when question is set)"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Where the item came from."
           }
         }
       },
-      "QueryEntityItem": {
-        "type": "object",
-        "description": "Returned when request used return='entities' — one row per entity, ranked by most-recent matching activity.",
-        "properties": {
-          "entity_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "entity_name": {
-            "type": "string",
-            "nullable": true
-          },
-          "matches": {
-            "type": "integer",
-            "description": "Observations in scope for this entity"
-          },
-          "most_recent_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "most_recent_type": {
-            "type": "string"
-          },
-          "most_recent_source": {
-            "type": "string"
-          },
-          "most_recent_summary": {
-            "type": "string",
-            "nullable": true
-          },
-          "most_recent_value": {
-            "description": "Present for state observations (funnel queries)"
-          }
-        }
+      "InsightLane": {
+        "type": "string",
+        "enum": [
+          "product",
+          "sales",
+          "success",
+          "market"
+        ]
       },
-      "WorkspaceFact": {
+      "InsightSubtype": {
+        "type": "string",
+        "enum": [
+          "bug",
+          "friction",
+          "feature",
+          "objection",
+          "pricing",
+          "pitch",
+          "setup",
+          "training",
+          "partners",
+          "buyers"
+        ]
+      },
+      "Insight": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "category": {
-            "type": "string",
-            "description": "Common: ICP, Market, Product, Pricing, Competitors, Playbook"
+          "lane": {
+            "$ref": "#/components/schemas/InsightLane"
+          },
+          "subtype": {
+            "$ref": "#/components/schemas/InsightSubtype"
           },
           "content": {
             "type": "string"
           },
-          "source": {
-            "type": "string"
+          "quote": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "recorded_at": {
-            "type": "string",
+          "speaker": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "account": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "entity_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "source_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The call or message the insight came from."
+          },
+          "occurred_at": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
-      "Document": {
+      "InsightTaxonomy": {
         "type": "object",
-        "description": "A note or document kept on a contact — a meeting brief, transcript, prep, research, or plain note.",
         "properties": {
+          "lanes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "#/components/schemas/InsightLane"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "subtypes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "#/components/schemas/InsightSubtype"
+                },
+                "lane": {
+                  "$ref": "#/components/schemas/InsightLane"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "definition": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ScoreResult": {
+        "type": "object",
+        "properties": {
+          "resolved": {
+            "type": "boolean"
+          },
+          "scored": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why nothing was scored: `unknown_identifier`, `ambiguous`, `awaiting_enrichment`, `partial`, `no_attributes`, or `no_model`."
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "const": "inline",
+            "description": "Present when scored from `attributes`."
+          },
+          "persisted": {
+            "type": "boolean",
+            "description": "False for inline scores. Nothing was written."
+          },
+          "icp": {
+            "type": "object",
+            "properties": {
+              "score": {
+                "type": "integer"
+              },
+              "fit": {
+                "type": "boolean"
+              },
+              "tier": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "tier_1",
+                  "tier_2",
+                  "tier_3",
+                  "not_icp",
+                  null
+                ]
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "scored_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "intent": {
+            "type": "object",
+            "properties": {
+              "score": {
+                "type": "integer"
+              },
+              "band": {
+                "type": "string",
+                "enum": [
+                  "Red-hot",
+                  "Hot",
+                  "Warm",
+                  "Aware",
+                  "Dormant"
+                ]
+              }
+            }
+          },
+          "layered": {
+            "$ref": "#/components/schemas/Layered"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FocusCandidate"
+            }
+          },
+          "identifier": {
+            "type": "string",
+            "description": "Echoed in `identifiers` batches."
+          },
+          "ref": {
+            "description": "Echoed in `leads` batches when the lead had a `ref` or `id`."
+          }
+        }
+      },
+      "ScoreAttributes": {
+        "type": "object",
+        "description": "A lead that is not in Nous. Aliases in brackets are accepted.",
+        "properties": {
+          "job_title": {
+            "type": "string",
+            "description": "[title]"
+          },
+          "seniority": {
+            "type": "string"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "employee_count": {
+            "description": "[company_size, size]"
+          },
+          "company_type": {
+            "type": "string",
+            "description": "[type]"
+          },
+          "location": {
+            "type": "string",
+            "description": "[country]"
+          },
+          "keywords": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "[headline]"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ClosedDeal": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "A bare company domain.",
+            "example": "acme.com"
+          },
+          {
+            "type": "object",
+            "required": [
+              "domain"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number",
+                "description": "Deal value in major units."
+              },
+              "currency": {
+                "type": "string"
+              },
+              "closed_at": {
+                "type": "string",
+                "format": "date",
+                "description": "When it closed. Future dates are clamped to today."
+              }
+            }
+          }
+        ]
+      },
+      "Foundation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "const": "icp"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body_md": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "nous",
+              "claude_code"
+            ]
+          },
+          "file_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          },
+          "synced_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "content_hash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "NoteSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "entity_id": {
             "type": "string",
             "format": "uuid"
@@ -382,1063 +3984,151 @@
             ]
           },
           "title": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "date": {
-            "type": "string",
-            "nullable": true,
-            "description": "The relevant date (e.g. the meeting date)"
-          },
-          "similarity": {
-            "type": "number",
-            "description": "Present in search results — match score 0–1"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "snippet": {
             "type": "string",
-            "description": "First ~400 chars of the document body"
-          }
-        }
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    }
-  },
-  "paths": {
-    "/v2/context": {
-      "post": {
-        "summary": "Get engineered context",
-        "description": "Engineered context for one task about one entity. Runs the pipeline: retrieve → rank → connect → compress → tag → budget.",
-        "tags": [
-          "Context"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "focus"
-                ],
-                "properties": {
-                  "focus": {
-                    "type": "string",
-                    "description": "Entity UUID, email, domain, LinkedIn URL, or name"
-                  },
-                  "intent": {
-                    "type": "string",
-                    "enum": [
-                      "account_review",
-                      "draft_email",
-                      "follow_up",
-                      "meeting_prep",
-                      "call_prep"
-                    ],
-                    "default": "account_review"
-                  },
-                  "budget_tokens": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Engineered context block, or candidates if focus is ambiguous",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "entity": {
-                          "type": "object"
-                        },
-                        "summary": {
-                          "type": "string"
-                        },
-                        "claims": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Claim"
-                          }
-                        },
-                        "workspace": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "timeline": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "stakeholders": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "predictions": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "meta": {
-                          "type": "object"
-                        }
-                      }
-                    },
-                    {
-                      "$ref": "#/components/schemas/AmbiguousFocus"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "focus_required or invalid_intent",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "entity_not_found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+            "description": "First 280 characters."
           }
         }
       }
     },
-    "/v2/accounts/{id}": {
-      "get": {
-        "summary": "Get the full Account Record",
-        "description": "Entity + every claim with epistemics + recent observation timeline.",
-        "tags": [
-          "Accounts"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
+    "responses": {
+      "Unauthorized": {
+        "description": "Missing, unknown, or expired API key.",
+        "content": {
+          "application/json": {
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/Error"
             },
-            "description": "URL-encoded entity UUID, email, domain, LinkedIn URL, or name"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account Record, or candidates if id is ambiguous",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/AccountRecord"
-                    },
-                    {
-                      "$ref": "#/components/schemas/AmbiguousFocus"
-                    }
-                  ]
+            "examples": {
+              "missing": {
+                "summary": "api_key_required",
+                "value": {
+                  "error": "api_key_required"
                 }
-              }
-            }
-          },
-          "404": {
-            "description": "entity_not_found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+              },
+              "invalid": {
+                "summary": "invalid_api_key",
+                "value": {
+                  "error": "invalid_api_key"
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/observations": {
-      "post": {
-        "summary": "Record observations",
-        "description": "Append events or state observations. The graph derives the new facts and tells you which were recomputed.",
-        "tags": [
-          "Observations"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "focus",
-                  "observations"
-                ],
-                "properties": {
-                  "focus": {
-                    "type": "string",
-                    "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name."
-                  },
-                  "observations": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                      "$ref": "#/components/schemas/Observation"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Recorded count + which claims were recomputed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "entity_id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "recorded": {
-                      "type": "integer"
-                    },
-                    "claims_recomputed": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "focus_and_observations_required or invalid_focus",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/query": {
-      "post": {
-        "summary": "Query a corpus of observations",
-        "description": "Retrieve + summarise observations across many entities. Three composable powers: return='entities' groups by entity, without subtracts a set, rollups.by_value (when scope.kind='state') gives funnel-style counts.",
-        "tags": [
-          "Query"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "scope"
-                ],
-                "properties": {
-                  "scope": {
-                    "$ref": "#/components/schemas/QueryScope"
-                  },
-                  "without": {
-                    "$ref": "#/components/schemas/QueryScope",
-                    "description": "Subtract entities matching this scope from the result. Same shape as scope. Enables 'sent but no reply', 'cooled in N days'."
-                  },
-                  "return": {
-                    "type": "string",
-                    "enum": [
-                      "observations",
-                      "entities"
-                    ],
-                    "default": "observations",
-                    "description": "observations = one row per observation. entities = one row per entity, ranked by most-recent matching activity."
-                  },
-                  "question": {
-                    "type": "string",
-                    "description": "Echoed in the response. When set (and `without` not set), enables semantic ranking via embeddings."
-                  },
-                  "budget_tokens": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Matched corpus + rollups. items shape depends on `return`.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "scope": {
-                      "$ref": "#/components/schemas/QueryScope"
-                    },
-                    "without": {
-                      "$ref": "#/components/schemas/QueryScope"
-                    },
-                    "mode": {
-                      "type": "string",
-                      "enum": [
-                        "structured",
-                        "semantic"
-                      ]
-                    },
-                    "return": {
-                      "type": "string",
-                      "enum": [
-                        "observations",
-                        "entities"
-                      ]
-                    },
-                    "matched": {
-                      "type": "integer"
-                    },
-                    "returned": {
-                      "type": "integer"
-                    },
-                    "sampled": {
-                      "type": "boolean"
-                    },
-                    "items": {
-                      "type": "array",
-                      "description": "QueryItem[] when return='observations', QueryEntityItem[] when return='entities'",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/components/schemas/QueryItem"
-                          },
-                          {
-                            "$ref": "#/components/schemas/QueryEntityItem"
-                          }
-                        ]
-                      }
-                    },
-                    "rollups": {
-                      "type": "object",
-                      "properties": {
-                        "by_type": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "integer"
-                          }
-                        },
-                        "by_source": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "integer"
-                          }
-                        },
-                        "by_value": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "integer"
-                          },
-                          "description": "Counts entities by current state value. Present only when scope.kind='state'."
-                        }
-                      }
-                    },
-                    "question": {
-                      "type": "string",
-                      "nullable": true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/attention": {
-      "get": {
-        "summary": "What needs attention",
-        "description": "Workspace-wide ranked decisions: accounts gone quiet, key facts decayed. Each item ships with a suggested action.",
-        "tags": [
-          "Attention"
-        ],
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "default": 25,
-              "maximum": 100
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Ranked attention items",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "entity_id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "entity_name": {
-                            "type": "string"
-                          },
-                          "what": {
-                            "type": "string",
-                            "enum": [
-                              "going_dark",
-                              "claim_stale",
-                              "prediction_unresolved",
-                              "decay_threshold"
-                            ]
-                          },
-                          "headline": {
-                            "type": "string"
-                          },
-                          "suggested_action": {
-                            "type": "string"
-                          },
-                          "score": {
-                            "type": "number"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/verify": {
-      "post": {
-        "summary": "Verify one claim",
-        "description": "Re-derive one claim against current observations. Returns before + after — the calibration check.",
-        "tags": [
-          "Verify"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "focus",
-                  "property"
-                ],
-                "properties": {
-                  "focus": {
-                    "type": "string"
-                  },
-                  "property": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Before / after snapshots and a note",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "property": {
-                          "type": "string"
-                        },
-                        "before": {
-                          "$ref": "#/components/schemas/Claim"
-                        },
-                        "after": {
-                          "$ref": "#/components/schemas/Claim"
-                        },
-                        "note": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    {
-                      "$ref": "#/components/schemas/AmbiguousFocus"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "focus_and_property_required"
-          },
-          "404": {
-            "description": "claim_not_found or entity_not_found"
-          }
-        }
-      }
-    },
-    "/v2/dedup": {
-      "post": {
-        "summary": "Classify cold-outbound identifiers",
-        "description": "Cross-list dedup: net_new / engaged / recent / bounced / unsubscribed / suppressed. Up to 50,000 of each kind per call.",
-        "tags": [
-          "Dedup"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "emails": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "email"
-                    }
-                  },
-                  "linkedin_urls": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "uri"
-                    }
-                  }
-                },
-                "description": "At least one of emails or linkedin_urls required"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Per-identifier classifications + rollup summary",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/DedupItem"
-                      }
-                    },
-                    "summary": {
-                      "type": "object",
-                      "properties": {
-                        "net_new": {
-                          "type": "integer"
-                        },
-                        "engaged": {
-                          "type": "integer"
-                        },
-                        "recent": {
-                          "type": "integer"
-                        },
-                        "bounced": {
-                          "type": "integer"
-                        },
-                        "unsubscribed": {
-                          "type": "integer"
-                        },
-                        "suppressed": {
-                          "type": "integer"
-                        },
-                        "total": {
-                          "type": "integer"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "identifiers_required"
-          },
-          "413": {
-            "description": "too_many (max 50,000 per kind per call)"
-          }
-        }
-      }
-    },
-    "/v2/workspace/facts": {
-      "get": {
-        "summary": "Get workspace facts",
-        "description": "Workspace-level facts the user has recorded about their own business: ICP, target market, product, pricing, competitors, playbook. Read-only.",
-        "tags": [
-          "GTM Profile"
-        ],
-        "parameters": [
-          {
-            "name": "categories",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Comma-separated list (e.g. 'ICP,Market'). Omit for all."
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "default": 50,
-              "maximum": 500
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Facts grouped by category",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "facts": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/WorkspaceFact"
-                      }
-                    },
-                    "count": {
-                      "type": "integer"
-                    },
-                    "by_category": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "integer"
-                      }
-                    }
-                  }
+              },
+              "expired": {
+                "summary": "api_key_expired",
+                "value": {
+                  "error": "api_key_expired",
+                  "detail": "This API key has expired. Create or rotate a key to get a fresh one."
                 }
               }
             }
           }
         }
       },
-      "post": {
-        "summary": "Write back a GTM section",
-        "description": "Keep a section of the user's own GTM context current. In the default 'replace' mode the section evolves — the prior version is kept as history, never silently contradicted. 'append' logs a new entry (the default for Notes).",
-        "tags": [
-          "GTM Profile"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "section",
-                  "content"
-                ],
-                "properties": {
-                  "section": {
-                    "type": "string",
-                    "enum": [
-                      "ICP",
-                      "Market",
-                      "Product",
-                      "Pricing",
-                      "Competitors",
-                      "Positioning",
-                      "GTM Motion",
-                      "Notes"
-                    ]
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "The section's current content — one short, current statement."
-                  },
-                  "mode": {
-                    "type": "string",
-                    "enum": [
-                      "replace",
-                      "append"
-                    ],
-                    "default": "replace"
-                  },
-                  "supersedes": {
-                    "type": "string",
-                    "format": "uuid",
-                    "description": "Explicit fact id to replace (overrides section matching)."
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The recorded/evolved fact",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "fact": {
-                      "$ref": "#/components/schemas/WorkspaceFact"
-                    },
-                    "section": {
-                      "type": "string"
-                    },
-                    "mode": {
-                      "type": "string",
-                      "enum": [
-                        "replace",
-                        "append"
-                      ]
-                    },
-                    "superseded": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "section_and_content_required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
+      "ReadOnlyKey": {
+        "description": "A read-only key called a write endpoint.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "read_only_key",
+              "detail": "This API key is read-only — it can read context but cannot record, modify, connect, or send. Use a read/write key for write operations."
             }
           }
         }
-      }
-    },
-    "/v2/notes": {
-      "post": {
-        "summary": "Save a note on a contact",
-        "description": "Attach a long-form artifact to a person or company — a meeting brief, transcript, prep, research, or plain note. Append-only and dated. NOT for logging that an interaction happened (use /v2/observations).",
-        "tags": [
-          "Notes"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "focus",
-                  "content"
-                ],
-                "properties": {
-                  "focus": {
-                    "type": "string",
-                    "description": "Entity UUID, email, domain, or LinkedIn URL. NOT a bare name."
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "The full note or document text."
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "note",
-                      "meeting_brief",
-                      "transcript",
-                      "meeting_notes",
-                      "pre_meeting",
-                      "research"
-                    ],
-                    "default": "note"
-                  },
-                  "title": {
-                    "type": "string",
-                    "description": "A short name, e.g. 'Pre-meeting brief — renewal'."
-                  },
-                  "date": {
-                    "type": "string",
-                    "description": "The relevant date (ISO or plain). Defaults to now."
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The saved note",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "note": {
-                      "type": "object"
-                    },
-                    "entity_id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "doc_type": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "focus_and_content_required or invalid_focus",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
+      },
+      "UpgradeRequired": {
+        "description": "The workspace is past its monthly operations limit and grace window.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "upgrade_required",
+              "reason": "ops_limit_reached",
+              "current_plan": "starter",
+              "upgrade_url": "/settings?section=billing"
             }
           }
         }
-      }
-    },
-    "/v2/notes/search": {
-      "post": {
-        "summary": "Search notes",
-        "description": "Semantic search over the saved notes & documents kept on contacts. Returns matching documents with a snippet. Pass focus to restrict to one contact, or omit it to search everyone.",
-        "tags": [
-          "Notes"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "question"
-                ],
-                "properties": {
-                  "question": {
-                    "type": "string",
-                    "description": "Natural-language query matched against document content."
-                  },
-                  "focus": {
-                    "type": "string",
-                    "description": "Optional — restrict to one person/company. Unresolvable focus falls back to a workspace-wide search."
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 8,
-                    "maximum": 20
-                  }
-                }
-              }
-            }
+      },
+      "RateLimited": {
+        "description": "More than 600 requests in a minute on this key.",
+        "headers": {
+          "RateLimit-Limit": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Requests allowed per window."
+          },
+          "RateLimit-Remaining": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Requests left in the window."
+          },
+          "RateLimit-Reset": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Seconds until the window resets."
           }
         },
-        "responses": {
-          "200": {
-            "description": "Ranked matching documents",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "documents": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Document"
-                      }
-                    },
-                    "count": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "question required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "rate_limited"
             }
           }
         }
-      }
-    },
-    "/v2/score": {
-      "post": {
-        "summary": "Score a lead against the ICP model and intent",
-        "description": "Resolve an identifier, score it against the workspace ICP model and current intent, and stake the fit prediction into the graph. Pass `identifier` for one lead or `identifiers` for a batch (max 100). Returns `unknown_identifier` when the account is not in the graph and `awaiting_enrichment` when it is known but has no scoreable facts yet.",
-        "tags": [
-          "Scoring"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "identifier": {
-                    "type": "string",
-                    "description": "One lead. An email, domain, LinkedIn URL, or entity UUID. Required unless identifiers is set."
-                  },
-                  "identifiers": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "A batch of leads, max 100. Response is a results array in order."
-                  },
-                  "intent": {
-                    "type": "string",
-                    "description": "Optional note on why you are scoring. Recorded, does not change the score."
-                  }
-                }
-              }
+      },
+      "InternalError": {
+        "description": "Unexpected server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "internal_error"
             }
           }
-        },
-        "responses": {
-          "200": {
-            "description": "The lead score. For a batch, a results array of the same objects each carrying its identifier.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "resolved": {
-                      "type": "boolean"
-                    },
-                    "scored": {
-                      "type": "boolean"
-                    },
-                    "entity_id": {
-                      "type": "string"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "unknown_identifier",
-                        "awaiting_enrichment",
-                        "ambiguous",
-                        "identifier_required"
-                      ]
-                    },
-                    "icp": {
-                      "type": "object",
-                      "properties": {
-                        "score": {
-                          "type": "number",
-                          "description": "ICP fit, 0 to 100"
-                        },
-                        "fit": {
-                          "type": "boolean"
-                        },
-                        "tier": {
-                          "type": "string",
-                          "enum": [
-                            "tier_1",
-                            "tier_2",
-                            "tier_3",
-                            "not_icp"
-                          ]
-                        },
-                        "reason": {
-                          "type": "string"
-                        },
-                        "scored_at": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    },
-                    "intent": {
-                      "type": "object",
-                      "properties": {
-                        "score": {
-                          "type": "number",
-                          "description": "Intent, 0 to 100, decaying"
-                        },
-                        "band": {
-                          "type": "string",
-                          "enum": [
-                            "Red-hot",
-                            "Hot",
-                            "Warm",
-                            "Aware",
-                            "Dormant"
-                          ]
-                        }
-                      }
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      },
-                      "description": "Present for batch requests. One entry per identifier."
-                    }
-                  }
-                }
-              }
+        }
+      },
+      "EntityNotFound": {
+        "description": "Nothing in the workspace matches the identifier.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "entity_not_found"
+            }
+          }
+        }
+      },
+      "Ambiguous": {
+        "description": "The identifier matches more than one record.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Ambiguous"
             }
           }
         }

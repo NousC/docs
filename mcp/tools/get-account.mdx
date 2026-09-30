@@ -1,47 +1,30 @@
 ---
 title: "get_account"
-description: "The full account — every known fact with its confidence and freshness, plus the recent activity timeline."
+description: "The full record for a person or company."
 ---
 
-Returns the complete projection for a person or company. Use this when you want the raw picture; prefer [`get_context`](/mcp/tools/get-context) for task-shaped output ranked for a specific intent.
-
-## Parameters
+Facts, attributes with confidence and freshness, saved documents, the buying committee, ICP fit, the latest call score, and activity ranked by how much it tells you. For a block shaped to one task, use [`get_context`](/mcp/tools/get-context).
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `id` | string | ✓ | Email address or entity UUID |
-
-## Returns
+| `id` | string | yes | Email, LinkedIn URL, domain, or entity UUID |
+| `intent` | string | | `account_review` (default), `meeting_prep`, `call_prep`, `follow_up`, `draft_email`. Shapes how much history comes back. |
 
 ```
-person · a1b2c3d4-...
+person · 9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40
 
-FACTS (8):
-  title: VP Sales            [92% · fresh]
-  stage: evaluating          [81% · fresh]
-  intent: budget_q3          [78% · aging]
-  email: sarah@acme.com      [95% · fresh]
-  company: Acme              [88% · fresh]
-  industry: B2B SaaS         [70% · aging]
-  seniority: vp              [85% · fresh]
-  decision_role: champion    [62% · aging]
+ICP FIT: 82/100 — strong fit  (VP-level buyer, 200-500 employees, B2B SaaS)
 
-TIMELINE (30):
-  2d ago    interaction.email_replied
-  4d ago    interaction.linkedin_message
-  1w ago    interaction.proposal_sent
-  2w ago    interaction.call_held
-  …
+FACTS (9 — durable memory about them):
+  [Budget] Budget approved for Q4, owned by the CRO.  (6d ago)
+      Sarah Chen · "We have the budget signed off for Q4."
+      2026-09-24
+
+WHAT HAPPENED (12 most telling):
+  Replied to email · gmail · 6d ago
+      Thursday works. Can you bring pricing for 40 seats?
 ```
 
-## When to call it
+When the identifier matches several records, the tool lists the candidates. Call again with one `entity_id`.
 
-- **"What do we know about X?"** type questions
-- Building an audit / debug view of a contact
-- When the agent needs to inspect `epistemic_class` and `sources` to understand WHY a claim is held
-
-For action-oriented context (drafting outreach, prepping a meeting), prefer [`get_context`](/mcp/tools/get-context).
-
-## Backed by
-
-`GET /v2/accounts/:id` — see the [HTTP reference](/public-api/accounts) for the raw JSON shape.
+REST: [`GET /v2/accounts/:id`](/public-api/accounts)

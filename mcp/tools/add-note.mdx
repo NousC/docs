@@ -1,0 +1,18 @@
+---
+title: "add_note"
+description: "Keep a note, brief, or transcript on a person or company."
+---
+
+Notes are append-only and dated, so an account builds a history across meetings.
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `focus` | string | yes | Email, LinkedIn URL, domain, or entity UUID. Never a bare name. |
+| `content` | string | yes | The note text |
+| `title` | string | | A short name, for example `Discovery prep` |
+| `type` | string | | `note` (default), `meeting_brief`, `transcript`, `meeting_notes`, `pre_meeting`, `research` |
+| `date` | string | | The relevant date, for example the meeting date. Defaults to now. |
+
+A new email, LinkedIn URL, or domain creates the person or company.
+
+REST: [`POST /v2/notes`](/public-api/notes)

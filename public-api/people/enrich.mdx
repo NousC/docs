@@ -1,0 +1,8 @@
+---
+title: "Enrich a person"
+openapi: "POST /v2/people/{id}/enrich"
+---
+
+Runs your connected enrichment providers on one person. Providers run in order Apollo, Prospeo, Findymail, and the first one that returns data wins. Connect at least one in **Settings → Integrations** first.
+
+`fields_added` lists what changed. `enriched` is `false` when no provider found anything new.

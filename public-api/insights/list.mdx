@@ -1,0 +1,23 @@
+---
+title: "List insights"
+openapi: "GET /v2/insights"
+---
+
+What customers said about your product, sales, success, and market, tied to the account that said it.
+
+Each insight has one `lane` (who has to act) and one `subtype` (what kind of work). The response carries the workspace's `taxonomy`, so you can label results without hardcoding it.
+
+| Lane | Subtype | Label | Covers |
+|---|---|---|---|
+| `product` | `bug` | Bug | Something in the product is broken or fails. |
+| `product` | `friction` | Friction | It works, but it is manual, slow, clunky, or confusing. |
+| `product` | `feature` | Feature request | A capability you do not have. |
+| `sales` | `objection` | Objection | A reason against buying, switching, or renewing, other than price. |
+| `sales` | `pricing` | Pricing | Cost, fees, discounts, value for money. |
+| `sales` | `pitch` | Pitch & messaging | The buyer misunderstood or questioned what you do or how you framed it. |
+| `success` | `setup` | Setup | Getting it running. Install, integrations, logins, access. |
+| `success` | `training` | Training & adoption | Staff not using it, or needing training or follow-up. |
+| `market` | `partners` | Competitors & partners | Other vendors, incumbent tools, partners. Know, don't fix. |
+| `market` | `buyers` | Who buys | Roles, decision makers, segments. Know, don't fix. |
+
+Service businesses get service labels on the same keys. For example `bug` reads "Missed results" and `feature` reads "Service request". Read `taxonomy` for the labels your workspace uses.

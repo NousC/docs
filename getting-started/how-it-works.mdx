@@ -63,7 +63,7 @@ Connectors normalise every signal into a fixed shape.
 
 Sources include CRMs (HubSpot, Pipedrive, Attio), outbound platforms (Instantly, Smartlead), Gmail, Outlook, SMTP, LinkedIn via Unipile, meeting capture (Fireflies, Fathom), web identity (RB2B), and any HTTP source via HMAC-signed custom webhooks.
 
-Agents themselves are signal sources too. Any [`POST /v2/observations`](/public-api/observations) call adds to the same graph.
+Agents themselves are signal sources too. Any [`POST /v2/notes`](/public-api/notes) call adds to the same graph.
 
 ### Identity Resolution
 
@@ -95,4 +95,4 @@ When your agent reads from the graph, every fact carries metadata.
 | `confidence` | `0.0` – `1.0`. How strongly the underlying signals support the fact. |
 | `sources` | The connectors that contributed. |
 
-Your agent reads these on every fact. That's what lets it decide whether to act now or call [`/v2/verify`](/public-api/verify) first.
+Your agent reads these on every fact. That's what lets it decide whether to act now or pull fresh [context](/public-api/context) first.

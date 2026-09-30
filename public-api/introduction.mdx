@@ -1,11 +1,8 @@
 ---
 title: "REST API"
-description: "The deterministic surface for workflow runtimes. Call it from n8n, Make, Zapier, or any backend. Parameters are known up front; responses are stable rows."
+sidebarTitle: "Introduction"
+description: "Read and write the context graph over HTTP."
 ---
-
-The REST API is one of two ways Nous exposes the v2 context graph. Reach for it when the caller already knows what to read or write, a workflow runtime fetching a filtered list of people, a form intake creating a lead, a daily job patching `sent_at` mid-loop.
-
-For agent-time decisions where the right action is reasoned at runtime (semantic exploration, intent-shaped context, recording an observation from open text), use the [MCP server](/mcp/introduction) instead. Both surfaces sit on the same context graph, so a write through one is visible to the other.
 
 ## Base URL
 
@@ -13,139 +10,86 @@ For agent-time decisions where the right action is reasoned at runtime (semantic
 https://api.opennous.cloud
 ```
 
-Self-hosting? Point at your own deployment.
+Self-hosted instances serve the same paths from their own API URL.
 
 ## Authentication
 
-Every request takes a workspace API key in the `Authorization` header. Create one at **Settings → API Keys** in your workspace.
+Send a workspace API key on every request. Create one in **Settings → API keys**. A key belongs to one workspace, so there is no workspace ID to pass.
 
-```bash
+<CodeGroup>
+
+```bash Bearer
 curl https://api.opennous.cloud/v2/attention \
-  -H 'Authorization: Bearer YOUR_API_KEY'
+  -H "Authorization: Bearer $NOUS_API_KEY"
 ```
 
-Keys are workspace-scoped, so no separate workspace ID is required.
+```bash X-API-Key
+curl https://api.opennous.cloud/v2/attention \
+  -H "X-API-Key: $NOUS_API_KEY"
+```
 
-## The endpoints
+</CodeGroup>
 
-### Read
+Call the API from a server. Browser requests are blocked by CORS.
 
-<CardGroup cols={2}>
-  <Card title="POST /v2/context" href="/public-api/context" icon="brain">
-    Engineered context for a task about one entity. The ranked, claim-tagged block your agent consumes before acting.
-  </Card>
-  <Card title="GET /v2/accounts/:id" href="/public-api/accounts" icon="user">
-    The full account. Entity plus every claim with epistemics plus the recent timeline.
-  </Card>
-  <Card title="GET /v2/people" href="/public-api/people" icon="users">
-    Filtered list of people in the workspace. Workflow shape — paginate, filter, sort.
-  </Card>
-  <Card title="GET /v2/leads" href="/public-api/leads" icon="list">
-    Filtered list of leads across lead lists. Same shape as `/v2/people`, with lead-specific fields.
-  </Card>
-  <Card title="POST /v2/query" href="/public-api/query" icon="magnifying-glass">
-    Retrieve and summarise a corpus of observations across many entities.
-  </Card>
-  <Card title="POST /v2/score" href="/public-api/score" icon="gauge-high">
-    Score a lead against your ICP model and intent, written into the graph. The thin verb a spreadsheet or Clay column calls per row.
-  </Card>
-  <Card title="GET /v2/attention" href="/public-api/attention" icon="bell">
-    Workspace-wide. Accounts gone quiet, facts decayed, ranked decisions.
-  </Card>
-  <Card title="POST /v2/verify" href="/public-api/verify" icon="shield-check">
-    Re-check one claim against current observations. The calibration check.
-  </Card>
-  <Card title="POST /v2/dedup" href="/public-api/dedup" icon="filter">
-    Cross-list cold-outbound dedup. net_new, engaged, bounced, unsubscribed.
-  </Card>
-  <Card title="GET /v2/workspace/facts" href="/public-api/gtm-profile" icon="book">
-    The user's own GTM profile. ICP, market, pricing, competitors.
-  </Card>
-  <Card title="POST /v2/notes/search" href="/public-api/notes-search" icon="file-magnifying-glass">
-    Semantic search over saved notes & documents. Pull the relevant passage, not the whole document.
-  </Card>
-</CardGroup>
+### Read-only keys
 
-### Write
+A read-only key can call every `GET` endpoint plus `POST /v2/context`, `POST /v2/query`, and `POST /v2/score`. Anything else returns `403 read_only_key`.
 
-<CardGroup cols={2}>
-  <Card title="POST /v2/observations" href="/public-api/observations" icon="pen">
-    Record what happened. You observe; Nous derives the claims.
-  </Card>
-  <Card title="POST /v2/notes" href="/public-api/notes" icon="note-sticky">
-    Attach a meeting brief, transcript, or note to a contact. Append-only and dated.
-  </Card>
-  <Card title="POST /v2/workspace/facts" href="/public-api/gtm-profile#writing-back" icon="book-open">
-    Write back a GTM section — it evolves, keeping the prior version as history.
-  </Card>
-  <Card title="POST + PATCH /v2/people" href="/public-api/people/create" icon="user-plus">
-    Create a person from a form intake. PATCH asserts fields like email, title, or company directly onto the entity.
-  </Card>
-  <Card title="POST + PATCH /v2/leads" href="/public-api/leads/create" icon="square-plus">
-    Add leads to a list. PATCH a row mid-workflow to record progress before the async webhook arrives.
-  </Card>
-  <Card title="POST /v2/lead-lists/attach" href="/public-api/leads/attach" icon="table-list">
-    Score a whole list you built somewhere else in one call. Nous creates the list, resolves every row, and scores it.
-  </Card>
-</CardGroup>
+### Member keys
 
-### React
+A key created by a workspace member acts as that member. On a closed workspace it only sees accounts in that member's book. A workspace key sees everything.
 
-<CardGroup cols={1}>
-  <Card title="Triggers (outbound webhooks)" href="/public-api/triggers/introduction" icon="bolt">
-    Subscribe a URL to interaction events. The instant a reply, connection accept, or meeting lands, Nous POSTs a signed payload to your workflow. The agent-gets-paged surface for the account.
-  </Card>
-</CardGroup>
+## Identifying an account
 
-## Two write shapes, one graph
+Endpoints that take `focus` or an `:id` accept an email, a LinkedIn URL, a domain, or an entity UUID. Pass one of those, never a bare name.
 
-Both write paths land in the same context graph.
+When an identifier matches more than one record, the response is `200` with the candidates. Call again with the `entity_id` you want.
 
-| Path | What it writes | When to use |
-|---|---|---|
-| `POST /v2/observations` | An immutable event or state observation; Nous re-derives the claim from the full history | The agent has just seen something happen; an integration is mirroring activity from another system |
-| `PATCH /v2/people` / `PATCH /v2/leads` | An asserted claim (sticky, confidence 1.0) directly on the entity; the derivation engine will not overwrite it | A workflow runtime is setting a field as ground truth (enrichment result, manual edit, form value) |
-
-The asserted-claim path is the deterministic shape n8n needs. The observation path is how the graph self-heals as new signals arrive. They coexist.
-
-## Identifiers are universal
-
-Most endpoints accept a `focus` parameter (or use `:id`). Pass any of:
-
-- an **entity UUID** (`a1b2c3d4-...`)
-- an **email** (`sarah@acme.com`)
-- a **domain** (`acme.com`)
-- a **LinkedIn URL** (`https://linkedin.com/in/sarah-chen`)
-- a **name** (`Sarah Chen`)
-
-A name may match several people. The response will be `{ status: "ambiguous", candidates: [...] }` so your workflow can pick one and re-call.
-
-## Epistemics on every claim
-
-Every claim Nous returns carries three signals so the caller can decide whether to act on it.
-
-| Field | Values | Meaning |
-|---|---|---|
-| `freshness` | `fresh` / `aging` / `suspect` / `expired` | How recently it was observed |
-| `confidence` | `0.0` – `1.0` | How strongly the observations support it |
-| `epistemic_class` | `observed` / `derived` / `asserted` | Where the claim came from |
-
-Workflows that depend on a fact should check `freshness === 'fresh' && confidence > 0.7`. Anything weaker, call `/v2/verify` first.
+```json
+{
+  "status": "ambiguous",
+  "candidates": [
+    { "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40", "name": "Sarah Chen", "detail": "VP Sales at Acme", "matched_on": "exact" }
+  ]
+}
+```
 
 ## Errors
 
-All errors return JSON with an `error` code.
+Errors return JSON with a machine code in `error`. Some add `detail` or other fields.
 
 ```json
-{ "error": "entity_not_found" }
+{ "error": "invalid_api_key" }
 ```
 
-| Status | Error | What to do |
+| Status | `error` | When |
 |---|---|---|
-| 400 | `focus_required`, `invalid_focus`, etc. | Missing or malformed parameter |
-| 401 | `unauthorized` | API key missing or invalid |
-| 402 | `feature_not_in_plan` | Upgrade. Visible on the Usage page |
-| 404 | `entity_not_found` | Focus did not match any entity |
-| 413 | `too_many` | Reduce batch size |
-| 429 | `rate_limited` | Honor `Retry-After` |
-| 500 | `internal_error` | Retry with backoff |
+| 400 | varies | A parameter is missing or invalid. Each endpoint lists its codes. |
+| 401 | `api_key_required` | No key on the request. |
+| 401 | `invalid_api_key` | The key is unknown or revoked. |
+| 401 | `api_key_expired` | The key has expired. Rotate it. |
+| 402 | `upgrade_required` | The workspace is past its plan limit and grace period. `reason` is `ops_limit_reached` or `active_accounts_limit_reached`. |
+| 402 | `feature_not_in_plan` | The endpoint needs a feature your plan does not include. |
+| 403 | `read_only_key` | A read-only key called a write endpoint. |
+| 404 | `entity_not_found` | Nothing in the workspace matches the identifier. |
+| 404 | `not_found` | The path does not exist. |
+| 429 | `rate_limited` | Too many requests. |
+| 500 | `internal_error` | Something failed on our side. |
+
+## Rate limits
+
+Each key gets 600 requests per minute. Every response carries `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset`. Past the limit, requests return `429` until the window resets.
+
+## Endpoints
+
+| Group | Endpoint |
+|---|---|
+| People | [`GET /v2/people`](/public-api/people/list) · [`POST /v2/people`](/public-api/people/create) · [`PATCH /v2/people/:id`](/public-api/people/update) · [`POST /v2/people/:id/enrich`](/public-api/people/enrich) |
+| Accounts | [`GET /v2/accounts/:id`](/public-api/accounts) · [`POST /v2/context`](/public-api/context) · [`POST /v2/query`](/public-api/query) |
+| Attention | [`GET /v2/attention`](/public-api/attention) |
+| Insights | [`GET /v2/insights`](/public-api/insights/list) · [`POST /v2/insights`](/public-api/insights/record) |
+| ICP | [`POST /v2/score`](/public-api/score) · [`POST /v2/foundations/icp`](/public-api/icp/create) · [`POST /v2/workspace/closed-deals`](/public-api/icp/train) |
+| Notes | [`POST /v2/notes`](/public-api/notes) · [`GET /v2/notes`](/public-api/notes/list) |
+
+Agents can reach the same graph through the [MCP server](/mcp/introduction).
