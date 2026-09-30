@@ -1,0 +1,47 @@
+/* Match www.opennous.cloud (nous-web v5): Geist, hairlines, mono eyebrows. */
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
+
+:root {
+  --nous-fg: #101011;
+  --nous-fg-soft: #4a4946;
+  --nous-fg-mute: #83817b;
+  --nous-bg-soft: #f4f4f2;
+  --nous-border: #eae9e5;
+  --nous-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+:root.dark {
+  --nous-fg: #f6f5f2;
+  --nous-fg-soft: #b9b7b1;
+  --nous-fg-mute: #86847e;
+  --nous-bg-soft: #17171a;
+  --nous-border: #262629;
+}
+
+h1, h2, h3, h4 { letter-spacing: -0.022em; }
+h1 { letter-spacing: -0.03em; }
+
+code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
+
+/* Mono uppercase eyebrows: page section label + sidebar group headers. */
+#content-area .eyebrow,
+#sidebar-group > h5,
+#sidebar h5 {
+  font-family: var(--nous-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--nous-fg-mute);
+}
+
+/* Code blocks: soft ground, 1px hairline, 0.7rem radius. */
+.code-block,
+pre {
+  border: 1px solid var(--nous-border) !important;
+  border-radius: 0.7rem !important;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+:not(pre) > code {
+  border-radius: 0.35rem;
+}

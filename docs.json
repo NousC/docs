@@ -1,14 +1,40 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "maple",
   "name": "Nous",
   "colors": {
-    "primary": "#bf5630",
-    "light": "#d97757",
-    "dark": "#a8462a"
+    "primary": "#101011",
+    "light": "#f6f5f2",
+    "dark": "#101011"
   },
   "appearance": {
     "default": "light"
+  },
+  "background": {
+    "decoration": "grid",
+    "color": {
+      "light": "#fbfbfa",
+      "dark": "#0e0e10"
+    }
+  },
+  "fonts": {
+    "heading": {
+      "family": "Geist",
+      "weight": 500
+    },
+    "body": {
+      "family": "Geist",
+      "weight": 400
+    }
+  },
+  "styling": {
+    "eyebrows": "section",
+    "codeblocks": {
+      "theme": {
+        "light": "github-light-default",
+        "dark": "vesper"
+      }
+    }
   },
   "favicon": "/favicon.svg",
   "openapi": "openapi.json",
@@ -283,7 +309,8 @@
   },
   "logo": {
     "light": "/logo/nous-light.svg",
-    "dark": "/logo/nous-dark.svg"
+    "dark": "/logo/nous-dark.svg",
+    "href": "https://www.opennous.cloud"
   },
   "navbar": {
     "links": [
@@ -298,8 +325,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Try Nous Cloud",
-      "href": "https://app.opennous.cloud"
+      "label": "Get started",
+      "href": "https://app.opennous.cloud/signup"
     }
   },
   "contextual": {
@@ -320,12 +347,33 @@
     }
   },
   "redirects": [
-    { "source": "/public-api/workspace-facts", "destination": "/public-api/gtm-profile" },
-    { "source": "/mcp/tools/get-workspace-facts", "destination": "/mcp/tools/get-playbook" },
-    { "source": "/mcp/tools/build-scoring-model", "destination": "/mcp/tools/build-icp-model" },
-    { "source": "/mcp/tools/record-closed-deals", "destination": "/mcp/tools/train-icp-model" },
-    { "source": "/public-api/api-keys/list-api-keys", "destination": "/public-api/introduction" },
-    { "source": "/public-api/api-keys/create-api-key", "destination": "/public-api/introduction" },
-    { "source": "/public-api/api-keys/delete-api-key", "destination": "/public-api/introduction" }
+    {
+      "source": "/public-api/workspace-facts",
+      "destination": "/public-api/gtm-profile"
+    },
+    {
+      "source": "/mcp/tools/get-workspace-facts",
+      "destination": "/mcp/tools/get-playbook"
+    },
+    {
+      "source": "/mcp/tools/build-scoring-model",
+      "destination": "/mcp/tools/build-icp-model"
+    },
+    {
+      "source": "/mcp/tools/record-closed-deals",
+      "destination": "/mcp/tools/train-icp-model"
+    },
+    {
+      "source": "/public-api/api-keys/list-api-keys",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/api-keys/create-api-key",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/api-keys/delete-api-key",
+      "destination": "/public-api/introduction"
+    }
   ]
 }
