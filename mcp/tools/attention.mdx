@@ -3,10 +3,18 @@ title: "attention"
 description: "What to work next, ranked."
 ---
 
-Hot-intent accounts, upcoming meetings, open commitments, accounts gone quiet, stale facts, and open flags, each with a suggested action.
+Hot-intent accounts, upcoming meetings, open commitments, accounts gone quiet, stale facts, and open flags, each with a suggested action and its source. A member key sees its own book.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
 | `limit` | number | | Maximum items, default 25, max 100 |
 
 REST: [`GET /v2/attention`](/public-api/attention)
+
+```
+2 items · 7 going dark · 2 decayed · 3 meetings · 4 commitments · 1 hot intent · 0 flags
+1. [upcoming meeting] Sarah Chen [9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40] · Thu, Oct 2, 3:00 PM UTC
+   Discovery call with Sarah Chen
+   → Prep with get_context intent meeting_prep
+   source: google_calendar
+```

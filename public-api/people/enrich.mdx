@@ -3,6 +3,10 @@ title: "Enrich a person"
 openapi: "POST /v2/people/{id}/enrich"
 ---
 
-Runs your connected enrichment providers on one person. Providers run in order Apollo, Prospeo, Findymail, and the first one that returns data wins. Connect at least one in **Settings → Integrations** first.
+Runs your enrichment providers on one person, then rescores it against your ICP. Connect an Apollo, Prospeo, or Findymail key in **Settings → Integrations** first.
 
-`fields_added` lists what changed. `enriched` is `false` when no provider found anything new.
+Providers run in turn until one returns data. With a LinkedIn URL the order is Prospeo, Findymail, Apollo. Without one it is Apollo, Findymail, Prospeo.
+
+A person enriched in the last 90 days comes back as is, with `cached: true` and nothing spent. Send `force: true` to enrich again.
+
+The person needs an email, a LinkedIn URL, or a full name plus a company domain. Otherwise the call returns `422`.

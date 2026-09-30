@@ -3,14 +3,14 @@ title: "get_insights"
 description: "What customers said about your product, sales, success, and market."
 ---
 
-Each insight is tied to the account that said it, with the quote and speaker when there is one.
+Reads the Insights board. Each insight is tied to the account that said it, with its tags, and the quote and speaker when there is one. New insights appear once they are sorted.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
 | `lane` | string | | `product`, `sales`, `success`, `market` |
 | `subtype` | string | | Must belong to `lane` when both are set. See below. |
-| `focus` | string | | One account. Email, LinkedIn URL, domain, or entity UUID. |
-| `since` | string | | ISO date. Only insights from then on. |
+| `focus` | string | | One account. Email, LinkedIn URL, domain, or entity UUID. Not a bare name. |
+| `since` | string | | ISO date, for example `2026-09-01`. Only insights from then on. |
 | `limit` | number | | Default 50, max 200 |
 | `offset` | number | | Rows to skip |
 

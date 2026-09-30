@@ -3,12 +3,12 @@ title: "list_people"
 description: "List and filter people in the workspace."
 ---
 
-Same filters as [`GET /v2/people`](/public-api/people/list). An unknown filter is an error, never ignored.
+People the workspace has engaged. They replied, met, are in the CRM, or were added by hand. Same filters as [`GET /v2/people`](/public-api/people/list).
 
 | Name | Type | Description |
 |---|---|---|
 | `search` | string | Substring match on email, name, company, LinkedIn URL |
-| `pipeline_stage` | string | Exact stage, for example `interested` |
+| `pipeline_stage` | string | Exact stage, for example `interested`. Stages are listed on [`GET /v2/people`](/public-api/people/list). |
 | `source` | string | Exact source |
 | `status` | string | Exact status |
 | `email` | string | Exact email |
@@ -23,4 +23,11 @@ Same filters as [`GET /v2/people`](/public-api/people/list). An unknown filter i
 | `limit` | number | Page size, default 100, max 1000 |
 | `offset` | number | Rows to skip |
 
-Returns one line per person with name, title, company, stage, ICP score, and last activity, and whether more pages exist.
+Returns one entry per person with name, title, company, id, email, LinkedIn URL, stage, ICP score, and last activity. Page with `offset` while more are available.
+
+```
+2 people · more available, page with offset
+• Sarah Chen — VP Sales at Acme  [9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40]
+    sarah@acme.com · https://www.linkedin.com/in/sarahchen
+    stage interested · ICP 82 fit · last activity 6d ago
+```

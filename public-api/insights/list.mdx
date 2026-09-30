@@ -3,7 +3,7 @@ title: "List insights"
 openapi: "GET /v2/insights"
 ---
 
-What customers said about your product, sales, success, and market, tied to the account that said it.
+What customers said about your product, sales, success, and market, tied to the account that said it. This is the same set the Insights board in the app shows. Only sorted insights linked to an account appear, newest first. Lines your own team said are left out.
 
 Each insight has one `lane` (who has to act) and one `subtype` (what kind of work). The response carries the workspace's `taxonomy`, so you can label results without hardcoding it.
 
@@ -21,3 +21,5 @@ Each insight has one `lane` (who has to act) and one `subtype` (what kind of wor
 | `market` | `buyers` | Who buys | Roles, decision makers, segments. Know, don't fix. |
 
 Service businesses get service labels on the same keys. For example `bug` reads "Missed results" and `feature` reads "Service request". Read `taxonomy` for the labels your workspace uses.
+
+New insights reach the board once they are sorted. Until then they do not appear here.

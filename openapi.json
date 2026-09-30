@@ -546,7 +546,7 @@
         ],
         "operationId": "enrichPerson",
         "summary": "Enrich a person",
-        "description": "Run the workspace's connected enrichment providers on one person, in order Apollo, Prospeo, Findymail. The first provider that returns data wins. Runs on your own provider keys.",
+        "description": "Run the workspace's enrichment providers (Apollo, Prospeo, Findymail) on one person, then rescore it against the ICP. A person enriched in the last 90 days is returned as is, with nothing spent, unless `force` is true.",
         "parameters": [
           {
             "name": "id",
@@ -570,7 +570,7 @@
                   "force": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Enrich again even if the person was enriched before."
+                    "description": "Enrich again even inside the 90-day reuse window."
                   }
                 }
               },
@@ -582,7 +582,7 @@
         },
         "responses": {
           "200": {
-            "description": "The person after enrichment.",
+            "description": "The person after enrichment, or the earlier result when it was reused.",
             "content": {
               "application/json": {
                 "schema": {
@@ -593,7 +593,7 @@
                     },
                     "enriched": {
                       "type": "boolean",
-                      "description": "True when a provider returned new data."
+                      "description": "True when this run found data."
                     },
                     "provider": {
                       "type": [
@@ -605,43 +605,115 @@
                         "prospeo",
                         "findymail",
                         null
-                      ]
+                      ],
+                      "description": "The provider that answered this run. Null when nothing ran or nothing was found."
                     },
                     "fields_added": {
                       "type": "array",
                       "items": {
                         "type": "string"
-                      }
+                      },
+                      "description": "Fields that were empty before and hold a value now."
+                    },
+                    "cached": {
+                      "type": "boolean",
+                      "description": "True when a recent enrichment was reused and no provider was called."
+                    },
+                    "last_enriched_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Present when `cached` is true."
+                    },
+                    "last_provider": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "apollo",
+                        "prospeo",
+                        "findymail",
+                        null
+                      ],
+                      "description": "Present when `cached` is true."
                     }
                   }
                 },
-                "example": {
-                  "person": {
-                    "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
-                    "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
-                    "email": "sarah@acme.com",
-                    "linkedin_url": "https://www.linkedin.com/in/sarahchen",
-                    "first_name": "Sarah",
-                    "last_name": "Chen",
-                    "job_title": "VP Sales",
-                    "seniority": "vp",
-                    "company": "Acme",
-                    "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
-                    "pipeline_stage": "discovery",
-                    "source": "hubspot",
-                    "icp_score": 82,
-                    "icp_fit": true,
-                    "first_seen_at": "2026-06-02T09:14:00Z",
-                    "last_activity_at": "2026-09-24T15:02:00Z",
-                    "phone": "+1 415 555 0142"
+                "examples": {
+                  "enriched": {
+                    "summary": "Enriched now",
+                    "value": {
+                      "person": {
+                        "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                        "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                        "email": "sarah@acme.com",
+                        "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                        "first_name": "Sarah",
+                        "last_name": "Chen",
+                        "job_title": "VP Sales",
+                        "seniority": "vp",
+                        "company": "Acme",
+                        "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                        "pipeline_stage": "discovery",
+                        "source": "hubspot",
+                        "icp_score": 82,
+                        "icp_fit": true,
+                        "first_seen_at": "2026-06-02T09:14:00Z",
+                        "last_activity_at": "2026-09-24T15:02:00Z",
+                        "phone": "+1 415 555 0142"
+                      },
+                      "enriched": true,
+                      "provider": "apollo",
+                      "fields_added": [
+                        "phone",
+                        "seniority"
+                      ],
+                      "cached": false
+                    }
                   },
-                  "enriched": true,
-                  "provider": "apollo",
-                  "fields_added": [
-                    "phone",
-                    "seniority",
-                    "company_size"
-                  ]
+                  "cached": {
+                    "summary": "Reused",
+                    "value": {
+                      "person": {
+                        "id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                        "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40",
+                        "email": "sarah@acme.com",
+                        "linkedin_url": "https://www.linkedin.com/in/sarahchen",
+                        "first_name": "Sarah",
+                        "last_name": "Chen",
+                        "job_title": "VP Sales",
+                        "seniority": "vp",
+                        "company": "Acme",
+                        "company_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b7a15",
+                        "pipeline_stage": "discovery",
+                        "source": "hubspot",
+                        "icp_score": 82,
+                        "icp_fit": true,
+                        "first_seen_at": "2026-06-02T09:14:00Z",
+                        "last_activity_at": "2026-09-24T15:02:00Z"
+                      },
+                      "enriched": false,
+                      "provider": null,
+                      "fields_added": [],
+                      "cached": true,
+                      "last_enriched_at": "2026-08-30T12:00:00Z",
+                      "last_provider": "apollo"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`:id` is not a UUID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid_id",
+                  "detail": ":id must be a person entity UUID"
                 }
               }
             }
@@ -678,7 +750,7 @@
             "$ref": "#/components/responses/ReadOnlyKey"
           },
           "404": {
-            "description": "No person with that id.",
+            "description": "No active person with that id, or not visible to this key.",
             "content": {
               "application/json": {
                 "schema": {
@@ -691,14 +763,29 @@
             }
           },
           "409": {
-            "description": "No enrichment provider is connected.",
+            "description": "The workspace has no enrichment key of its own.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "error": "no_enrichment_provider"
+                  "error": "no_enrichment_provider",
+                  "detail": "connect an Apollo (with \"use for enrichment\" on), Findymail or Prospeo key to enrich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The person has nothing a provider can look up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "no_usable_identifier",
+                  "detail": "enrichment needs an email, a LinkedIn URL, or a full name plus a company domain"
                 }
               }
             }
@@ -1308,7 +1395,7 @@
         ],
         "operationId": "listInsights",
         "summary": "List insights",
-        "description": "What customers told you about your product, sales, success, and market, tied to the account that said it. Filter by lane and subtype.",
+        "description": "The Insights board. What customers said about your product, sales, success, and market, tied to the account that said it. Only sorted insights linked to an account appear, never lines your own team said. Newest first. Unknown query parameters return 400.",
         "parameters": [
           {
             "name": "lane",
@@ -1335,7 +1422,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Only insights from one account. Email, LinkedIn URL, domain, or entity UUID."
+            "description": "Only insights from one account. Email, LinkedIn URL, domain, or entity UUID. A bare name returns 400."
           },
           {
             "name": "since",
@@ -1343,9 +1430,9 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date"
             },
-            "description": "Only insights that occurred at or after this time."
+            "description": "Only insights on or after this ISO date, for example `2026-09-01`."
           },
           {
             "name": "limit",
@@ -1509,29 +1596,78 @@
             }
           },
           "400": {
-            "description": "Unknown lane or subtype, or a subtype outside the lane.",
+            "description": "A bad parameter.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "unknown_query_param": {
+                    "summary": "unknown_query_param",
+                    "value": {
+                      "error": "unknown_query_param",
+                      "detail": "unsupported query param(s): type",
+                      "supported": [
+                        "lane",
+                        "subtype",
+                        "focus",
+                        "since",
+                        "limit",
+                        "offset",
+                        "category"
+                      ]
+                    }
+                  },
                   "invalid_lane": {
                     "summary": "invalid_lane",
                     "value": {
-                      "error": "invalid_lane"
+                      "error": "invalid_lane",
+                      "supported": [
+                        "product",
+                        "sales",
+                        "success",
+                        "market"
+                      ]
                     }
                   },
                   "invalid_subtype": {
                     "summary": "invalid_subtype",
                     "value": {
-                      "error": "invalid_subtype"
+                      "error": "invalid_subtype",
+                      "supported": [
+                        "bug",
+                        "friction",
+                        "feature",
+                        "objection",
+                        "pricing",
+                        "pitch",
+                        "setup",
+                        "training",
+                        "partners",
+                        "buyers"
+                      ]
                     }
                   },
                   "subtype_not_in_lane": {
                     "summary": "subtype_not_in_lane",
                     "value": {
-                      "error": "subtype_not_in_lane"
+                      "error": "subtype_not_in_lane",
+                      "detail": "'pricing' belongs to the 'sales' lane, not 'product'"
+                    }
+                  },
+                  "invalid_since": {
+                    "summary": "invalid_since",
+                    "value": {
+                      "error": "invalid_since",
+                      "detail": "since must be an ISO date, e.g. 2026-09-01"
+                    }
+                  },
+                  "invalid_focus": {
+                    "summary": "invalid_focus",
+                    "value": {
+                      "error": "invalid_focus",
+                      "detail": "provide an entity id, email, LinkedIn URL, or domain — not a bare name"
                     }
                   }
                 }
@@ -1541,11 +1677,40 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "404": {
+            "description": "`focus` matches no account visible to this key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "focus_not_found"
+                }
+              }
+            }
+          },
           "429": {
             "$ref": "#/components/responses/RateLimited"
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "description": "The Insights board is not set up on this instance yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "insights_board_not_ready"
+                }
+              }
+            }
           }
         }
       },
@@ -1679,6 +1844,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
           },
           "403": {
             "$ref": "#/components/responses/ReadOnlyKey"
@@ -3638,7 +3806,8 @@
             "$ref": "#/components/schemas/InsightSubtype"
           },
           "content": {
-            "type": "string"
+            "type": "string",
+            "description": "The insight as one statement."
           },
           "quote": {
             "type": [

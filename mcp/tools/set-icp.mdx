@@ -9,6 +9,8 @@ Pass the full ICP as markdown. Who the buyer is, who is not a fit, and the scori
 |---|---|---|---|
 | `body_md` | string | yes | The ICP as markdown |
 
-Writing replaces the current ICP. Check `whoami` for whether one exists, and read it with `query` `scope: { foundation: "icp" }` before overwriting.
+Writing replaces the current ICP text. An existing scoring model is kept, not rebuilt from the new text. Check `whoami` for whether an ICP exists, and read it with `query` `scope: { foundation: "icp" }` before overwriting.
+
+Returns a one-line confirmation.
 
 REST: [`POST /v2/foundations/icp`](/public-api/icp/create). To train the model on won and lost deals, use [`POST /v2/workspace/closed-deals`](/public-api/icp/train).
