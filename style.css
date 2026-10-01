@@ -1,47 +1,169 @@
-/* Match www.opennous.cloud (nous-web v5): Geist, hairlines, mono eyebrows. */
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
+/* Match www.opennous.cloud (nous-web v5): Schibsted Grotesk + JetBrains Mono, square corners,
+   hairline borders, mono uppercase tracked labels, one orange accent. */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
-  --nous-fg: #101011;
-  --nous-fg-soft: #4a4946;
-  --nous-fg-mute: #83817b;
-  --nous-bg-soft: #f4f4f2;
-  --nous-border: #eae9e5;
-  --nous-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --nous-fg: #1c1a17;
+  --nous-fg-soft: #4a463f;
+  --nous-fg-mute: #787369;
+  --nous-bg: #fcfbf8;
+  --nous-bg-soft: #f1efe8;
+  --nous-border: #e9e6dc;
+  --nous-border-strong: #d8d4c6;
+  --nous-accent: #e85b3d;
+  --nous-accent-ink: #c2482e;
+  --nous-on-accent: #fdf9f3;
+  --nous-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --nous-track: 0.12em;
 }
 :root.dark {
-  --nous-fg: #f6f5f2;
-  --nous-fg-soft: #b9b7b1;
-  --nous-fg-mute: #86847e;
-  --nous-bg-soft: #17171a;
-  --nous-border: #262629;
+  --nous-fg: #f2f0e9;
+  --nous-fg-soft: #b4afa3;
+  --nous-fg-mute: #8f8a7e;
+  --nous-bg: #131416;
+  --nous-bg-soft: #1a1b1e;
+  --nous-border: #26272b;
+  --nous-border-strong: #34353a;
+  --nous-accent-ink: #e85b3d;
 }
 
+/* ── Type ─────────────────────────────────────────────────────────────── */
 h1, h2, h3, h4 { letter-spacing: -0.022em; }
 h1 { letter-spacing: -0.03em; }
 
 code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 
-/* Mono uppercase eyebrows: page section label + sidebar group headers. */
+/* The site's label voice: mono, uppercase, tracked wide, muted. */
 #content-area .eyebrow,
 #sidebar-group > h5,
-#sidebar h5 {
-  font-family: var(--nous-mono);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.13em;
+#sidebar h5,
+#table-of-contents-label,
+#table-of-contents > div:first-child,
+.nav-tabs-item,
+#navbar nav a,
+#navbar li > a,
+#footer h4,
+#content-area table thead th,
+.method-pill,
+[data-component-part="field-type"],
+[data-component-part="field-required-pill"] {
+  font-family: var(--nous-mono) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--nous-track) !important;
   text-transform: uppercase;
-  color: var(--nous-fg-mute);
+}
+#content-area .eyebrow,
+#sidebar-group > h5,
+#sidebar h5,
+#content-area table thead th {
+  color: var(--nous-fg-mute) !important;
 }
 
-/* Code blocks: soft ground, 1px hairline, 0.7rem radius. */
+/* Tabs: the active tab gets the accent underline, the rest stay quiet. */
+.nav-tabs-item { color: var(--nous-fg-mute); }
+.nav-tabs-item:hover { color: var(--nous-fg); }
+.nav-tabs-item[data-active="true"],
+.nav-tabs-item.font-semibold { color: var(--nous-fg) !important; }
+
+/* ── Links ────────────────────────────────────────────────────────────── */
+#content-area a:not(.card):not([class*="button"]) {
+  color: var(--nous-accent-ink);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--nous-accent) 35%, transparent);
+}
+#content-area a:not(.card):not([class*="button"]):hover {
+  border-bottom-color: var(--nous-accent);
+}
+
+/* ── Navbar CTA: the site's square orange button ─────────────────────── */
+#topbar-cta-button a,
+#topbar-cta-button > a > span,
+#topbar-cta-button span {
+  border-radius: 0 !important;
+}
+#topbar-cta-button a {
+  background: var(--nous-accent) !important;
+  color: var(--nous-on-accent) !important;
+  font-family: var(--nous-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--nous-track);
+  text-transform: uppercase;
+}
+#topbar-cta-button a:hover { background: #d64c2f !important; }
+#topbar-cta-button svg { display: none; }
+
+/* ── Square corners, hairline borders ────────────────────────────────── */
 .code-block,
+.code-group,
+pre,
+.card,
+.callout,
+[data-callout-type],
+#content-area table,
+#content-area img,
+#search-bar-entry,
+#search-bar-entry-mobile,
+.api-section,
+.request-example,
+.response-example,
+[data-component-part="field-type"],
+.method-pill {
+  border-radius: 0 !important;
+}
+.code-block,
+.code-group,
 pre {
   border: 1px solid var(--nous-border) !important;
-  border-radius: 0.7rem !important;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.86rem;
+  line-height: 1.65;
 }
 :not(pre) > code {
-  border-radius: 0.35rem;
+  border-radius: 0 !important;
+  border: 1px solid var(--nous-border);
+  background: var(--nous-bg-soft) !important;
+  padding: 0.1em 0.35em;
+  font-size: 0.86em;
 }
+
+/* Code block header: the filename / language reads as a mono label. */
+.code-block [data-component-part="code-block-header"],
+.code-group [role="tablist"] {
+  font-family: var(--nous-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--nous-border);
+}
+
+/* Cards: flat, hairline, accent rule on hover — like the site's spec rows. */
+.card {
+  border: 1px solid var(--nous-border) !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.card:hover { border-color: var(--nous-accent) !important; }
+
+/* Tables read like the site's spec lists: no zebra, hairline rows. */
+#content-area table { border: 1px solid var(--nous-border); border-collapse: collapse; }
+#content-area table th,
+#content-area table td { border-bottom: 1px solid var(--nous-border); }
+#content-area table tbody tr:nth-child(even) { background: transparent; }
+
+/* Callouts: a left accent rule instead of a tinted rounded box. */
+.callout,
+[data-callout-type] {
+  border-left-width: 2px !important;
+}
+
+/* Sidebar: active page marked by the accent, square highlight. */
+#sidebar a[aria-current="page"],
+#sidebar li[data-active="true"] > a {
+  border-radius: 0 !important;
+  color: var(--nous-fg) !important;
+  box-shadow: inset 2px 0 0 var(--nous-accent);
+}
+#sidebar a { border-radius: 0 !important; }
+
+/* API pages: method pills square and mono. */
+.method-pill { padding: 0.15em 0.5em; }
