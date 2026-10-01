@@ -1,0 +1,8 @@
+---
+title: "Record insights"
+openapi: "POST /v2/insights"
+---
+
+Records what a call or email taught you about your own business. Send every insight from one source in one call. Facts about the account itself belong in a [note](/public-api/notes).
+
+`category` is one of `product`, `positioning`, `market`, or `buyer`. Near-duplicates of existing insights are skipped, so `written` can be lower than `submitted`.

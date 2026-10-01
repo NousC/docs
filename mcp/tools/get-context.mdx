@@ -1,74 +1,20 @@
 ---
 title: "get_context"
-description: "Engineered context for one task about one entity. The headline call before drafting outreach, prepping a meeting, or making any decision about a person or company."
+description: "Ranked context on a person, account, or deal, for one task."
 ---
 
-The most-used tool. Pass who you're working on and what you're about to do — get back a focused, ranked block: the account's ICP fit score, facts with confidence + freshness, the recent timeline, any saved notes & documents on the contact, the buying-group stakeholders, and any open predictions.
+Call it before drafting outreach or preparing for a meeting. Returns a summary, ICP fit, durable facts, attributes, your own ICP context, the timeline, the buying committee, and predictions, cut to a token budget. Meeting and call prep also get the next and last meeting with attendees.
 
-## Parameters
+Pass a deal id from [`find`](/mcp/tools/find) and the result leads with the deal: stage, amount, close date, owner, health, the people on it, and the objections, competitors, budget, and timeline filed to it. Then comes its account's context.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `focus` | string | ✓ | Email, LinkedIn URL, domain, entity UUID, or name |
-| `intent` | enum | | `account_review` *(default)*, `draft_email`, `follow_up`, `meeting_prep`, `call_prep` |
-| `budget_tokens` | number | | Approximate token budget for the returned block |
+| `focus` | string | yes | Email, LinkedIn URL, domain, entity UUID, CRM deal UUID, or `implied:<account_id>` |
+| `intent` | string | | `account_review` (default), `draft_email`, `follow_up`, `meeting_prep`, `call_prep` |
+| `budget_tokens` | number | | Approximate token budget |
 
-## Returns
+An attribute's freshness says whether to trust it. Act on `fresh`. Check `suspect` or `expired` first.
 
-Formatted text — one line per claim, the recent timeline, stakeholders, predictions:
+When `focus` matches several records, the tool lists the candidates. Call again with one `entity_id`.
 
-```
-Sarah is evaluating for Q3; primary concern is Salesforce migration.
-
-ICP FIT: 84/100 — strong fit  (matches B2B SaaS, 50–200, already on Apollo)
-
-FACTS (12):
-  title: VP Sales                              [92% · fresh]
-  stage: evaluating                            [81% · fresh]
-  intent: budget_q3                            [78% · aging]
-
-YOUR CONTEXT (ICP / product / positioning):
-  ICP: GTM Engineers or RevOps leaders, B2B SaaS, 50–200 employees
-
-TIMELINE:
-  2d ago    email replied: Interested but budget waiting on Q3
-  4d ago    linkedin message: Can we reschedule?
-  1w ago    proposal sent: Q3 outbound package — $12k/yr
-
-DOCUMENTS (notes & meeting records — use search_notes to search their content):
-  meeting brief · Pre-meeting brief — renewal  [1w ago]
-    Budget waiting on Q3 close; expect a discount ask…
-
-STAKEHOLDERS:
-  Maria Lopez — CFO
-  James Park — Head of Eng
-
-PREDICTIONS:
-  icp_fit: 0.84 (78%)
-
-(entity_id: a1b2c3d4-...)
-```
-
-The **DOCUMENTS** block is an overview (snippets only) of the notes and meeting records kept on the contact via [`save_note`](/mcp/tools/save-note). To pull the relevant content from them, use [`search_notes`](/mcp/tools/search-notes).
-
-### Ambiguous name
-
-If `focus` is a name that matches several people:
-
-```
-"Sarah Chen" matches several people. Call get_context again with one of these entity ids:
-  • Sarah Chen — VP Sales @ Acme  [a1b2c3d4-...]
-  • Sarah Chen — Designer @ Pixel [b2c3d4e5-...]
-```
-
-## When to call it
-
-- **Before any outbound action** on a known contact
-- **At the start of meeting prep** — pick the `intent` that matches the use case
-- **Whenever your agent needs to ground a decision** in a person's current state
-
-For raw data ("what do we know about X?"), prefer [`get_account`](/mcp/tools/get-account). For questions about your OWN business (ICP, pricing), use [`get_playbook`](/mcp/tools/get-playbook).
-
-## Backed by
-
-`POST /v2/context` — see the [HTTP reference](/public-api/context) for the raw JSON shape.
+REST: [`POST /v2/context`](/public-api/context)

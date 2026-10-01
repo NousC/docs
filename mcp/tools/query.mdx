@@ -1,76 +1,37 @@
 ---
 title: "query"
-description: "Retrieve and summarise a corpus of activity across many people. The graph retrieves; your agent finds the pattern."
+description: "Activity and facts across many accounts."
 ---
 
-Where `get_context` is one person, `query` is many. Pull the last 30 days of email replies, every meeting from `fireflies`, every cold email sent — and let your agent reason over the result.
-
-## Parameters
+Nous retrieves and compacts. Your agent finds the pattern.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `scope` | object | ✓ | Filter for the corpus |
-| `question` | string | | Your analytical question — echoed in the response |
+| `scope` | object | yes | What to retrieve. See below. |
+| `without` | object | | Subtract accounts matching this scope. Same fields as `scope`. |
+| `return` | string | | `observations` (default) or `entities`, one row per account |
+| `question` | string | | What you want to learn. Enables semantic ranking. |
 
-### Scope
+| `scope` field | Description |
+|---|---|
+| `kind` | `event` or `state` |
+| `property` | Prefix, for example `interaction.email` or `interaction.meeting_scheduled` |
+| `source` | For example `gmail`, `linkedin` |
+| `entity_id` | One person or company |
+| `since_days` | Last N days. Looks back only. |
+| `from`, `to` | ISO bounds. Use for future meetings. |
+| `order` | `desc` (default) or `asc` |
+| `limit` | Default 50, max 200 |
+| `facts` | Search durable facts instead of activity. Needs `question`. |
+| `reporting` | `role` or `company`. Objections and themes for a seat. |
+| `role` | With `reporting: role`, the seat |
+| `attention` | `mine`. Your worklist. |
+| `foundation` | `icp`. The ICP document itself. |
 
-| Field | Type | Description |
-|---|---|---|
-| `kind` | `"event"` or `"state"` | Limit to one observation type |
-| `property` | string | Prefix match — `interaction.email` covers `email_sent` and `email_replied` |
-| `source` | string | e.g. `gmail`, `linkedin`, `fireflies` |
-| `entity_id` | string | Scope to one entity |
-| `since_days` | number | Only observations within the last N days |
-| `limit` | number | Max items (default 50, cap 200) |
+Examples.
 
-## Returns
+- Emailed in 5 days with no reply. `scope` on `interaction.email_sent` with `since_days: 5`, `without` on `interaction.email_replied` with `since_days: 5`, `return: "entities"`.
+- Funnel by stage. `scope: { kind: "state", property: "pipeline_stage" }`.
+- Which accounts want to replace Clay. `scope: { facts: true }`, `question: "want to replace Clay"`, `return: "entities"`.
 
-```
-142 matches (showing 50)
-142× email replied
-
-  2d ago   Sarah Chen          email replied: Interested but budget waiting on Q3
-  3d ago   Maria Lopez         email replied: Send it over
-  4d ago   James Park          email replied: We're already evaluating two vendors
-  …
-```
-
-## Examples
-
-"What email replies came in this week?"
-
-```json
-{
-  "scope": {
-    "kind": "event",
-    "property": "interaction.email_replied",
-    "since_days": 7,
-    "limit": 50
-  },
-  "question": "What email replies came in this week?"
-}
-```
-
-"All meetings on a specific account":
-
-```json
-{
-  "scope": {
-    "kind": "event",
-    "property": "interaction.meeting",
-    "entity_id": "a1b2c3d4-..."
-  }
-}
-```
-
-## When to call it
-
-- **"Across all accounts this week, who replied positively?"**
-- **"What signal types are firing most often?"**
-- **"How many cold emails went out from Instantly this month?"**
-
-For your own GTM profile (ICP, pricing, etc.) use [`get_playbook`](/mcp/tools/get-playbook) — `query` is for per-entity observations only.
-
-## Backed by
-
-`POST /v2/query` — see the [HTTP reference](/public-api/query) for the raw JSON shape.
+REST: [`POST /v2/query`](/public-api/query)

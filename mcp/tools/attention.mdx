@@ -1,44 +1,20 @@
 ---
 title: "attention"
-description: "What needs your attention across the workspace right now — accounts gone quiet, key facts decayed. Each item ships with a suggested action."
+description: "What to work next, ranked."
 ---
 
-The "what should I work next?" tool. Returns a ranked list of accounts that have decayed past your thresholds, with a suggested next action on each.
-
-## Parameters
+Hot-intent accounts, upcoming meetings, open commitments, accounts gone quiet, stale facts, and open flags, each with a suggested action and its source. A member key sees its own book.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `limit` | number | | Max items. Default 25, cap 100. |
+| `limit` | number | | Maximum items, default 25, max 100 |
 
-## Returns
-
-```
-Needs attention (5):
-  Arnold Schwarzenegger — no activity for 35 days
-      → Re-engage with a follow-up or close the account out
-  Rinor Recica — no activity for 45 days
-      → Re-engage with a follow-up or close the account out
-  Brian Dempsey — no activity for 48 days
-      → Re-engage with a follow-up or close the account out
-  Arkadiusz Czarniecki — no activity for 68 days
-      → Re-engage with a follow-up or close the account out
-  Gudrun Glinder — no activity for 125 days
-      → Re-engage with a follow-up or close the account out
-```
-
-If nothing needs attention:
+REST: [`GET /v2/attention`](/public-api/attention)
 
 ```
-Nothing needs attention right now.
+2 items · 7 going dark · 2 decayed · 3 meetings · 4 commitments · 1 hot intent · 0 flags
+1. [upcoming meeting] Sarah Chen [9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40] · Thu, Oct 2, 3:00 PM UTC
+   Discovery call with Sarah Chen
+   → Prep with get_context intent meeting_prep
+   source: google_calendar
 ```
-
-## When to call it
-
-- **At the start of an agent's working session** — pick what to act on
-- **As a recurring cron** that surfaces accounts into a Slack channel or task queue
-- **In a Playground prompt** ("who has gone quiet that I should follow up with?") to surface the today-list
-
-## Backed by
-
-`GET /v2/attention` — see the [HTTP reference](/public-api/attention) for the raw JSON shape.

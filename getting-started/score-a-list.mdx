@@ -8,7 +8,7 @@ You already keep lists somewhere. A Google Sheet, a Clay table, a CRM export. Yo
 The list stays yours. Nous owns the score. And because the score lands in the graph, every agent you run reads the same number through [`get_context`](/mcp/tools/get-context) and [`query`](/public-api/query), and the model sharpens from your own won and lost deals as you record outcomes.
 
 <Note>
-Scoring needs a model. Build one first with [`build_icp_model`](/mcp/tools/build-icp-model), or train it on real deals with [`train_icp_model`](/mcp/tools/train-icp-model).
+Scoring needs a model. Create one first with [`set_icp`](/mcp/tools/set-icp), or train it on real deals with [`POST /v2/workspace/closed-deals`](/public-api/icp/train).
 </Note>
 
 ## Two verbs
@@ -16,7 +16,7 @@ Scoring needs a model. Build one first with [`build_icp_model`](/mcp/tools/build
 | Verb | Use it for |
 |---|---|
 | [`score`](/public-api/score) | One row at a time. A spreadsheet cell, a Clay column, a per-record workflow step |
-| [`attach_list`](/public-api/leads/attach) | A whole list in one call. Nous creates the list, resolves every row, and scores it |
+| `attach_list` | A whole list in one call. Nous creates the list, resolves every row, and scores it |
 
 Both accept an email, a domain, a LinkedIn URL, or an entity UUID, and both write the result into the graph.
 
@@ -85,4 +85,4 @@ A row only scores if Nous has facts to score on. A brand-new email with nothing 
 | `intent.score` | How warm the account is right now, `0` to `100`, decaying over time |
 | `intent.band` | `Red-hot` / `Hot` / `Warm` / `Aware` / `Dormant` |
 
-For the raw JSON shape, see the [`/v2/score`](/public-api/score) and [`/v2/lead-lists/attach`](/public-api/leads/attach) reference.
+For the raw JSON shape, see the [`/v2/score`](/public-api/score) reference.

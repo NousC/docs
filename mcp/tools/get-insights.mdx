@@ -1,42 +1,24 @@
 ---
 title: "get_insights"
-description: "What calls and replies taught us about our product, positioning, market, and buyer — grounded in verbatim quotes. The mirror of our own GTM profile."
+description: "What customers said about your product, sales, success, and market."
 ---
 
-Where `get_gtm_profile` is what *we assert* about our business, `get_insights` is what our **buyers taught us** — auto-extracted from every call transcript into four living docs, each insight grounded in a verbatim quote from the prospect (with attribution). It's how the market's own words feed back into how we build, message, and sell.
-
-The four categories:
-
-| Category | Answers |
-|---|---|
-| `product` | what to build next — gaps, friction, feature pulls |
-| `positioning` | what lands vs confuses — the language that works |
-| `market` | segments, timing, where demand is |
-| `buyer` | who buys and the pain that drives the purchase |
-
-## Parameters
+Reads the Insights board. Each insight is tied to the account that said it, with its tags, and the quote and speaker when there is one. New insights appear once they are sorted.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `category` | `product` \| `positioning` \| `market` \| `buyer` | | One doc to read. Omit to get all four. |
+| `lane` | string | | `product`, `sales`, `success`, `market` |
+| `subtype` | string | | Must belong to `lane` when both are set. See below. |
+| `focus` | string | | One account. Email, LinkedIn URL, domain, or entity UUID. Not a bare name. |
+| `since` | string | | ISO date, for example `2026-09-01`. Only insights from then on. |
+| `limit` | number | | Default 50, max 200 |
+| `offset` | number | | Rows to skip |
 
-## Returns
+| Lane | Subtypes |
+|---|---|
+| `product` | `bug`, `friction`, `feature` |
+| `sales` | `objection`, `pricing`, `pitch` |
+| `success` | `setup`, `training` |
+| `market` | `partners`, `buyers` |
 
-Each doc as markdown, versioned, newest insights first — every line a learning plus the quote it came from.
-
-```
-# Buyer insights (v14)
-
-- Buyers resist starting on our workspace; prefer inviting us into their own account.
-    "I might opt to start with my own workspace from day one and invite you into mine." — Matt Muschol
-- The real friction isn't sparking warm replies — it's converting them into booked meetings.
-    "you're doing a good job getting the warm response, but what about the next step?"
-```
-
-## Examples
-
-- *"What have our calls taught us about what to build next?"* → `get_insights(product)`
-- *"What language lands with buyers and what confuses them?"* → `get_insights(positioning)`
-- *"Who actually buys, and what's the pain that drives the purchase?"* → `get_insights(buyer)`
-
-<Note>Insights are **authored by the extractor, not agents** — they fill automatically as call transcripts land. There's no write tool; the record builds itself from what buyers actually said.</Note>
+Definitions for each subtype are on [`GET /v2/insights`](/public-api/insights/list).

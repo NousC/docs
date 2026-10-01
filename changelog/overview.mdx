@@ -23,10 +23,10 @@ See the [REST reference](/public-api/score) and the [`score`](/mcp/tools/score) 
 
 Nous is now operated by the agent. The MCP server exposes **seventeen tools** — seven new ones let the agent set the workspace up itself instead of a human clicking through the app:
 
-- **[`get_workspace_status`](/mcp/tools/get-workspace-status)** — the whole setup state in one call (onboarding, GTM playbook, integrations, CRM sync, triggers) plus a ranked next-steps list. The first call in a session.
-- **[`set_workspace_profile`](/mcp/tools/set-workspace-profile)** — agent-driven onboarding: name, website, business type, and a sentence on the ICP.
-- **[`build_icp_model`](/mcp/tools/build-icp-model)** — turn the recorded GTM context into the ICP model.
-- **[`connect_integration`](/mcp/tools/connect-integration)** — connect a key-based integration (Apollo, Prospeo, HubSpot token, …); credentials are verified before saving.
+- **`get_workspace_status`** — the whole setup state in one call (onboarding, GTM playbook, integrations, CRM sync, triggers) plus a ranked next-steps list. The first call in a session.
+- **`set_workspace_profile`** — agent-driven onboarding: name, website, business type, and a sentence on the ICP.
+- **`build_icp_model`** — turn the recorded GTM context into the ICP model.
+- **`connect_integration`** — connect a key-based integration (Apollo, Prospeo, HubSpot token, …); credentials are verified before saving.
 - **`configure_crm_sync`** — set the CRM sync rules (auto-sync, create policy, hygiene cadence). Growth+.
 - **`set_trigger`** / **`list_triggers`** — wire outbound event triggers for the user's stack. _(internal-only; not exposed to agents as of MCP v0.46.)_
 
@@ -44,13 +44,13 @@ Install or update with `@opennous/mcp@0.19.0` and `@opennous/cli@0.4.0`.
 
 The MCP server now exposes **ten tools**. Three are new since the last release:
 
-- **[`save_note`](/mcp/tools/save-note)** — keep a meeting brief, transcript, prep, or plain note on a contact's record. Append-only and dated, so a contact builds a history across meetings. ([`POST /v2/notes`](/public-api/notes))
-- **[`search_notes`](/mcp/tools/search-notes)** — semantic search across saved notes & documents, so an agent pulls the relevant passage instead of loading whole documents. ([`POST /v2/notes/search`](/public-api/notes-search))
-- **[`set_workspace_profile`](/mcp/tools/set-workspace-profile)** — write back a lasting change to a GTM section. The section evolves and the prior version is kept as history, never silently contradicted. ([`POST /v2/workspace/facts`](/public-api/gtm-profile#writing-back))
+- **`save_note`** — keep a meeting brief, transcript, prep, or plain note on a contact's record. Append-only and dated, so a contact builds a history across meetings. ([`POST /v2/notes`](/public-api/notes))
+- **`search_notes`** — semantic search across saved notes & documents, so an agent pulls the relevant passage instead of loading whole documents. (`POST /v2/notes/search`)
+- **`set_workspace_profile`** — write back a lasting change to a GTM section. The section evolves and the prior version is kept as history, never silently contradicted. (`POST /v2/workspace/facts`)
 
 [`get_context`](/mcp/tools/get-context) now also surfaces a **DOCUMENTS** block — an overview of the notes kept on a contact — alongside the account's ICP fit score.
 
-`save_note` keeps the document itself; [`record`](/mcp/tools/record) still logs that an interaction happened. After a meeting, use both.
+`save_note` keeps the document itself; `record` still logs that an interaction happened. After a meeting, use both.
 
 </Update>
 

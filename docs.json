@@ -1,17 +1,42 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "maple",
   "name": "Nous",
   "colors": {
-    "primary": "#bf5630",
-    "light": "#d97757",
-    "dark": "#a8462a"
+    "primary": "#101011",
+    "light": "#f6f5f2",
+    "dark": "#101011"
   },
   "appearance": {
     "default": "light"
   },
+  "background": {
+    "decoration": "grid",
+    "color": {
+      "light": "#fbfbfa",
+      "dark": "#0e0e10"
+    }
+  },
+  "fonts": {
+    "heading": {
+      "family": "Geist",
+      "weight": 500
+    },
+    "body": {
+      "family": "Geist",
+      "weight": 400
+    }
+  },
+  "styling": {
+    "eyebrows": "section",
+    "codeblocks": {
+      "theme": {
+        "light": "github-light-default",
+        "dark": "vesper"
+      }
+    }
+  },
   "favicon": "/favicon.svg",
-  "openapi": "openapi.json",
   "navigation": {
     "tabs": [
       {
@@ -109,6 +134,7 @@
       },
       {
         "tab": "REST API",
+        "openapi": "openapi.json",
         "groups": [
           {
             "group": "Overview",
@@ -117,65 +143,92 @@
             ]
           },
           {
-            "group": "Account Context",
-            "pages": [
-              "public-api/context",
-              "public-api/accounts"
-            ]
-          },
-          {
-            "group": "Observations",
-            "pages": [
-              "public-api/observations"
-            ]
-          },
-          {
             "group": "People",
             "pages": [
               "public-api/people/list",
-              "public-api/people/create",
-              "public-api/people/update"
+              "public-api/people/get"
             ]
           },
           {
-            "group": "Leads",
+            "group": "Accounts",
             "pages": [
-              "public-api/leads/list",
-              "public-api/leads/create",
-              "public-api/leads/bulk",
-              "public-api/leads/update",
-              "public-api/leads/attach"
+              "public-api/accounts/list",
+              "public-api/accounts",
+              "public-api/context",
+              "public-api/query"
             ]
           },
           {
-            "group": "Search",
+            "group": "Deals",
             "pages": [
-              "public-api/query",
-              "public-api/attention",
-              "public-api/action-items",
-              "public-api/verify",
-              "public-api/dedup",
-              "public-api/score"
-            ]
-          },
-          {
-            "group": "Workspace",
-            "pages": [
-              "public-api/gtm-profile"
+              "public-api/deals/list",
+              "public-api/deals/get",
+              "public-api/deals/pipelines"
             ]
           },
           {
             "group": "Notes",
             "pages": [
               "public-api/notes",
-              "public-api/notes-search"
+              "public-api/notes/list"
             ]
           },
           {
-            "group": "Triggers",
+            "group": "Attention",
             "pages": [
-              "public-api/triggers/introduction",
-              "public-api/triggers/events"
+              "public-api/attention"
+            ]
+          },
+          {
+            "group": "Insights",
+            "pages": [
+              "public-api/insights/list",
+              "public-api/insights/record"
+            ]
+          },
+          {
+            "group": "Enrich & score",
+            "pages": [
+              "public-api/people/enrich",
+              "public-api/score"
+            ]
+          },
+          {
+            "group": "Organization",
+            "pages": [
+              "public-api/org/whoami",
+              "public-api/members/list",
+              "public-api/members/invite",
+              "public-api/members/remove",
+              "public-api/brain/read",
+              "public-api/brain/search",
+              "public-api/brain/page",
+              "public-api/brain/write",
+              "public-api/icp/get",
+              "public-api/icp/update",
+              "public-api/icp/train"
+            ]
+          },
+          {
+            "group": "Workflows",
+            "tag": "Beta",
+            "pages": [
+              "public-api/workflows/list",
+              "public-api/workflows/create",
+              "public-api/workflows/get",
+              "public-api/workflows/update",
+              "public-api/workflows/delete",
+              "public-api/workflows/duplicate",
+              "public-api/workflows/run",
+              "public-api/workflows/runs",
+              "public-api/workflows/triggers"
+            ]
+          },
+          {
+            "group": "Usage",
+            "pages": [
+              "public-api/usage/get",
+              "public-api/usage/breakdown"
             ]
           }
         ]
@@ -186,59 +239,59 @@
           {
             "group": "Overview",
             "pages": [
-              "mcp/introduction"
+              "mcp/introduction",
+              "mcp/tools/whoami"
             ]
           },
           {
-            "group": "Retrieve",
+            "group": "Find",
+            "pages": [
+              "mcp/tools/find"
+            ]
+          },
+          {
+            "group": "Understand",
             "pages": [
               "mcp/tools/get-context",
-              "mcp/tools/get-account",
-              "mcp/tools/score",
-              "mcp/tools/query",
-              "mcp/tools/search-notes",
-              "mcp/tools/get-playbook"
+              "mcp/tools/query"
             ]
           },
           {
-            "group": "Learn",
+            "group": "Attention",
+            "pages": [
+              "mcp/tools/attention"
+            ]
+          },
+          {
+            "group": "Insights",
             "pages": [
               "mcp/tools/get-insights"
             ]
           },
           {
-            "group": "Aggregate",
+            "group": "Notes",
             "pages": [
-              "mcp/tools/campaign-performance",
-              "mcp/tools/pipeline-intelligence"
+              "mcp/tools/add-note"
             ]
           },
           {
-            "group": "Act",
+            "group": "Enrich & score",
             "pages": [
-              "mcp/tools/attention",
-              "mcp/tools/get-action-items"
+              "mcp/tools/enrich",
+              "mcp/tools/score"
             ]
           },
           {
-            "group": "Write",
+            "group": "Brain",
             "pages": [
-              "mcp/tools/record",
-              "mcp/tools/save-note",
-              "mcp/tools/verify"
+              "mcp/tools/read-brain",
+              "mcp/tools/write-brain"
             ]
           },
           {
-            "group": "Setup",
+            "group": "ICP",
             "pages": [
-              "mcp/tools/get-workspace-status",
-              "mcp/tools/set-workspace-profile",
-              "mcp/tools/build-icp-model",
-              "mcp/tools/train-icp-model",
-              "mcp/tools/sync-icp",
-              "mcp/tools/export-icp-model",
-              "mcp/tools/sync-playbook",
-              "mcp/tools/connect-integration"
+              "mcp/tools/set-icp"
             ]
           }
         ]
@@ -283,7 +336,8 @@
   },
   "logo": {
     "light": "/logo/nous-light.svg",
-    "dark": "/logo/nous-dark.svg"
+    "dark": "/logo/nous-dark.svg",
+    "href": "https://www.opennous.cloud"
   },
   "navbar": {
     "links": [
@@ -298,8 +352,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Try Nous Cloud",
-      "href": "https://app.opennous.cloud"
+      "label": "Get started",
+      "href": "https://app.opennous.cloud/signup"
     }
   },
   "contextual": {
@@ -320,12 +374,181 @@
     }
   },
   "redirects": [
-    { "source": "/public-api/workspace-facts", "destination": "/public-api/gtm-profile" },
-    { "source": "/mcp/tools/get-workspace-facts", "destination": "/mcp/tools/get-playbook" },
-    { "source": "/mcp/tools/build-scoring-model", "destination": "/mcp/tools/build-icp-model" },
-    { "source": "/mcp/tools/record-closed-deals", "destination": "/mcp/tools/train-icp-model" },
-    { "source": "/public-api/api-keys/list-api-keys", "destination": "/public-api/introduction" },
-    { "source": "/public-api/api-keys/create-api-key", "destination": "/public-api/introduction" },
-    { "source": "/public-api/api-keys/delete-api-key", "destination": "/public-api/introduction" }
+    {
+      "source": "/public-api/workspace-facts",
+      "destination": "/public-api/icp/update"
+    },
+    {
+      "source": "/mcp/tools/get-workspace-facts",
+      "destination": "/mcp/tools/get-context"
+    },
+    {
+      "source": "/mcp/tools/build-scoring-model",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/record-closed-deals",
+      "destination": "/public-api/icp/train"
+    },
+    {
+      "source": "/public-api/api-keys/list-api-keys",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/api-keys/create-api-key",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/api-keys/delete-api-key",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/leads",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/list",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/create",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/bulk",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/update",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/leads/attach",
+      "destination": "/public-api/score"
+    },
+    {
+      "source": "/public-api/people",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/observations",
+      "destination": "/public-api/notes"
+    },
+    {
+      "source": "/public-api/action-items",
+      "destination": "/public-api/attention"
+    },
+    {
+      "source": "/public-api/verify",
+      "destination": "/public-api/context"
+    },
+    {
+      "source": "/public-api/dedup",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/gtm-profile",
+      "destination": "/public-api/icp/update"
+    },
+    {
+      "source": "/public-api/notes-search",
+      "destination": "/public-api/notes/list"
+    },
+    {
+      "source": "/public-api/triggers",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/triggers/introduction",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/public-api/triggers/events",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/mcp/tools/build-icp-model",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/campaign-performance",
+      "destination": "/mcp/tools/query"
+    },
+    {
+      "source": "/mcp/tools/connect-integration",
+      "destination": "/mcp/introduction"
+    },
+    {
+      "source": "/mcp/tools/export-icp-model",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/get-action-items",
+      "destination": "/mcp/tools/attention"
+    },
+    {
+      "source": "/mcp/tools/get-playbook",
+      "destination": "/mcp/tools/get-context"
+    },
+    {
+      "source": "/mcp/tools/get-workspace-status",
+      "destination": "/mcp/tools/whoami"
+    },
+    {
+      "source": "/mcp/tools/pipeline-intelligence",
+      "destination": "/mcp/tools/query"
+    },
+    {
+      "source": "/mcp/tools/record",
+      "destination": "/mcp/tools/add-note"
+    },
+    {
+      "source": "/mcp/tools/save-note",
+      "destination": "/mcp/tools/add-note"
+    },
+    {
+      "source": "/mcp/tools/search-notes",
+      "destination": "/mcp/tools/query"
+    },
+    {
+      "source": "/mcp/tools/set-workspace-profile",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/sync-icp",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/sync-playbook",
+      "destination": "/mcp/tools/set-icp"
+    },
+    {
+      "source": "/mcp/tools/train-icp-model",
+      "destination": "/public-api/icp/train"
+    },
+    {
+      "source": "/mcp/tools/verify",
+      "destination": "/mcp/tools/get-context"
+    },
+    {
+      "source": "/public-api/people/create",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/people/update",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/icp/create",
+      "destination": "/public-api/icp/update"
+    },
+    {
+      "source": "/mcp/tools/list-people",
+      "destination": "/mcp/tools/find"
+    },
+    {
+      "source": "/mcp/tools/get-account",
+      "destination": "/mcp/tools/get-context"
+    }
   ]
 }

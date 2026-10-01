@@ -1,0 +1,21 @@
+---
+title: "enrich"
+description: "Enrich one person and rescore them."
+---
+
+Runs your enrichment providers (Apollo, Prospeo, Findymail, on your own keys) to fill title, email, LinkedIn, company, phone, and location, then rescores the person against the ICP. Enrich the people you are about to work, not a whole list.
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `person` | string | yes | Entity UUID, email, or LinkedIn URL. Not a name. Use [`find`](/mcp/tools/find) with `search` first. |
+| `force` | boolean | | Enrich again inside the 90-day reuse window |
+
+A person enriched in the last 90 days comes back from what is already held, with nothing spent.
+
+```
+Enriched Sarah Chen via apollo: added phone, seniority.
+  VP Sales at Acme · sarah@acme.com · https://www.linkedin.com/in/sarahchen · +1 415 555 0142 · ICP 82
+(entity_id: 9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40)
+```
+
+REST: [`POST /v2/people/:id/enrich`](/public-api/people/enrich)

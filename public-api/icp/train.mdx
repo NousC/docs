@@ -1,0 +1,8 @@
+---
+title: "Train from closed deals"
+openapi: "POST /v2/icp/closed-deals"
+---
+
+Trains the ICP model on deals you actually won and lost, then rescores open accounts.
+
+Pass domains, or objects with `amount`, `currency`, and `closed_at`. One deal is enough to start. Won and lost together give the clearest signal.

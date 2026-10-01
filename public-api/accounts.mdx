@@ -1,109 +1,13 @@
 ---
-title: "Get Account"
-api: "GET https://api.opennous.cloud/v2/accounts/{id}"
-description: "The full account — entity + every claim with epistemics + recent observation timeline."
+title: "Get an account"
+openapi: "GET /v2/accounts/{id}"
 ---
 
-The raw projection. Returns every known fact about an entity, each with its source, freshness, and confidence, plus the recent activity timeline. Use this when you want the complete picture; prefer [`/v2/context`](/public-api/context) for task-shaped, ranked output.
+The full record for a person or company. A company also returns its people and its deals. For a ranked block shaped to one task, use [get context](/public-api/context).
 
-## Request
+Pass `intent` to add `key_activity`, the timeline ranked by how much each interaction tells you. Add `compress=1` to drop the raw `recent_observations`.
 
 ```bash
-curl https://api.opennous.cloud/v2/accounts/sarah%40acme.com \
-  -H 'Authorization: Bearer YOUR_API_KEY'
+curl "https://api.opennous.cloud/v2/accounts/acme.com?intent=meeting_prep&compress=1" \
+  -H "Authorization: Bearer $NOUS_API_KEY"
 ```
-
-### Path params
-
-<ParamField path="id" type="string" required>
-  URL-encoded identifier — entity UUID, email, domain, LinkedIn URL, or name. Names may return candidates.
-</ParamField>
-
-## Response
-
-```json
-{
-  "entity": {
-    "id": "a1b2c3d4-...",
-    "type": "person",
-    "name": "Sarah Chen",
-    "primary_identifier": "sarah@acme.com",
-    "created_at": "2026-04-12T09:31:00Z"
-  },
-  "identifiers": [
-    { "kind": "email",        "value": "sarah@acme.com" },
-    { "kind": "linkedin_url", "value": "https://linkedin.com/in/sarahchen" }
-  ],
-  "claims": [
-    {
-      "property": "title",
-      "value": "VP Sales",
-      "confidence": 0.92,
-      "freshness": "fresh",
-      "epistemic_class": "observed",
-      "sources": ["hubspot", "linkedin"],
-      "valid_from": "2026-05-01T...",
-      "last_observed_at": "2026-05-21T..."
-    },
-    {
-      "property": "stage",
-      "value": "evaluating",
-      "confidence": 0.81,
-      "freshness": "fresh",
-      "epistemic_class": "derived",
-      "sources": ["gmail", "fireflies"]
-    }
-  ],
-  "recent_observations": [
-    {
-      "kind": "event",
-      "property": "interaction.email_replied",
-      "observed_at": "2026-05-21T15:00:00Z",
-      "value": { "subject": "Re: Q3 pricing", "snippet": "Interested but…" }
-    }
-  ]
-}
-```
-
-`recent_observations` is **truncated** to the most recent 50 events. Treat counts derived from it (number of replies, messages, etc.) as lower bounds, not totals. For accurate counts across a longer window or many entities, use [`POST /v2/query`](/public-api/query).
-
-### Claim shapes worth knowing
-
-Most claims hold a simple scalar value (`"VP Sales"`, `"evaluating"`, `0.78`). A few hold structured objects — read these as **nested** rather than flat. The big one is `channels`, which carries per-channel state for LinkedIn, email, and anything else Nous tracks per-contact:
-
-```json
-{
-  "property": "channels",
-  "value": {
-    "linkedin": {
-      "url": "https://www.linkedin.com/in/sarah-chen",
-      "state": "connected",
-      "member_id": "ACoAA...",
-      "connected_at": "2026-05-18T18:50:13Z",
-      "synced_at": "2026-05-27T09:00:00Z"
-    },
-    "email": {
-      "state": "active",
-      "last_bounced_at": null
-    }
-  }
-}
-```
-
-So adapters reading "is this person connected on LinkedIn?" should look at `claims.channels.value.linkedin.state === 'connected'`, not a flat `linkedin.state` claim. New channels get added under the same `value` object as integrations land.
-
-### Ambiguous focus
-
-Same shape as `/v2/context`:
-
-```json
-{ "status": "ambiguous", "candidates": [ ... ] }
-```
-
-## When to call it
-
-- **"What do we know about X?"** type questions
-- Building an audit / debug view of a contact
-- Inspecting `epistemic_class` and `sources` to understand WHY a claim is held
-
-For action-oriented context (drafting outreach, prepping a meeting), prefer [`/v2/context`](/public-api/context) — it returns less, but ranked for the task.

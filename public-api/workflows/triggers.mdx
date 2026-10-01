@@ -1,0 +1,12 @@
+---
+title: "List triggers and steps"
+openapi: "GET /v2/workflows/triggers"
+---
+
+<Note>
+Workflows are in beta. Today the runner executes the first agent step and the first send step. Email and webhook sends are delivered. A Slack step is recorded, but Slack delivery is not wired yet. Other step types are validated and saved but not executed yet.
+</Note>
+
+Every trigger and step type. `live` says whether the trigger fires on its own today. `runs_now` says whether [run now](/public-api/workflows/run) supports it.
+
+Triggers that fire today are `clock` and `before_meeting` on the routine schedule, and the deal triggers in the daily automation poll. Event triggers such as `call_ended` are saved but not fired yet.

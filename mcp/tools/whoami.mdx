@@ -1,0 +1,25 @@
+---
+title: "whoami"
+description: "Who this key acts as, whether the workspace is set up, and the budget left."
+---
+
+Call it first in a session. No parameters.
+
+| Field | Values |
+|---|---|
+| Scope | `admin` sees the whole workspace. `member` sees their own book plus the shared graph. |
+| Roles | GTM roles such as account executive, SDR, founder. A person can hold several. |
+| Capability | read/write, or read-only |
+| Usage | Plan, ops left, credits left, and when the period ends. Unlimited when the plan has no cap. |
+| Setup | Whether the workspace is onboarded, how many accounts it has, and whether an ICP is set |
+
+```
+You are acting as Jordan Lee on Acme GTM.
+Scope: MEMBER — you see only your own book plus the shared graph.
+Role(s): account_executive.
+Capability: read/write.
+Usage: plan growth · ops 8,160 left (1,840 used of 10,000) · credits 312 left · period ends 2026-10-01.
+Setup: onboarded · 412 accounts · ICP set. NEXT → run `focus` for today's worklist.
+```
+
+REST: [`GET /v2/workspace/whoami`](/public-api/org/whoami)
