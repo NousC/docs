@@ -105,16 +105,16 @@ pre {
 }
 
 /* "Try it": outlined, not filled. */
-.tryit-button {
+button.tryit-button.tryit-button {
   background: transparent !important;
   color: var(--nous-accent-ink) !important;
   border: 1px solid var(--nous-accent) !important;
 }
-.tryit-button:hover { background: color-mix(in srgb, var(--nous-accent) 8%, transparent) !important; opacity: 1 !important; }
+button.tryit-button.tryit-button:hover { background: color-mix(in srgb, var(--nous-accent) 8%, transparent) !important; opacity: 1 !important; }
 
 /* Sidebar: group titles in bold ink with the tracked label voice; active page in accent. */
-.sidebar-title,
-#sidebar h5 {
+html body .sidebar-title.sidebar-title,
+html body .sidebar-title span {
   color: var(--nous-fg) !important;
   font-weight: 600 !important;
 }
