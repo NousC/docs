@@ -73,15 +73,27 @@ h1, h2, h3, h4, #page-title {
   border: 0 !important;
 }
 
-/* Code panels: black in both themes, no border, no chrome. */
+/* Code panels: black in both themes, no border, no chrome. Mintlify colours code with
+   light-mode values plus a --shiki-dark variable; on black we always want the dark ones. */
 .code-block,
 .code-group,
+.code-block-background,
 .code-block [role="presentation"],
 .code-group [role="presentation"],
+.code-block-background [role="presentation"],
 pre {
   background: #0b0b0c !important;
   border: 0 !important;
   box-shadow: none !important;
+  color: #e6e3da;
+}
+.code-block *, .code-group *, .code-block-background * {
+  border-color: transparent !important;
+}
+.code-block span[style*="--shiki-dark"],
+.code-group span[style*="--shiki-dark"],
+.code-block-background span[style*="--shiki-dark"] {
+  color: var(--shiki-dark) !important;
 }
 .code-block [data-component-part="code-block-header"],
 .code-group [role="tablist"] {

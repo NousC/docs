@@ -31,7 +31,7 @@
     "eyebrows": "section",
     "codeblocks": {
       "theme": {
-        "light": "vesper",
+        "light": "github-light-default",
         "dark": "vesper"
       }
     }
