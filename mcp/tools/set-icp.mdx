@@ -1,16 +1,16 @@
 ---
 title: "set_icp"
-description: "Create or replace the workspace ICP."
+description: "Set or replace the workspace ICP."
 ---
 
-Pass the full ICP as markdown. Who the buyer is, who is not a fit, and the scoring rules. The first time, Nous builds the scoring model from it so [`score`](/mcp/tools/score) works right away.
+Pass the full ICP as markdown. Who the buyer is, who is not a fit, and the scoring rules.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
 | `body_md` | string | yes | The ICP as markdown |
 
-Writing replaces the current ICP text. An existing scoring model is kept, not rebuilt from the new text. Check `whoami` for whether an ICP exists, and read it with `query` `scope: { foundation: "icp" }` before overwriting.
+The ICP text is replaced and versioned. The scoring model is built from it only when the workspace has none yet. An existing model is kept, so weights trained on closed deals survive a text edit. The result says which happened.
 
-Returns a one-line confirmation.
+Read the current ICP first with [`query`](/mcp/tools/query) `{ scope: { foundation: "icp" } }` and keep what is still true.
 
-REST: [`POST /v2/foundations/icp`](/public-api/icp/create). To train the model on won and lost deals, use [`POST /v2/workspace/closed-deals`](/public-api/icp/train).
+REST: [`PUT /v2/icp`](/public-api/icp/update). To train the model on won and lost deals, use [`POST /v2/icp/closed-deals`](/public-api/icp/train).

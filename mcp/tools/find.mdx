@@ -1,0 +1,43 @@
+---
+title: "find"
+description: "List people, accounts, or deals by filter."
+---
+
+The lists, in one tool. Pick a `kind`, then filter and sort. To open one row, pass its id to [`get_context`](/mcp/tools/get-context).
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `kind` | string | yes | `people`, `accounts`, or `deals` |
+| `search` | string | | Text match. People and accounts only. |
+| `filters` | object | | Filters for the chosen kind. See below. |
+| `sort` | string | | Default `last_activity`. See below. |
+| `limit` | number | | Page size. Default 50, or 100 for people. |
+| `offset` | number | | Rows to skip |
+
+## Filters and sorts by kind
+
+| Kind | Filters | Sorts |
+|---|---|---|
+| `people` | `stage`, `source`, `status`, `has_email`, `has_linkedin`, `email`, `linkedin_url`, `icp_fit`, `min_icp_score`, `last_activity_before`, `last_activity_after`, `account`, `include_all` | `last_activity`, `last_activity_asc`, `icp_score`, `icp_score_asc`, `recently_added` |
+| `accounts` | `stage`, `icp_fit`, `min_icp_score`, `owner`, `country`, `has_open_deal`, `last_activity_before`, `last_activity_after`, `include_all` | `last_activity`, `icp_score`, `pipeline_value`, `health`, `win_chance` (max 50) |
+| `deals` | `account`, `pipeline`, `status` (`open`, `won`, `lost`), `stage`, `owner`, `closing_within_days`, `min_amount`, `implied` | `last_activity`, `close_date`, `amount`, `win_probability` |
+
+A filter the kind does not support is refused with the reason, never ignored. `stage` is a [standard stage](/public-api/deals/pipelines). For people, `include_all` adds cold leads and supports only `stage`, `email`, `has_email`, `icp_fit`, `min_icp_score`, the activity filters, and `account`. For accounts, `include_all` lists every account, not just the active ones.
+
+A deal with `implied` is an account with no CRM deal. Its id is `implied:<account_id>`.
+
+## Examples
+
+| Ask | Call |
+|---|---|
+| Deals closing this month | `{ kind: "deals", filters: { status: "open", closing_within_days: 30 }, sort: "close_date" }` |
+| ICP-fit accounts gone quiet | `{ kind: "accounts", filters: { icp_fit: true, last_activity_before: "30d" } }` |
+| Who we know at acme.com | `{ kind: "people", filters: { account: "acme.com" } }` |
+| Accounts most likely to close | `{ kind: "accounts", sort: "win_chance" }` |
+
+```
+1 deal · sorted by close_date
+• Acme — 40 seats — Acme · Discovery call (discovery) · open · 48,000 USD · closes 2026-11-15 · win 42% (18% in 30d) · health 71 · owner Jordan Lee · pipeline Sales pipeline · active 6d ago  [d3c1b2a0-5e4f-4a7b-9c8d-1e2f3a4b5c6d]
+```
+
+REST: [`GET /v2/people`](/public-api/people/list), [`GET /v2/accounts`](/public-api/accounts/list), [`GET /v2/deals`](/public-api/deals/list)

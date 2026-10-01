@@ -4,7 +4,7 @@ sidebarTitle: "Introduction"
 description: "The context graph as tools for any MCP client."
 ---
 
-The OpenNous MCP server gives an agent the same graph as the [REST API](/public-api/introduction), as ten tools.
+The OpenNous MCP server gives an agent the same graph as the [REST API](/public-api/introduction), as twelve tools.
 
 ## Connect
 
@@ -47,6 +47,15 @@ The server reads the key from `NOUS_API_KEY`, or from `~/.nous/config.json`, whi
 
 ### Claude Code
 
+The OpenNous plugin bundles this server with the skills that use it.
+
+```
+/plugin marketplace add NousC/revenue-plugin
+/plugin install opennous@opennous
+```
+
+Or add the server alone.
+
 <CodeGroup>
 
 ```bash Hosted
@@ -62,19 +71,23 @@ claude mcp add opennous -- npx -y @opennous/mcp
 
 ## First call
 
-Call [`whoami`](/mcp/tools/whoami) first. It confirms the workspace, who the key acts as, and whether the workspace is set up.
+Call [`whoami`](/mcp/tools/whoami) first. It confirms the workspace, who the key acts as, whether the workspace is set up, and the plan with ops and credits left.
 
 ## Tools
 
 | Tool | Does | REST |
 |---|---|---|
-| [`whoami`](/mcp/tools/whoami) | Who the key acts as, and setup state | |
-| [`list_people`](/mcp/tools/list-people) | List and filter people | `GET /v2/people` |
-| [`get_account`](/mcp/tools/get-account) | The full record for a person or company | `GET /v2/accounts/:id` |
-| [`get_context`](/mcp/tools/get-context) | Ranked context for one task | `POST /v2/context` |
+| [`whoami`](/mcp/tools/whoami) | Who the key acts as, setup, and budget left | `GET /v2/workspace/whoami` |
+| [`find`](/mcp/tools/find) | List people, accounts, or deals by filter | `GET /v2/people`, `/v2/accounts`, `/v2/deals` |
+| [`get_context`](/mcp/tools/get-context) | Ranked context on a person, account, or deal | `POST /v2/context` |
 | [`query`](/mcp/tools/query) | Activity and facts across accounts | `POST /v2/query` |
 | [`attention`](/mcp/tools/attention) | What to work next | `GET /v2/attention` |
 | [`get_insights`](/mcp/tools/get-insights) | What customers said, by lane and subtype | `GET /v2/insights` |
-| [`score`](/mcp/tools/score) | Score leads against the ICP | `POST /v2/score` |
-| [`set_icp`](/mcp/tools/set-icp) | Create or replace the ICP | `POST /v2/foundations/icp` |
 | [`add_note`](/mcp/tools/add-note) | Keep a note on a person or company | `POST /v2/notes` |
+| [`enrich`](/mcp/tools/enrich) | Enrich one person | `POST /v2/people/:id/enrich` |
+| [`score`](/mcp/tools/score) | Score leads against the ICP | `POST /v2/score` |
+| [`read_brain`](/mcp/tools/read-brain) | Read or search the GTM brain | `GET /v2/brain` |
+| [`write_brain`](/mcp/tools/write-brain) | Save a GTM brain page | `PUT /v2/brain/page` |
+| [`set_icp`](/mcp/tools/set-icp) | Set or replace the ICP | `PUT /v2/icp` |
+
+Older tools stay registered for existing plugin installs. They are not documented and will be retired.

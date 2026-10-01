@@ -1,0 +1,15 @@
+---
+title: "read_brain"
+description: "Read or search the GTM brain."
+---
+
+The GTM brain is the company's own knowledge of how it sells: positioning, ICP, market, distribution, pricing, competitors, decisions, and internal meetings. What customers said is in [`get_insights`](/mcp/tools/get-insights) instead.
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `path` | string | | One page, for example `Playbooks/ICP` or `Decisions` |
+| `search` | string | | What you are looking for, in plain language |
+
+With no arguments it returns the overview and every page path, marked writable or read-only. With `search` it returns matching pages with a snippet. With `path` it returns one page as markdown, with what links to it and what it links to.
+
+REST: [`GET /v2/brain`](/public-api/brain/read), [`GET /v2/brain/search`](/public-api/brain/search), [`GET /v2/brain/page`](/public-api/brain/page)

@@ -244,15 +244,14 @@
             ]
           },
           {
-            "group": "People",
+            "group": "Find",
             "pages": [
-              "mcp/tools/list-people"
+              "mcp/tools/find"
             ]
           },
           {
-            "group": "Accounts",
+            "group": "Understand",
             "pages": [
-              "mcp/tools/get-account",
               "mcp/tools/get-context",
               "mcp/tools/query"
             ]
@@ -270,16 +269,29 @@
             ]
           },
           {
-            "group": "ICP",
-            "pages": [
-              "mcp/tools/score",
-              "mcp/tools/set-icp"
-            ]
-          },
-          {
             "group": "Notes",
             "pages": [
               "mcp/tools/add-note"
+            ]
+          },
+          {
+            "group": "Enrich & score",
+            "pages": [
+              "mcp/tools/enrich",
+              "mcp/tools/score"
+            ]
+          },
+          {
+            "group": "Brain",
+            "pages": [
+              "mcp/tools/read-brain",
+              "mcp/tools/write-brain"
+            ]
+          },
+          {
+            "group": "ICP",
+            "pages": [
+              "mcp/tools/set-icp"
             ]
           }
         ]
@@ -529,6 +541,14 @@
     {
       "source": "/public-api/icp/create",
       "destination": "/public-api/icp/update"
+    },
+    {
+      "source": "/mcp/tools/list-people",
+      "destination": "/mcp/tools/find"
+    },
+    {
+      "source": "/mcp/tools/get-account",
+      "destination": "/mcp/tools/get-context"
     }
   ]
 }

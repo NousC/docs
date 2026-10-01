@@ -1,0 +1,23 @@
+---
+title: "write_brain"
+description: "Save the next version of a GTM brain page."
+---
+
+A save replaces the page, and the old version is kept. Read the page first with [`read_brain`](/mcp/tools/read-brain) and keep what is still true.
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `path` | string | yes | The page, for example `Decisions` or `Playbooks/Competitors/Acme` |
+| `markdown` | string | yes | The whole page as it should read after the save |
+
+| Page | Use it for |
+|---|---|
+| `Decisions` | Decisions, newest first, one `## YYYY-MM-DD · the decision` heading each |
+| `Playbooks/Positioning`, `Playbooks/ICP`, `Playbooks/Market`, `Playbooks/Distribution`, `Playbooks/Pricing` | The GTM profile the ICP model scores against |
+| `Playbooks/Competitors/<Name>` | One page per competitor |
+| `Working Documents/<Name>` | Anything without a clear home |
+| `Archive/<Name>` | What you no longer use |
+
+Internal meetings, insights, the overview, and indexes cannot be written.
+
+REST: [`PUT /v2/brain/page`](/public-api/brain/write)

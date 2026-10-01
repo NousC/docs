@@ -1,13 +1,15 @@
 ---
 title: "get_context"
-description: "Ranked context on one person or company, for one task."
+description: "Ranked context on a person, account, or deal, for one task."
 ---
 
 Call it before drafting outreach or preparing for a meeting. Returns a summary, ICP fit, durable facts, attributes, your own ICP context, the timeline, the buying committee, and predictions, cut to a token budget. Meeting and call prep also get the next and last meeting with attendees.
 
+Pass a deal id from [`find`](/mcp/tools/find) and the result leads with the deal: stage, amount, close date, owner, health, the people on it, and the objections, competitors, budget, and timeline filed to it. Then comes its account's context.
+
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `focus` | string | yes | Email, LinkedIn URL, domain, or entity UUID |
+| `focus` | string | yes | Email, LinkedIn URL, domain, entity UUID, CRM deal UUID, or `implied:<account_id>` |
 | `intent` | string | | `account_review` (default), `draft_email`, `follow_up`, `meeting_prep`, `call_prep` |
 | `budget_tokens` | number | | Approximate token budget |
 
