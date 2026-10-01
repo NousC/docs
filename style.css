@@ -37,8 +37,8 @@ code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 #content-area .eyebrow,
 #sidebar-group > h5,
 #sidebar h5,
-#table-of-contents-label,
-#table-of-contents > div:first-child,
+.sidebar-title,
+#table-of-contents h2,
 .nav-tabs-item,
 #navbar nav a,
 #navbar li > a,
@@ -56,6 +56,8 @@ code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 #content-area .eyebrow,
 #sidebar-group > h5,
 #sidebar h5,
+.sidebar-title,
+#table-of-contents h2,
 #content-area table thead th {
   color: var(--nous-fg-mute) !important;
 }
@@ -94,7 +96,27 @@ code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 #topbar-cta-button a:hover { background: #d64c2f !important; }
 #topbar-cta-button svg { display: none; }
 
+/* "Try it": the same square orange button, not Mintlify's green pill. */
+.tryit-button {
+  background: var(--nous-accent) !important;
+  color: var(--nous-on-accent) !important;
+  border-radius: 0 !important;
+  font-family: var(--nous-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--nous-track);
+  text-transform: uppercase;
+}
+
 /* ── Square corners, hairline borders ────────────────────────────────── */
+/* Mintlify rounds its panels with Tailwind classes; the site has no rounded corners at all.
+   rounded-full is left alone (theme toggle, dots). */
+[class*="rounded-sm"], [class*="rounded-md"], [class*="rounded-lg"],
+[class*="rounded-xl"], [class*="rounded-2xl"], [class*="rounded-3xl"],
+[class*="rounded-l-"], [class*="rounded-r-"], [class*="rounded-t-"], [class*="rounded-b-"],
+[class~="rounded"] {
+  border-radius: 0 !important;
+}
 .code-block,
 .code-group,
 pre,
