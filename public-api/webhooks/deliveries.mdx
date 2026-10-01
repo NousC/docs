@@ -1,0 +1,12 @@
+---
+title: "List deliveries"
+openapi: "GET /v2/webhooks/{id}/deliveries"
+---
+
+Recent sends for one webhook, newest first.
+
+| `status` | Meaning |
+|---|---|
+| `delivered` | Your URL answered `2xx`. |
+| `pending` | Queued or waiting for a retry. `next_attempt_at` says when. |
+| `failed` | A permanent `4xx`, or six failed attempts. `last_status_code` and `last_error` say why. |

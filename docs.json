@@ -227,6 +227,20 @@
             ]
           },
           {
+            "group": "Webhooks",
+            "pages": [
+              "public-api/webhooks/overview",
+              "public-api/webhooks/events",
+              "public-api/webhooks/list",
+              "public-api/webhooks/create",
+              "public-api/webhooks/get",
+              "public-api/webhooks/update",
+              "public-api/webhooks/delete",
+              "public-api/webhooks/test",
+              "public-api/webhooks/deliveries"
+            ]
+          },
+          {
             "group": "Usage",
             "pages": [
               "public-api/usage/get",
@@ -294,6 +308,12 @@
             "group": "ICP",
             "pages": [
               "mcp/tools/set-icp"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "mcp/tools/webhooks"
             ]
           }
         ]

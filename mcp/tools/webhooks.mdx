@@ -1,0 +1,35 @@
+---
+title: "webhooks"
+description: "Push events to your own stack, with the account record attached."
+---
+
+Subscribe a URL to events such as a call ending, a reply arriving or a deal closing. Each record event carries the account, its people, the deal and the evidence behind it. See [Webhooks](/public-api/webhooks/overview) for the events, the payload and how to verify a delivery.
+
+| Parameter | Used by | Meaning |
+|---|---|---|
+| `action` | all | `events`, `list`, `create`, `update`, `delete`, `test` or `deliveries` |
+| `id` | `update`, `delete`, `test`, `deliveries` | The webhook id |
+| `url` | `create`, `update` | Where to POST events |
+| `events` | `create`, `update` | Event types, such as `conversation.call_ended` or `deal.won` |
+| `name` | `create`, `update` | A label for the webhook |
+| `active` | `update` | `false` pauses it |
+| `rotate_secret` | `update` | `true` issues a new signing secret |
+| `account_id` | `test` | The account to build the test event from |
+
+`create` and `rotate_secret` return the signing secret once. Store it where your receiver can read it.
+
+```
+Created 3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41 for deal.won, deal.lost, conversation.call_ended → https://hooks.yourco.com/opennous.
+Signing secret (shown once, store it now): whsec_…
+```
+
+`deliveries` lists the latest 50 sends.
+
+```
+2026-10-01T14:02:00Z · deal.won · delivered (200)
+2026-10-01T11:40:00Z · conversation.call_ended · pending (503) — http_503
+```
+
+Changing or deleting a webhook needs an admin key.
+
+REST: [`/v2/webhooks`](/public-api/webhooks/list)
