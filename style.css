@@ -288,3 +288,4 @@ pre {
 
 /* API pages: method pills square and mono. */
 .method-pill { padding: 0.15em 0.5em; }
+button.tryit-button.tryit-button svg { color: currentColor !important; fill: currentColor !important; }
