@@ -28,8 +28,15 @@
 }
 
 /* ── Type ─────────────────────────────────────────────────────────────── */
-h1, h2, h3, h4 { letter-spacing: -0.022em; }
-h1 { letter-spacing: -0.03em; }
+/* Titles light, like the site's "Build on the graph": regular weight, size does the work. */
+h1, h2, h3, h4,
+#content-area h1, #content-area h2, #content-area h3, #content-area h4,
+#page-title {
+  font-weight: 400 !important;
+  letter-spacing: -0.022em;
+}
+h1, #page-title { letter-spacing: -0.03em; }
+#content-area strong, #content-area b { font-weight: 500; }
 
 code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 
