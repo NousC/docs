@@ -1,0 +1,10 @@
+---
+title: "Create a webhook"
+openapi: "POST /v2/webhooks"
+---
+
+Subscribe a URL to one or more [events](/public-api/webhooks/events). `name` defaults to the URL's host.
+
+The response carries the signing `secret`. It is shown once, so store it before you do anything else. Use it to [verify each delivery](/public-api/webhooks/overview#verify-the-signature).
+
+The URL must be `https` or `http`. Private, loopback and cloud metadata addresses are refused with `blocked_internal_host`.

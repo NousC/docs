@@ -1,0 +1,8 @@
+---
+title: "Send a test event"
+openapi: "POST /v2/webhooks/{id}/test"
+---
+
+Queues one `webhook.test` event built on a real account. Pass `account_id` to choose it. Otherwise the most recently active account is used.
+
+It goes through the same signed, retried delivery as a real event and shows in the [delivery log](/public-api/webhooks/deliveries). Expect it within 30 seconds.

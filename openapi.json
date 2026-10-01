@@ -48,6 +48,10 @@
       "name": "Workflows"
     },
     {
+      "name": "Webhooks",
+      "description": "Subscribe to events and have them pushed to your own stack, with the account record attached."
+    },
+    {
       "name": "Usage"
     }
   ],
@@ -6501,6 +6505,888 @@
           }
         }
       }
+    },
+    "/v2/webhooks/events": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "listWebhookEvents",
+        "summary": "List events",
+        "description": "Every event you can subscribe to, the payload version, and how deliveries are signed.",
+        "responses": {
+          "200": {
+            "description": "The event catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_version": {
+                      "type": "string"
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookEventType"
+                      }
+                    },
+                    "signature": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "example": {
+                  "api_version": "2026-10-01",
+                  "events": [
+                    {
+                      "type": "conversation.call_ended",
+                      "record": true,
+                      "description": "A customer call was recorded and reviewed. Carries the call, its score and the account record."
+                    },
+                    {
+                      "type": "deal.won",
+                      "record": true,
+                      "description": "A deal closed won. Checked hourly; deals reach the ledger after the CRM records the close."
+                    },
+                    {
+                      "type": "interaction.meeting_held",
+                      "record": false,
+                      "description": "A meeting took place. Person snapshot only."
+                    }
+                  ],
+                  "signature": {
+                    "header": "X-Nous-Signature",
+                    "scheme": "sha256=<hex HMAC-SHA256 of the raw request body, keyed with your webhook secret>",
+                    "also": [
+                      "X-Nous-Event-Id",
+                      "X-Nous-Event-Type"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Self-hosted instance. Webhooks are an OpenNous Cloud feature.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "cloud_only_feature": {
+                    "summary": "cloud_only_feature",
+                    "value": {
+                      "error": "cloud_only_feature"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v2/webhooks": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "listWebhooks",
+        "summary": "List webhooks",
+        "description": "Every webhook in the workspace. Secrets are never included.",
+        "responses": {
+          "200": {
+            "description": "The webhooks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webhooks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Webhook"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "webhooks": [
+                    {
+                      "id": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41",
+                      "name": "n8n deal router",
+                      "url": "https://hooks.yourco.com/opennous",
+                      "events": [
+                        "deal.won",
+                        "deal.lost",
+                        "conversation.call_ended"
+                      ],
+                      "active": true,
+                      "created_at": "2026-10-01T09:00:00Z",
+                      "updated_at": "2026-10-01T09:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Self-hosted instance. Webhooks are an OpenNous Cloud feature.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "cloud_only_feature": {
+                    "summary": "cloud_only_feature",
+                    "value": {
+                      "error": "cloud_only_feature"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "createWebhook",
+        "summary": "Create a webhook",
+        "description": "Subscribe a URL to events. The response carries the signing secret. It is shown once; store it.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url",
+                  "events"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Where we POST events. https or http; private and internal hosts are refused."
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "conversation.call_ended",
+                        "conversation.reply_received",
+                        "deal.won",
+                        "deal.lost",
+                        "deal.stage_changed",
+                        "interaction.email_received",
+                        "interaction.email_bounced",
+                        "interaction.linkedin_connection_accepted",
+                        "interaction.linkedin_message_received",
+                        "interaction.meeting_scheduled",
+                        "interaction.meeting_held"
+                      ]
+                    },
+                    "description": "Event types to receive. See GET /v2/webhooks/events."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Defaults to the URL's host."
+                  }
+                }
+              },
+              "example": {
+                "url": "https://hooks.yourco.com/opennous",
+                "events": [
+                  "deal.won",
+                  "deal.lost",
+                  "conversation.call_ended"
+                ],
+                "name": "n8n deal router"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created. `secret` is shown only in this response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webhook": {
+                      "$ref": "#/components/schemas/Webhook"
+                    },
+                    "secret": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "webhook": {
+                    "id": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41",
+                    "name": "n8n deal router",
+                    "url": "https://hooks.yourco.com/opennous",
+                    "events": [
+                      "deal.won",
+                      "deal.lost",
+                      "conversation.call_ended"
+                    ],
+                    "active": true,
+                    "created_at": "2026-10-01T09:00:00Z",
+                    "updated_at": "2026-10-01T09:00:00Z"
+                  },
+                  "secret": "whsec_9f2c1e7b4a6d8e0f3b5c7a9d1e2f4a6b"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The body is missing something or names an event that does not exist. Most 400s also return `available_events`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "url_and_events_required": {
+                    "summary": "url_and_events_required",
+                    "value": {
+                      "error": "url_and_events_required"
+                    }
+                  },
+                  "unknown_event:deal.closed": {
+                    "summary": "unknown_event",
+                    "value": {
+                      "error": "unknown_event:deal.closed"
+                    }
+                  },
+                  "invalid_url": {
+                    "summary": "invalid_url",
+                    "value": {
+                      "error": "invalid_url"
+                    }
+                  },
+                  "invalid_url_protocol": {
+                    "summary": "invalid_url_protocol",
+                    "value": {
+                      "error": "invalid_url_protocol"
+                    }
+                  },
+                  "blocked_internal_host": {
+                    "summary": "blocked_internal_host",
+                    "value": {
+                      "error": "blocked_internal_host"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v2/webhooks/{id}": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "getWebhook",
+        "summary": "Get a webhook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Webhook id.",
+            "example": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The webhook.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webhook": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                },
+                "example": {
+                  "webhook": {
+                    "id": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41",
+                    "name": "n8n deal router",
+                    "url": "https://hooks.yourco.com/opennous",
+                    "events": [
+                      "deal.won",
+                      "deal.lost",
+                      "conversation.call_ended"
+                    ],
+                    "active": true,
+                    "created_at": "2026-10-01T09:00:00Z",
+                    "updated_at": "2026-10-01T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No webhook with that id in this workspace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "error": "not_found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "updateWebhook",
+        "summary": "Update a webhook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Webhook id.",
+            "example": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41"
+          }
+        ],
+        "description": "Change the name, URL or events, pause it with `active: false`, or rotate the secret. Admin key only.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "conversation.call_ended",
+                        "conversation.reply_received",
+                        "deal.won",
+                        "deal.lost",
+                        "deal.stage_changed",
+                        "interaction.email_received",
+                        "interaction.email_bounced",
+                        "interaction.linkedin_connection_accepted",
+                        "interaction.linkedin_message_received",
+                        "interaction.meeting_scheduled",
+                        "interaction.meeting_held"
+                      ]
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "rotate_secret": {
+                    "type": "boolean",
+                    "description": "Issue a new secret. The old one stops working at once."
+                  }
+                }
+              },
+              "example": {
+                "active": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The webhook. `secret` is present only when you rotated it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webhook": {
+                      "$ref": "#/components/schemas/Webhook"
+                    },
+                    "secret": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "webhook": {
+                    "id": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41",
+                    "name": "n8n deal router",
+                    "url": "https://hooks.yourco.com/opennous",
+                    "events": [
+                      "deal.won",
+                      "deal.lost",
+                      "conversation.call_ended"
+                    ],
+                    "active": false,
+                    "created_at": "2026-10-01T09:00:00Z",
+                    "updated_at": "2026-10-01T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown field, bad URL, empty name, or unknown event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unknown_fields": {
+                    "summary": "unknown_fields",
+                    "value": {
+                      "error": "unknown_fields"
+                    }
+                  },
+                  "invalid_url": {
+                    "summary": "invalid_url",
+                    "value": {
+                      "error": "invalid_url"
+                    }
+                  },
+                  "name_required": {
+                    "summary": "name_required",
+                    "value": {
+                      "error": "name_required"
+                    }
+                  },
+                  "events_required": {
+                    "summary": "events_required",
+                    "value": {
+                      "error": "events_required"
+                    }
+                  },
+                  "unknown_event:deal.closed": {
+                    "summary": "unknown_event",
+                    "value": {
+                      "error": "unknown_event:deal.closed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Only an admin key can change or remove a webhook.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "admin_key_required": {
+                    "summary": "admin_key_required",
+                    "value": {
+                      "error": "admin_key_required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No webhook with that id in this workspace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "error": "not_found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "deleteWebhook",
+        "summary": "Delete a webhook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Webhook id.",
+            "example": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41"
+          }
+        ],
+        "description": "Remove the webhook. Admin key only.",
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Only an admin key can change or remove a webhook.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "admin_key_required": {
+                    "summary": "admin_key_required",
+                    "value": {
+                      "error": "admin_key_required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No webhook with that id in this workspace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "error": "not_found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v2/webhooks/{id}/test": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "testWebhook",
+        "summary": "Send a test event",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Webhook id.",
+            "example": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41"
+          }
+        ],
+        "description": "Queue one `webhook.test` event built on a real account: the one you name, else the most recently active. It is signed, retried and logged like a real event.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account_id": {
+                    "type": "string",
+                    "description": "Account to build the sample record from."
+                  }
+                }
+              },
+              "example": {}
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued. Delivered within 30 seconds.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "queued": {
+                      "type": "boolean"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "account": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "queued": true,
+                  "event_id": "8c0e5d2a-7b1f-4e3c-9a6d-5f4b2e1c0d9a",
+                  "account": "Acme",
+                  "note": "Delivered within 30 seconds; see GET /v2/webhooks/:id/deliveries."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "404": {
+            "description": "No webhook with that id in this workspace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "error": "not_found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v2/webhooks/{id}/deliveries": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "operationId": "listWebhookDeliveries",
+        "summary": "List deliveries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Webhook id.",
+            "example": "3f1c2b7a-9d4e-4b8a-a6c1-2e5f7d9b0c41"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 200
+            },
+            "description": "How many, newest first."
+          }
+        ],
+        "description": "Recent sends for this webhook, newest first, with their status and last error.",
+        "responses": {
+          "200": {
+            "description": "The delivery log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deliveries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookDelivery"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "deliveries": [
+                    {
+                      "id": "1b2c3d4e-5f60-4a7b-8c9d-0e1f2a3b4c5d",
+                      "event_type": "deal.won",
+                      "occurred_at": "2026-10-01T14:02:00Z",
+                      "status": "delivered",
+                      "attempts": 1,
+                      "last_status_code": 200,
+                      "last_error": null,
+                      "delivered_at": "2026-10-01T14:02:21Z",
+                      "next_attempt_at": "2026-10-01T14:02:00Z",
+                      "dead_lettered_at": null
+                    },
+                    {
+                      "id": "6e7f8a9b-0c1d-4e2f-a3b4-c5d6e7f8a9b0",
+                      "event_type": "conversation.call_ended",
+                      "occurred_at": "2026-10-01T11:40:00Z",
+                      "status": "pending",
+                      "attempts": 2,
+                      "last_status_code": 503,
+                      "last_error": "http_503",
+                      "delivered_at": null,
+                      "next_attempt_at": "2026-10-01T12:11:00Z",
+                      "dead_lettered_at": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No webhook with that id in this workspace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "error": "not_found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyHeader": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -9112,6 +9998,117 @@
               "null"
             ],
             "description": "Null when unlimited."
+          }
+        }
+      },
+      "Webhook": {
+        "type": "object",
+        "description": "A subscription. The signing secret is never returned here; you get it once on create and on rotate.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "conversation.call_ended",
+                "conversation.reply_received",
+                "deal.won",
+                "deal.lost",
+                "deal.stage_changed",
+                "interaction.email_received",
+                "interaction.email_bounced",
+                "interaction.linkedin_connection_accepted",
+                "interaction.linkedin_message_received",
+                "interaction.meeting_scheduled",
+                "interaction.meeting_held"
+              ]
+            }
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookDelivery": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "delivered",
+              "pending",
+              "failed"
+            ]
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "last_status_code": {
+            "type": "integer",
+            "nullable": true
+          },
+          "last_error": {
+            "type": "string",
+            "nullable": true
+          },
+          "delivered_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "next_attempt_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dead_lettered_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Set when delivery gave up."
+          }
+        }
+      },
+      "WebhookEventType": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "record": {
+            "type": "boolean",
+            "description": "true: the event carries the full record envelope. false: a legacy person snapshot."
           }
         }
       }

@@ -1,0 +1,10 @@
+---
+title: "Update a webhook"
+openapi: "PATCH /v2/webhooks/{id}"
+---
+
+Send only the fields you want to change. Needs an admin key.
+
+- `active: false` pauses the webhook. Events already queued keep retrying on the usual schedule. Resume within about 9 hours and they are delivered. Otherwise they end as `failed`.
+- `events` replaces the whole list.
+- `rotate_secret: true` issues a new secret and returns it once. The old secret stops working at once.

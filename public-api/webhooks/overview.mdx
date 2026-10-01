@@ -1,0 +1,185 @@
+---
+title: "Webhooks"
+description: "Get events pushed to your own stack, with the account record attached."
+---
+
+A webhook sends an event to your URL when something happens on an account. A call ends, a prospect replies, a deal closes or moves stage. Each record event carries the identity-resolved account, its people, the deal and the evidence behind it, so your receiver can act without calling back.
+
+Point it at n8n, Make, Clay, your own backend or your agent's endpoint. Manage webhooks with the endpoints in this group or the [`webhooks` MCP tool](/mcp/tools/webhooks).
+
+<Note>
+Webhooks run on OpenNous Cloud. A self-hosted instance returns `403 cloud_only_feature`.
+</Note>
+
+## Set one up
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/webhooks \
+  -H "Authorization: Bearer $NOUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://hooks.yourco.com/opennous",
+    "events": ["deal.won", "deal.lost", "conversation.call_ended"]
+  }'
+```
+
+The response holds the signing `secret`. It is shown once. Store it next to your receiver. If you lose it, rotate it with [`PATCH /v2/webhooks/{id}`](/public-api/webhooks/update) and `rotate_secret: true`.
+
+Then send a [test event](/public-api/webhooks/test). It is built on one of your real accounts, so you see the exact shape your handler will receive.
+
+Any key can list, create and test webhooks. Changing or deleting one needs an admin key. A read-only key cannot create or test.
+
+## Events
+
+[`GET /v2/webhooks/events`](/public-api/webhooks/events) returns this catalog.
+
+| Event | When it fires | `data` |
+|---|---|---|
+| `conversation.call_ended` | A customer call was recorded and reviewed. | Always `meeting_id`, `title`, `source`, `source_ref`, `url`, `call_type`. Sales calls add `score` and `scores[]` (`dimension`, `score`, `note`). Customer success calls add `summary`, `what_changed`, `standing`, `risks[]` (`risk`, `quote`), `expansion[]` (`signal`, `quote`) and `commitments` (a count). |
+| `conversation.reply_received` | Someone replied to an email you sent from Gmail. Bulk mail and replies from teammates never fire it. | `source`, `subject`, `snippet`, `thread_id`, `message_id`, `from` |
+| `deal.won` | A deal closed won. Checked hourly. | `outcome`, `closed_at`, `deal_id` |
+| `deal.lost` | A deal closed lost. Checked hourly. | `outcome`, `closed_at`, `deal_id` |
+| `deal.stage_changed` | An account's pipeline stage moved. Checked hourly. | `stage`, `changed_at` |
+| `webhook.test` | You called the test endpoint. | `note` |
+
+`deal.won` and `deal.lost` arrive once the deal ledger learns of the close from your CRM. Expect them hours after the close, sometimes later.
+
+### Legacy interaction events
+
+Six older events carry a person snapshot only, in a different shape. They are `interaction.email_received`, `interaction.email_bounced`, `interaction.linkedin_connection_accepted`, `interaction.linkedin_message_received`, `interaction.meeting_scheduled` and `interaction.meeting_held`.
+
+```json
+{
+  "event_id": "uuid",
+  "event_type": "interaction.meeting_held",
+  "occurred_at": "2026-10-01T15:00:00Z",
+  "workspace_id": "uuid",
+  "entity_id": "uuid",
+  "person": { "entity_id": "uuid", "email": "sarah@acme.com", "linkedin_url": null, "name": "Sarah Chen", "job_title": "VP Sales", "company": "Acme" },
+  "event_data": { "source": "fireflies", "summary": null, "description": null, "external_id": null, "detected_via": "realtime" }
+}
+```
+
+## Payload
+
+Every record event has the same envelope. `api_version` changes when the envelope changes shape, so you can branch on it.
+
+```json
+{
+  "id": "8c0e5d2a-7b1f-4e3c-9a6d-5f4b2e1c0d9a",
+  "type": "deal.won",
+  "api_version": "2026-10-01",
+  "occurred_at": "2026-10-01T14:02:00Z",
+  "workspace_id": "a1b2c3d4-0000-4000-8000-000000000001",
+  "account": {
+    "entity_id": "3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b1a47",
+    "name": "Acme",
+    "domain": "acme.com",
+    "industry": "Software",
+    "country": "US",
+    "stage": "closed_won",
+    "icp": { "score": 88, "tier": "tier_1" },
+    "health": 74,
+    "open_deals": 0,
+    "pipeline_value": 0,
+    "won_value": 50000,
+    "people_count": 6,
+    "last_activity_at": "2026-10-01T13:40:00Z",
+    "api_url": "/v2/accounts/3e7a1d52-8c4b-4b9e-a0f3-6d2c9e8b1a47"
+  },
+  "people": [
+    { "entity_id": "9b2f6c1e-4d3a-4f7e-9a51-2c8d7e3b1f40", "name": "Sarah Chen", "email": "sarah@acme.com", "title": "VP Sales", "stage": "closed_won" }
+  ],
+  "deal": {
+    "entity_id": "20000000-0000-4000-8000-000000000020",
+    "name": "Acme annual",
+    "stage": "closed_won",
+    "status": "won",
+    "amount": 50000,
+    "currency": "USD",
+    "close_date": "2026-09-30",
+    "owner": { "name": "Chris Black", "email": "chris@yourco.com" }
+  },
+  "deals_count": 2,
+  "evidence": {
+    "claims": [
+      { "property": "competitors", "value": ["Gong"], "confidence": 0.9, "freshness": "fresh", "observations": 3, "last_observed_at": "2026-09-28T10:00:00Z" }
+    ],
+    "facts": [
+      { "fact": "Budget approved for Q4", "category": "budget", "quote": "We got sign-off last week.", "speaker": "Sarah Chen", "source": "fellow", "source_ref": "meeting:123", "observed_at": "2026-09-28T10:00:00Z" }
+    ]
+  },
+  "data": { "outcome": "won", "closed_at": "2026-09-30T00:00:00Z", "deal_id": "20000000-0000-4000-8000-000000000020" }
+}
+```
+
+- `people` lists the person the event is about first, then the most recently active, up to 10.
+- `deal` is the deal the event names. Otherwise it is the account's open deal closing soonest, else its latest. It is `null` when the account has no deal.
+- `account.icp.tier` is `tier_1`, `tier_2`, `tier_3` or `not_icp`.
+- `evidence.claims` holds up to 15 key account claims with their confidence and freshness (`fresh`, `aging`, `suspect` or `expired`). `evidence.facts` holds up to 8 facts with their source.
+- A webhook goes to a shared destination, so the payload carries only what every member can read. It never includes anything derived from one person's private mail.
+
+## Delivery
+
+We `POST` the JSON body to your URL with these headers.
+
+| Header | Value |
+|---|---|
+| `X-Nous-Signature` | `sha256=` and the hex HMAC-SHA256 of the raw body, keyed with your secret |
+| `X-Nous-Event-Id` | The event `id` (`event_id` on legacy events) |
+| `X-Nous-Event-Type` | The event type |
+| `User-Agent` | `Nous-Triggers/1.0` |
+
+- Respond with any `2xx` within 10 seconds to mark the event delivered.
+- A `4xx` other than `408` or `429` is permanent. We stop and mark it `failed`.
+- A `5xx`, `408`, `429`, timeout or network error is retried after 1 minute, 5 minutes, 30 minutes, 2 hours and 6 hours. After 6 attempts, about 9 hours, it is marked `failed`.
+- Each event goes to each webhook at most once. Still treat `X-Nous-Event-Id` as an idempotency key in your receiver.
+- History is not replayed. Events older than 48 hours are not sent, or 45 days for deal closes. A new webhook receives nothing from before the week it was created.
+
+See every attempt, its status code and its last error in [`GET /v2/webhooks/{id}/deliveries`](/public-api/webhooks/deliveries).
+
+## Verify the signature
+
+Compute the HMAC over the raw request bytes before you parse the JSON, then compare in constant time. Parsing and re-serialising the body changes the bytes and breaks the check.
+
+<CodeGroup>
+
+```javascript Node (Express)
+import crypto from "node:crypto";
+import express from "express";
+
+const app = express();
+const SECRET = process.env.OPENNOUS_WEBHOOK_SECRET;
+
+app.post("/opennous", express.raw({ type: "application/json" }), (req, res) => {
+  const expected = "sha256=" + crypto.createHmac("sha256", SECRET).update(req.body).digest("hex");
+  const given = req.get("X-Nous-Signature") || "";
+  const ok = given.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(given), Buffer.from(expected));
+  if (!ok) return res.status(401).end();
+
+  const event = JSON.parse(req.body);
+  // Skip if you have already handled event.id, then act on it.
+  res.status(200).end();
+});
+```
+
+```python Python (Flask)
+import hashlib, hmac, json, os
+from flask import Flask, request, abort
+
+app = Flask(__name__)
+SECRET = os.environ["OPENNOUS_WEBHOOK_SECRET"].encode()
+
+@app.post("/opennous")
+def opennous():
+    raw = request.get_data()
+    expected = "sha256=" + hmac.new(SECRET, raw, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, request.headers.get("X-Nous-Signature", "")):
+        abort(401)
+    event = json.loads(raw)
+    # Skip if you have already handled event["id"], then act on it.
+    return "", 200
+```
+
+</CodeGroup>
