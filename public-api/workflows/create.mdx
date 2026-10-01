@@ -1,0 +1,26 @@
+---
+title: "Create a workflow"
+openapi: "POST /v2/workflows"
+---
+
+<Note>
+Workflows are in beta. Today the runner executes the first agent step and the first send step. Email and webhook sends are delivered. A Slack step is recorded, but Slack delivery is not wired yet. Other step types are validated and saved but not executed yet.
+</Note>
+
+Send a `trigger` and `steps`. Each is `{ type, ...settings }`. See [list triggers and steps](/public-api/workflows/triggers) for the types.
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/workflows \
+  -H "Authorization: Bearer $NOUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Daily pipeline digest",
+    "trigger": { "type": "clock", "frequency": "daily", "at": "08:00" },
+    "steps": [
+      { "type": "agent", "prompt": "Summarise what moved in the pipeline since yesterday." },
+      { "type": "email", "to": "team@yourco.com" }
+    ]
+  }'
+```
+
+A new workflow is enabled unless you send `enabled: false`. Enabled workflows count toward your plan's automation limit.

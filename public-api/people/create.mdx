@@ -1,8 +1,0 @@
----
-title: "Create a person"
-openapi: "POST /v2/people"
----
-
-Creates a person, or updates the existing one when an identifier already matches. Safe to call from a form or webhook that fires more than once.
-
-Identifier fields (`email`, `linkedin_url`, `linkedin_member_id`, `hubspot_id`, `pipedrive_id`, `apollo_id`, `attio_id`, and the extra email fields) attach to the person. Every other field is stored as an asserted fact.

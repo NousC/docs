@@ -1,0 +1,10 @@
+---
+title: "List runs"
+openapi: "GET /v2/workflows/{id}/runs"
+---
+
+<Note>
+Workflows are in beta. Today the runner executes the first agent step and the first send step. Email and webhook sends are delivered. A Slack step is recorded, but Slack delivery is not wired yet. Other step types are validated and saved but not executed yet.
+</Note>
+
+Run history, newest first. Filter by `status` and `days`.

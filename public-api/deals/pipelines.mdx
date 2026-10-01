@@ -1,0 +1,22 @@
+---
+title: "List pipelines"
+openapi: "GET /v2/pipelines"
+---
+
+Your CRM pipelines and their stages. Each stage carries `canonical`, the standard stage it maps to. That is what `canonical_stage` on a deal and the `stage` filters use.
+
+| Standard stage | Meaning |
+|---|---|
+| `identified` | Nothing has happened yet. |
+| `connected` | They did something. Accepted, replied, opened, visited. |
+| `interested` | They replied positively. |
+| `meeting_booked` | A meeting is on the calendar. |
+| `discovery` | A first call happened. |
+| `demo` | A demo happened. |
+| `negotiation` | Terms or a proposal are on the table. |
+| `closed_won` | Signed. |
+| `closed_lost` | Lost the deal. |
+| `disqualified` | Not a fit, or asked us to stop. |
+| `churned` | A former customer who left. |
+
+A workspace without a CRM returns no pipelines, `implied: true`, and its own stage ladder in `workspace_stages`.

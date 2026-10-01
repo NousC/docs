@@ -40,9 +40,16 @@ A read-only key can call every `GET` endpoint plus `POST /v2/context`, `POST /v2
 
 A key created by a workspace member acts as that member. On a closed workspace it only sees accounts in that member's book. A workspace key sees everything.
 
+## Conventions
+
+- **Lists** return `{ <items>, limit, offset, has_more }`. `limit` defaults to 50 with a max of 200. [List people](/public-api/people/list) without `include=all` keeps its own default of 100 and max of 1000. Page with `offset` until `has_more` is `false`.
+- **Unknown query parameters** return `400 unknown_query_param` with the `supported` list. A filter is never silently ignored.
+- **Admin-only routes**, such as inviting or removing members, return `403 admin_key_required` to a member key.
+- **A member key's book.** On a closed workspace a member key sees only its own accounts. A record outside that book returns `404`, the same as one that does not exist.
+
 ## Identifying an account
 
-Endpoints that take `focus` or an `:id` accept an email, a LinkedIn URL, a domain, or an entity UUID. Pass one of those, never a bare name.
+Endpoints that take `focus` or an `:id` accept an email, a LinkedIn URL, a domain, or an entity UUID. Pass one of those, never a bare name. Deal endpoints and [get context](/public-api/context) also take a deal id.
 
 When an identifier matches more than one record, the response is `200` with the candidates. Call again with the `entity_id` you want.
 
@@ -72,7 +79,8 @@ Errors return JSON with a machine code in `error`. Some add `detail` or other fi
 | 402 | `upgrade_required` | The workspace is past its plan limit and grace period. `reason` is `ops_limit_reached` or `active_accounts_limit_reached`. |
 | 402 | `feature_not_in_plan` | The endpoint needs a feature your plan does not include. |
 | 403 | `read_only_key` | A read-only key called a write endpoint. |
-| 404 | `entity_not_found` | Nothing in the workspace matches the identifier. |
+| 403 | `admin_key_required` | A member key called an admin-only endpoint. |
+| 404 | `entity_not_found`, `person_not_found`, `deal_not_found`, ... | Nothing matches, or the record is outside a member key's book. |
 | 404 | `not_found` | The path does not exist. |
 | 429 | `rate_limited` | Too many requests. |
 | 500 | `internal_error` | Something failed on our side. |
@@ -83,13 +91,17 @@ Each key gets 600 requests per minute. Every response carries `RateLimit-Limit`,
 
 ## Endpoints
 
-| Group | Endpoint |
+| Group | Endpoints |
 |---|---|
-| People | [`GET /v2/people`](/public-api/people/list) · [`POST /v2/people`](/public-api/people/create) · [`PATCH /v2/people/:id`](/public-api/people/update) · [`POST /v2/people/:id/enrich`](/public-api/people/enrich) |
-| Accounts | [`GET /v2/accounts/:id`](/public-api/accounts) · [`POST /v2/context`](/public-api/context) · [`POST /v2/query`](/public-api/query) |
+| People | [`GET /v2/people`](/public-api/people/list) · [`GET /v2/people/:id`](/public-api/people/get) |
+| Accounts | [`GET /v2/accounts`](/public-api/accounts/list) · [`GET /v2/accounts/:id`](/public-api/accounts) · [`POST /v2/context`](/public-api/context) · [`POST /v2/query`](/public-api/query) |
+| Deals | [`GET /v2/deals`](/public-api/deals/list) · [`GET /v2/deals/:id`](/public-api/deals/get) · [`GET /v2/pipelines`](/public-api/deals/pipelines) |
+| Notes | [`POST /v2/notes`](/public-api/notes) · [`GET /v2/notes`](/public-api/notes/list) |
 | Attention | [`GET /v2/attention`](/public-api/attention) |
 | Insights | [`GET /v2/insights`](/public-api/insights/list) · [`POST /v2/insights`](/public-api/insights/record) |
-| ICP | [`POST /v2/score`](/public-api/score) · [`POST /v2/foundations/icp`](/public-api/icp/create) · [`POST /v2/workspace/closed-deals`](/public-api/icp/train) |
-| Notes | [`POST /v2/notes`](/public-api/notes) · [`GET /v2/notes`](/public-api/notes/list) |
+| Enrich & score | [`POST /v2/people/:id/enrich`](/public-api/people/enrich) · [`POST /v2/score`](/public-api/score) |
+| Organization | [`GET /v2/workspace/whoami`](/public-api/org/whoami) · [members](/public-api/members/list) · [brain](/public-api/brain/read) · [ICP](/public-api/icp/get) |
+| Workflows (beta) | [`/v2/workflows`](/public-api/workflows/list) |
+| Usage | [`GET /v2/usage`](/public-api/usage/get) · [`GET /v2/usage/breakdown`](/public-api/usage/breakdown) |
 
 Agents can reach the same graph through the [MCP server](/mcp/introduction).

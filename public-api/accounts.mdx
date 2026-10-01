@@ -3,11 +3,11 @@ title: "Get an account"
 openapi: "GET /v2/accounts/{id}"
 ---
 
-The full record for a person or company. For a ranked block shaped to one task, use [`POST /v2/context`](/public-api/context).
+The full record for a person or company. A company also returns its people and its deals. For a ranked block shaped to one task, use [get context](/public-api/context).
 
 Pass `intent` to add `key_activity`, the timeline ranked by how much each interaction tells you. Add `compress=1` to drop the raw `recent_observations`.
 
 ```bash
-curl "https://api.opennous.cloud/v2/accounts/sarah@acme.com?intent=meeting_prep&compress=1" \
+curl "https://api.opennous.cloud/v2/accounts/acme.com?intent=meeting_prep&compress=1" \
   -H "Authorization: Bearer $NOUS_API_KEY"
 ```

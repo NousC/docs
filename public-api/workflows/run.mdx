@@ -1,0 +1,16 @@
+---
+title: "Run a workflow now"
+openapi: "POST /v2/workflows/{id}/run"
+---
+
+<Note>
+Workflows are in beta. Today the runner executes the first agent step and the first send step. Email and webhook sends are delivered. A Slack step is recorded, but Slack delivery is not wired yet. Other step types are validated and saved but not executed yet.
+</Note>
+
+Runs a workflow once, now.
+
+| Trigger | What a run does |
+|---|---|
+| Deal triggers (`deal_closed_won`, `deal_closed_lost`, `deal_stage_changed`) | Runs on the most recent deal that hit the trigger in the last 90 days. Returns `nothing_to_run_on` when there is none. |
+| `clock`, `before_meeting`, `manual` | Runs one agent turn on the workflow's prompt. Needs an agent step with a prompt. |
+| Anything else | Returns `409 run_not_supported`. |

@@ -146,17 +146,31 @@
             "group": "People",
             "pages": [
               "public-api/people/list",
-              "public-api/people/create",
-              "public-api/people/update",
-              "public-api/people/enrich"
+              "public-api/people/get"
             ]
           },
           {
             "group": "Accounts",
             "pages": [
+              "public-api/accounts/list",
               "public-api/accounts",
               "public-api/context",
               "public-api/query"
+            ]
+          },
+          {
+            "group": "Deals",
+            "pages": [
+              "public-api/deals/list",
+              "public-api/deals/get",
+              "public-api/deals/pipelines"
+            ]
+          },
+          {
+            "group": "Notes",
+            "pages": [
+              "public-api/notes",
+              "public-api/notes/list"
             ]
           },
           {
@@ -173,18 +187,48 @@
             ]
           },
           {
-            "group": "ICP",
+            "group": "Enrich & score",
             "pages": [
-              "public-api/score",
-              "public-api/icp/create",
+              "public-api/people/enrich",
+              "public-api/score"
+            ]
+          },
+          {
+            "group": "Organization",
+            "pages": [
+              "public-api/org/whoami",
+              "public-api/members/list",
+              "public-api/members/invite",
+              "public-api/members/remove",
+              "public-api/brain/read",
+              "public-api/brain/search",
+              "public-api/brain/page",
+              "public-api/brain/write",
+              "public-api/icp/get",
+              "public-api/icp/update",
               "public-api/icp/train"
             ]
           },
           {
-            "group": "Notes",
+            "group": "Workflows",
+            "tag": "Beta",
             "pages": [
-              "public-api/notes",
-              "public-api/notes/list"
+              "public-api/workflows/list",
+              "public-api/workflows/create",
+              "public-api/workflows/get",
+              "public-api/workflows/update",
+              "public-api/workflows/delete",
+              "public-api/workflows/duplicate",
+              "public-api/workflows/run",
+              "public-api/workflows/runs",
+              "public-api/workflows/triggers"
+            ]
+          },
+          {
+            "group": "Usage",
+            "pages": [
+              "public-api/usage/get",
+              "public-api/usage/breakdown"
             ]
           }
         ]
@@ -320,7 +364,7 @@
   "redirects": [
     {
       "source": "/public-api/workspace-facts",
-      "destination": "/public-api/icp/create"
+      "destination": "/public-api/icp/update"
     },
     {
       "source": "/mcp/tools/get-workspace-facts",
@@ -356,15 +400,15 @@
     },
     {
       "source": "/public-api/leads/create",
-      "destination": "/public-api/people/create"
+      "destination": "/public-api/people/list"
     },
     {
       "source": "/public-api/leads/bulk",
-      "destination": "/public-api/people/create"
+      "destination": "/public-api/people/list"
     },
     {
       "source": "/public-api/leads/update",
-      "destination": "/public-api/people/update"
+      "destination": "/public-api/people/list"
     },
     {
       "source": "/public-api/leads/attach",
@@ -392,7 +436,7 @@
     },
     {
       "source": "/public-api/gtm-profile",
-      "destination": "/public-api/icp/create"
+      "destination": "/public-api/icp/update"
     },
     {
       "source": "/public-api/notes-search",
@@ -473,6 +517,18 @@
     {
       "source": "/mcp/tools/verify",
       "destination": "/mcp/tools/get-context"
+    },
+    {
+      "source": "/public-api/people/create",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/people/update",
+      "destination": "/public-api/people/list"
+    },
+    {
+      "source": "/public-api/icp/create",
+      "destination": "/public-api/icp/update"
     }
   ]
 }

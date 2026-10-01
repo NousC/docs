@@ -1,0 +1,8 @@
+---
+title: "Invite a member"
+openapi: "POST /v2/members"
+---
+
+Sends an invitation by email. Admin keys only. A member key returns `403 admin_key_required`.
+
+When the email does not send, the response still has `invite_link` to share yourself.

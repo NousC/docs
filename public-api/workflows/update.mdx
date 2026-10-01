@@ -1,0 +1,10 @@
+---
+title: "Update a workflow"
+openapi: "PATCH /v2/workflows/{id}"
+---
+
+<Note>
+Workflows are in beta. Today the runner executes the first agent step and the first send step. Email and webhook sends are delivered. A Slack step is recorded, but Slack delivery is not wired yet. Other step types are validated and saved but not executed yet.
+</Note>
+
+Change the name, trigger, steps, or switch. Send `enabled: false` to stop a workflow and keep its run history.

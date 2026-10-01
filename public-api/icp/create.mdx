@@ -1,8 +1,0 @@
----
-title: "Create the ICP"
-openapi: "POST /v2/foundations/icp"
----
-
-Sets the workspace ICP from markdown. Write who the buyer is, who is not a fit, and the scoring rules. The first time, Nous builds the scoring model from it so [score](/public-api/score) works right away.
-
-Sending again replaces the ICP text. An existing scoring model is kept and `model.status` is `exists`. To sharpen the model, [train it on closed deals](/public-api/icp/train).

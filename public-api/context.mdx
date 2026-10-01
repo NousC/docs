@@ -3,7 +3,9 @@ title: "Get context"
 openapi: "POST /v2/context"
 ---
 
-Ranked context on one person or company, shaped for the task you name and cut to a token budget.
+Ranked context on one person, account, or deal, shaped for the task you name and cut to a token budget.
+
+A deal `focus` is a CRM deal UUID or `implied:<account_id>`. The response then starts with a `deal` block, and the rest is about the deal's account.
 
 | `intent` | Use it before |
 |---|---|

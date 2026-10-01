@@ -1,0 +1,11 @@
+---
+title: "List accounts"
+openapi: "GET /v2/accounts"
+---
+
+Accounts, filtered and sorted. An account's `stage` is the furthest stage any of its people has reached.
+
+```bash
+curl "https://api.opennous.cloud/v2/accounts?has_open_deal=true&sort=win_chance&limit=20" \
+  -H "Authorization: Bearer $NOUS_API_KEY"
+```

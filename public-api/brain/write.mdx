@@ -1,0 +1,8 @@
+---
+title: "Write a brain page"
+openapi: "PUT /v2/brain/page"
+---
+
+Saves the next version of a page. `markdown` replaces the whole page.
+
+You can write the playbooks (`Playbooks/Positioning`, `Playbooks/ICP`, `Playbooks/Market`, `Playbooks/Distribution`, `Playbooks/Pricing`), `Decisions`, `Playbooks/Competitors/<name>`, `Working Documents/<name>`, and `Archive/<name>`. Other pages are built from the rest of the brain and return `400 path_not_writable`.

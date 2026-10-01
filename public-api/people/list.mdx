@@ -3,27 +3,15 @@ title: "List people"
 openapi: "GET /v2/people"
 ---
 
-Filtered, paginated list of people. Unknown query parameters return `400`, so a filter is never silently dropped.
+People are created by activity from your connected tools, so this group is read-only.
+
+By default the list holds the people your workspace has engaged. Add `include=all` for everyone, cold leads included.
 
 ```bash
-curl "https://api.opennous.cloud/v2/people?pipeline_stage=interested&last_activity_after=7d&sort=icp_score&limit=50" \
+curl "https://api.opennous.cloud/v2/people?pipeline_stage=interested&last_activity_after=7d&sort=icp_score" \
   -H "Authorization: Bearer $NOUS_API_KEY"
 ```
 
-## Pipeline stages
+This list keeps its own page size, default 100 and max 1000. With `include=all` it follows the usual 50 and 200.
 
-| Stage | Meaning |
-|---|---|
-| `identified` | Nothing has happened yet. The default. |
-| `connected` | They did something. Accepted, replied, opened, visited. |
-| `interested` | They replied positively. |
-| `meeting_booked` | A meeting is on the calendar. |
-| `discovery` | A first call happened. |
-| `demo` | A demo happened. |
-| `negotiation` | Terms or a proposal are on the table. |
-| `closed_won` | Signed. |
-| `closed_lost` | Lost the deal. |
-| `disqualified` | Not a fit, or asked us to stop. |
-| `churned` | A former customer who left. |
-
-Page with `limit` and `offset`, and stop when `has_more` is `false`.
+`pipeline_stage` takes a [standard stage](/public-api/deals/pipelines).

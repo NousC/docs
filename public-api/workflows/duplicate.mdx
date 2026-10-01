@@ -1,0 +1,10 @@
+---
+title: "Duplicate a workflow"
+openapi: "POST /v2/workflows/{id}/duplicate"
+---
+
+<Note>
+Workflows are in beta. Today the runner executes the first agent step and the first send step. Email and webhook sends are delivered. A Slack step is recorded, but Slack delivery is not wired yet. Other step types are validated and saved but not executed yet.
+</Note>
+
+Copies a workflow as `<name> (copy)`. The copy is disabled, so it takes no slot on your plan until you switch it on.

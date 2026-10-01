@@ -1,0 +1,25 @@
+---
+title: "List deals"
+openapi: "GET /v2/deals"
+---
+
+Deals are read-only. Your CRM is the source of truth, and Nous reads it.
+
+## Implied deals
+
+An account with no CRM deal still has a deal, its implied deal. That covers workspaces without a CRM and accounts the CRM has no deal for. An implied deal has the id `implied:<account_id>` and `implied: true`. Its stage is the account's stage, and it has no pipeline or close date. It works anywhere a deal id does, in [get a deal](/public-api/deals/get) and as the `focus` of [get context](/public-api/context).
+
+## How the objects fit
+
+| Object | Created by | Linked to | `stage` means |
+|---|---|---|---|
+| Person | Activity from your connected tools | The account they work at, and the deals they are on | How far that person's thread has gone |
+| Account | Activity, or the CRM | Its people and its deals | The furthest stage among its people |
+| Deal | Your CRM, or implied for an account without one | One account, and its stakeholders | The CRM stage, mapped onto the standard ladder as `canonical_stage` |
+
+All three share the standard ladder. See [list pipelines](/public-api/deals/pipelines) for how your CRM stages map onto it.
+
+```bash
+curl "https://api.opennous.cloud/v2/deals?status=open&closing_within_days=30&sort=win_probability" \
+  -H "Authorization: Bearer $NOUS_API_KEY"
+```
