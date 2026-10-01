@@ -5,7 +5,7 @@ description: Log LinkedIn outbound events from HeyReach on contact timelines.
 
 ## Endpoint
 
-Auto-registered on connect. The URL Nous registers with HeyReach is:
+Auto-registered on connect. The URL OpenNous registers with HeyReach is:
 
 ```
 POST https://api.yourdomain.com/inbound/heyreach/<your-workspace-id>
@@ -15,11 +15,11 @@ You can see it (and the registered webhook IDs) under **Settings → Integration
 
 ## Auth
 
-HeyReach does not sign webhook payloads. For an extra layer of protection, set `HEYREACH_WEBHOOK_SECRET` in `nous.env`. When set, Nous appends `?secret=<value>` to the registered URL and rejects any inbound request whose query string doesn't match.
+HeyReach does not sign webhook payloads. For an extra layer of protection, set `HEYREACH_WEBHOOK_SECRET` in `nous.env`. When set, OpenNous appends `?secret=<value>` to the registered URL and rejects any inbound request whose query string doesn't match.
 
 ## Setup in HeyReach
 
-Nothing manual. On connect, Nous calls `POST /api/public/webhooks/CreateWebhook` once per event type. On disconnect, Nous calls `DELETE /api/public/webhooks/DeleteWebhook?webhookId=…` for each.
+Nothing manual. On connect, OpenNous calls `POST /api/public/webhooks/CreateWebhook` once per event type. On disconnect, OpenNous calls `DELETE /api/public/webhooks/DeleteWebhook?webhookId=…` for each.
 
 ## Supported events
 
@@ -42,7 +42,7 @@ Replies and accepted connections create a new contact if one doesn't exist yet. 
 
 ## Payload
 
-Nous reads these fields from the HeyReach payload:
+OpenNous reads these fields from the HeyReach payload:
 
 ```json
 {

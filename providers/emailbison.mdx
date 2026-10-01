@@ -11,18 +11,18 @@ description: Log email outbound events from EmailBison on contact timelines.
 
   </Step>
 
-  <Step title="Connect in Nous">
-    Go to **Settings → Integrations → + Add Integration → EmailBison**, paste the key, and click **Connect**. Nous verifies it by calling `GET /api/campaigns` against `https://dedi.emailbison.com`.
+  <Step title="Connect in OpenNous">
+    Go to **Settings → Integrations → + Add Integration → EmailBison**, paste the key, and click **Connect**. OpenNous verifies it by calling `GET /api/campaigns` against `https://dedi.emailbison.com`.
 
   </Step>
 </Steps>
 
 ## Set up the Webhook (recommended)
 
-The webhook lets Nous log email events (sends, opens, replies, unsubscribes) in real time as they happen. EmailBison does not expose a webhook-registration API, so this step is manual.
+The webhook lets OpenNous log email events (sends, opens, replies, unsubscribes) in real time as they happen. EmailBison does not expose a webhook-registration API, so this step is manual.
 
 <Steps>
-  <Step title="Copy your webhook URL from Nous">
+  <Step title="Copy your webhook URL from OpenNous">
     Go to **Settings → Integrations → Webhooks → EmailBison** and copy the URL shown.
 
   </Step>

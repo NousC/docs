@@ -1,14 +1,14 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
-  "name": "Nous",
+  "name": "OpenNous",
   "colors": {
     "primary": "#c2482e",
     "light": "#e85b3d",
     "dark": "#e85b3d"
   },
   "appearance": {
-    "default": "dark"
+    "default": "light"
   },
   "background": {
     "decoration": "grid",
@@ -23,7 +23,7 @@
       "weight": 400
     },
     "body": {
-      "family": "Schibsted Grotesk",
+      "family": "JetBrains Mono",
       "weight": 400
     }
   },
@@ -31,7 +31,7 @@
     "eyebrows": "section",
     "codeblocks": {
       "theme": {
-        "light": "github-light-default",
+        "light": "vesper",
         "dark": "vesper"
       }
     }

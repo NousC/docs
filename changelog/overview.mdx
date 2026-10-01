@@ -1,15 +1,15 @@
 ---
 title: "Changelog"
-description: "New features, improvements, and fixes shipped in Nous."
+description: "New features, improvements, and fixes shipped in OpenNous."
 ---
 
 <Update label="August 17, 2026" description="Layered ICP scoring + cold-lead & list scoring">
 
-## The ICP score is now four layers, and works on leads that aren't in Nous yet
+## The ICP score is now four layers, and works on leads that aren't in OpenNous yet
 
 Scoring is no longer one flat number. Every [`score`](/public-api/score) call returns the **layered** read — **Fit · Pain · Intent · Ability** — where any layer you have no evidence for comes back **unknown, never 0**, with a `missing` worklist that tells your agent exactly what to enrich next and a `play` (research / nurture / work now / enrich / suppress). `priority` combines only the layers you actually know, so a partly-observed lead is never dragged down or inflated.
 
-- **Score a cold lead not in Nous** — pass `attributes` (title, company, keywords/headline). Fit and Pain resolve from what you have; **nothing is written to the graph**.
+- **Score a cold lead not in OpenNous** — pass `attributes` (title, company, keywords/headline). Fit and Pain resolve from what you have; **nothing is written to the graph**.
 - **Score a whole external list** — pass `leads` (up to **1000**). All scored inline in one call, the model loaded once, nothing written — triage a big list before you decide which accounts to bring in.
 - **A lead in the graph that's too thin to stake** now returns a `partial` layered read instead of a dead end.
 
@@ -19,9 +19,9 @@ See the [REST reference](/public-api/score) and the [`score`](/mcp/tools/score) 
 
 <Update label="June 10, 2026" description="Operated by the agent + browser login">
 
-## Set up Nous from inside your agent
+## Set up OpenNous from inside your agent
 
-Nous is now operated by the agent. The MCP server exposes **seventeen tools** — seven new ones let the agent set the workspace up itself instead of a human clicking through the app:
+OpenNous is now operated by the agent. The MCP server exposes **seventeen tools** — seven new ones let the agent set the workspace up itself instead of a human clicking through the app:
 
 - **`get_workspace_status`** — the whole setup state in one call (onboarding, GTM playbook, integrations, CRM sync, triggers) plus a ranked next-steps list. The first call in a session.
 - **`set_workspace_profile`** — agent-driven onboarding: name, website, business type, and a sentence on the ICP.
@@ -56,13 +56,13 @@ The MCP server now exposes **ten tools**. Three are new since the last release:
 
 <Update label="May 22, 2026" description="Week of May 18–22">
 
-## Rebrand: Proply is now Nous
+## Rebrand: Proply is now OpenNous
 
-We're shipping under a new name. Nous is the context graph that GTM agents run on, and the rename reflects that focus. The product, self-hosting story, and roadmap are unchanged — only the branding and a handful of integration points have moved.
+We're shipping under a new name. OpenNous is the context graph that GTM agents run on, and the rename reflects that focus. The product, self-hosting story, and roadmap are unchanged — only the branding and a handful of integration points have moved.
 
 ### ⚠️ Breaking changes
 
-If you're on Nous Cloud or self-hosting, update your integrations this week.
+If you're on OpenNous Cloud or self-hosting, update your integrations this week.
 
 - **Environment variables.** `PROPLY_API_KEY` → `NOUS_API_KEY`, `PROPLY_BASE_URL` → `NOUS_BASE_URL`. Rotate your `.env` and redeploy.
 - **HTTP header.** Custom clients must send `x-nous-client` instead of `x-proply-client` when calling the [REST API](/public-api/introduction).
@@ -73,7 +73,7 @@ If you're on Nous Cloud or self-hosting, update your integrations this week.
 
 - Your workspace, contacts, context, and provider connections.
 - All [REST API](/public-api/introduction) and [MCP](/mcp/introduction) endpoints, request shapes, and response formats.
-- Pricing and plans on Nous Cloud.
+- Pricing and plans on OpenNous Cloud.
 
 Need help migrating? Ping us on [Discord](https://discord.gg/2Ph4ZYXw).
 

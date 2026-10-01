@@ -3,6 +3,6 @@ title: "Set the ICP"
 openapi: "PUT /v2/icp"
 ---
 
-Sets the ICP from markdown. Write who the buyer is, who is not a fit, and the scoring rules. The first time, Nous builds the scoring model from it so [score](/public-api/score) works right away.
+Sets the ICP from markdown. Write who the buyer is, who is not a fit, and the scoring rules. The first time, OpenNous builds the scoring model from it so [score](/public-api/score) works right away.
 
 Sending again replaces the text. An existing model is kept, and `model.status` is `exists`. To sharpen the model, [train it on closed deals](/public-api/icp/train).

@@ -15,7 +15,7 @@ Copy it directly from the UI — your workspace ID is already embedded.
 
 ## Auth
 
-Smartlead webhooks are not signed by default. For an extra layer of protection, set `SMARTLEAD_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the URL when pasting it into Smartlead. Nous rejects any inbound request whose query string doesn't match.
+Smartlead webhooks are not signed by default. For an extra layer of protection, set `SMARTLEAD_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the URL when pasting it into Smartlead. OpenNous rejects any inbound request whose query string doesn't match.
 
 ## Setup in Smartlead
 
@@ -23,7 +23,7 @@ Smartlead webhooks are configured per campaign.
 
 1. Open the campaign you want to track.
 2. Go to **Settings → Webhooks → Add Webhook**.
-3. Paste the URL from Nous and tick the events you want.
+3. Paste the URL from OpenNous and tick the events you want.
 4. Repeat for every campaign you care about.
 
 ## Supported events
@@ -41,7 +41,7 @@ Replies create a new contact if one doesn't exist yet. All other events are upda
 
 ## Payload
 
-Nous reads these fields from the Smartlead payload:
+OpenNous reads these fields from the Smartlead payload:
 
 ```json
 {

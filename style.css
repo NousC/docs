@@ -38,6 +38,86 @@ h1, h2, h3, h4,
 h1, #page-title { letter-spacing: -0.03em; }
 #content-area strong, #content-area b { font-weight: 500; }
 
+/* Body in mono, like a terminal page: smaller, airier, quieter. Titles stay in Schibsted. */
+body, #content-area, #sidebar, #table-of-contents {
+  font-family: var(--nous-mono);
+}
+h1, h2, h3, h4, #page-title {
+  font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif !important;
+}
+#content-area p,
+#content-area li,
+#content-area td,
+.prose {
+  font-size: 14.5px;
+  line-height: 1.8;
+  letter-spacing: -0.01em;
+}
+#content-area [class*="description"],
+#content-area header p {
+  font-size: 15px;
+  color: var(--nous-fg-soft);
+}
+#sidebar a,
+#sidebar li {
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+#table-of-contents a { font-size: 12.5px; }
+
+/* ── Floqer-style reference look ─────────────────────────────────────── */
+/* Inline code: accent text on a soft accent ground, no box. */
+:not(pre) > code {
+  color: var(--nous-accent-ink) !important;
+  background: color-mix(in srgb, var(--nous-accent) 10%, transparent) !important;
+  border: 0 !important;
+}
+
+/* Code panels: black in both themes, no border, no chrome. */
+.code-block,
+.code-group,
+.code-block [role="presentation"],
+.code-group [role="presentation"],
+pre {
+  background: #0b0b0c !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.code-block [data-component-part="code-block-header"],
+.code-group [role="tablist"] {
+  background: #0b0b0c !important;
+  color: #8f8a7e !important;
+  text-transform: uppercase;
+  letter-spacing: var(--nous-track);
+  border-bottom: 1px solid #1d1d20;
+}
+
+/* "Try it": outlined, not filled. */
+.tryit-button {
+  background: transparent !important;
+  color: var(--nous-accent-ink) !important;
+  border: 1px solid var(--nous-accent) !important;
+}
+.tryit-button:hover { background: color-mix(in srgb, var(--nous-accent) 8%, transparent) !important; opacity: 1 !important; }
+
+/* Sidebar: group titles in bold ink with the tracked label voice; active page in accent. */
+.sidebar-title,
+#sidebar h5 {
+  color: var(--nous-fg) !important;
+  font-weight: 600 !important;
+}
+#sidebar a[aria-current="page"],
+#sidebar li[data-active="true"] > a {
+  color: var(--nous-accent-ink) !important;
+  background: transparent !important;
+}
+
+/* Response fields nest on hairline rules. */
+#content-area .field + .field,
+#content-area [data-component-part="field-children"] {
+  border-left: 1px solid var(--nous-border);
+}
+
 code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 
 /* The site's label voice: mono, uppercase, tracked wide, muted. */
