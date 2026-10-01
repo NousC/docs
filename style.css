@@ -289,3 +289,19 @@ pre {
 /* API pages: method pills square and mono. */
 .method-pill { padding: 0.15em 0.5em; }
 button.tryit-button.tryit-button svg { color: currentColor !important; fill: currentColor !important; }
+
+/* Plain-text blocks (no highlighting) carry their colour on <pre>, not on spans. */
+pre.shiki[style*="--shiki-dark"] { color: var(--shiki-dark) !important; }
+/* The scroll fade and the copy button's backing were white; make them part of the black panel. */
+.code-block-fade-overlay {
+  --fade-color-light: #0b0b0c !important;
+  --fade-color-dark: #0b0b0c !important;
+}
+.code-block [data-floating-buttons],
+.code-block-copy-button,
+.code-block-copy-button button,
+.code-group [data-floating-buttons] {
+  background: transparent !important;
+}
+.code-block-copy-button svg { color: #8f8a7e !important; }
+.code-block-copy-button button:hover svg { color: #e6e3da !important; }
