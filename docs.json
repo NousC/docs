@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
-  "name": "Nous",
+  "name": "OpenNous",
   "colors": {
-    "primary": "#101011",
-    "light": "#f6f5f2",
-    "dark": "#101011"
+    "primary": "#c2482e",
+    "light": "#e85b3d",
+    "dark": "#e85b3d"
   },
   "appearance": {
     "default": "light"
@@ -13,17 +13,17 @@
   "background": {
     "decoration": "grid",
     "color": {
-      "light": "#fbfbfa",
-      "dark": "#0e0e10"
+      "light": "#fcfbf8",
+      "dark": "#131416"
     }
   },
   "fonts": {
     "heading": {
-      "family": "Geist",
-      "weight": 500
+      "family": "Schibsted Grotesk",
+      "weight": 400
     },
     "body": {
-      "family": "Geist",
+      "family": "JetBrains Mono",
       "weight": 400
     }
   },
@@ -37,6 +37,9 @@
     }
   },
   "favicon": "/favicon.svg",
+  "api": {
+    "openapi": "openapi.json"
+  },
   "navigation": {
     "tabs": [
       {
@@ -134,7 +137,6 @@
       },
       {
         "tab": "REST API",
-        "openapi": "openapi.json",
         "groups": [
           {
             "group": "Overview",

@@ -11,8 +11,8 @@ description: Log email outbound events from Smartlead on contact timelines.
 
   </Step>
 
-  <Step title="Connect in Nous">
-    Go to **Settings → Integrations → + Add Integration → Smartlead**, paste the key, and click **Connect**. Nous verifies it by calling `GET /api/v1/campaigns/?api_key=...` against `https://server.smartlead.ai`.
+  <Step title="Connect in OpenNous">
+    Go to **Settings → Integrations → + Add Integration → Smartlead**, paste the key, and click **Connect**. OpenNous verifies it by calling `GET /api/v1/campaigns/?api_key=...` against `https://server.smartlead.ai`.
 
   </Step>
 </Steps>
@@ -22,7 +22,7 @@ description: Log email outbound events from Smartlead on contact timelines.
 Smartlead webhooks are configured per campaign in the Smartlead UI, so this step is manual.
 
 <Steps>
-  <Step title="Copy your webhook URL from Nous">
+  <Step title="Copy your webhook URL from OpenNous">
     Go to **Settings → Integrations → Webhooks → Smartlead** and copy the URL shown.
 
   </Step>
@@ -42,4 +42,4 @@ See the [Smartlead webhook reference](/webhooks/smartlead) for the event-to-acti
 
 ## Optional: shared secret
 
-Set `SMARTLEAD_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the webhook URL when pasting it into Smartlead. Nous rejects any inbound request whose query string doesn't match.
+Set `SMARTLEAD_WEBHOOK_SECRET` in `nous.env` and append `?secret=<value>` to the webhook URL when pasting it into Smartlead. OpenNous rejects any inbound request whose query string doesn't match.

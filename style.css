@@ -1,47 +1,307 @@
-/* Match www.opennous.cloud (nous-web v5): Geist, hairlines, mono eyebrows. */
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
+/* Match www.opennous.cloud (nous-web v5): Schibsted Grotesk + JetBrains Mono, square corners,
+   hairline borders, mono uppercase tracked labels, one orange accent. */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
-  --nous-fg: #101011;
-  --nous-fg-soft: #4a4946;
-  --nous-fg-mute: #83817b;
-  --nous-bg-soft: #f4f4f2;
-  --nous-border: #eae9e5;
-  --nous-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --nous-fg: #1c1a17;
+  --nous-fg-soft: #4a463f;
+  --nous-fg-mute: #787369;
+  --nous-bg: #fcfbf8;
+  --nous-bg-soft: #f1efe8;
+  --nous-border: #e9e6dc;
+  --nous-border-strong: #d8d4c6;
+  --nous-accent: #e85b3d;
+  --nous-accent-ink: #c2482e;
+  --nous-on-accent: #fdf9f3;
+  --nous-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --nous-track: 0.12em;
 }
 :root.dark {
-  --nous-fg: #f6f5f2;
-  --nous-fg-soft: #b9b7b1;
-  --nous-fg-mute: #86847e;
-  --nous-bg-soft: #17171a;
-  --nous-border: #262629;
+  --nous-fg: #f2f0e9;
+  --nous-fg-soft: #b4afa3;
+  --nous-fg-mute: #8f8a7e;
+  --nous-bg: #131416;
+  --nous-bg-soft: #1a1b1e;
+  --nous-border: #26272b;
+  --nous-border-strong: #34353a;
+  --nous-accent-ink: #e85b3d;
 }
 
-h1, h2, h3, h4 { letter-spacing: -0.022em; }
-h1 { letter-spacing: -0.03em; }
+/* ── Type ─────────────────────────────────────────────────────────────── */
+/* Titles light, like the site's "Build on the graph": regular weight, size does the work. */
+h1, h2, h3, h4,
+#content-area h1, #content-area h2, #content-area h3, #content-area h4,
+#page-title {
+  font-weight: 400 !important;
+  letter-spacing: -0.022em;
+}
+h1, #page-title { letter-spacing: -0.03em; }
+#content-area strong, #content-area b { font-weight: 500; }
+
+/* Body in mono, like a terminal page: smaller, airier, quieter. Titles stay in Schibsted. */
+body, #content-area, #sidebar, #table-of-contents {
+  font-family: var(--nous-mono);
+}
+h1, h2, h3, h4, #page-title {
+  font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif !important;
+}
+#content-area p,
+#content-area li,
+#content-area td,
+.prose {
+  font-size: 14.5px;
+  line-height: 1.8;
+  letter-spacing: -0.01em;
+}
+#content-area [class*="description"],
+#content-area header p {
+  font-size: 15px;
+  color: var(--nous-fg-soft);
+}
+#sidebar a,
+#sidebar li {
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+#table-of-contents a { font-size: 12.5px; }
+
+/* ── Floqer-style reference look ─────────────────────────────────────── */
+/* Inline code: accent text on a soft accent ground, no box. */
+:not(pre) > code {
+  color: var(--nous-accent-ink) !important;
+  background: color-mix(in srgb, var(--nous-accent) 10%, transparent) !important;
+  border: 0 !important;
+}
+
+/* Code panels: black in both themes, no border, no chrome. Mintlify colours code with
+   light-mode values plus a --shiki-dark variable; on black we always want the dark ones. */
+.code-block,
+.code-group,
+.code-block-background,
+.code-block [role="presentation"],
+.code-group [role="presentation"],
+.code-block-background [role="presentation"],
+pre {
+  background: #0b0b0c !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #e6e3da;
+}
+.code-block *, .code-group *, .code-block-background * {
+  border-color: transparent !important;
+}
+.code-block span[style*="--shiki-dark"],
+.code-group span[style*="--shiki-dark"],
+.code-block-background span[style*="--shiki-dark"] {
+  color: var(--shiki-dark) !important;
+}
+.code-block [data-component-part="code-block-header"],
+.code-group [role="tablist"] {
+  background: #0b0b0c !important;
+  color: #8f8a7e !important;
+  text-transform: uppercase;
+  letter-spacing: var(--nous-track);
+  border-bottom: 1px solid #1d1d20;
+}
+
+/* "Try it": outlined, not filled. */
+button.tryit-button.tryit-button {
+  background: transparent !important;
+  color: var(--nous-accent-ink) !important;
+  border: 1px solid var(--nous-accent) !important;
+}
+button.tryit-button.tryit-button:hover { background: color-mix(in srgb, var(--nous-accent) 8%, transparent) !important; opacity: 1 !important; }
+
+/* Sidebar: group titles in bold ink with the tracked label voice; active page in accent. */
+html body .sidebar-title.sidebar-title,
+html body .sidebar-title span {
+  color: var(--nous-fg) !important;
+  font-weight: 600 !important;
+}
+#sidebar a[aria-current="page"],
+#sidebar li[data-active="true"] > a {
+  color: var(--nous-accent-ink) !important;
+  background: transparent !important;
+}
+
+/* Response fields nest on hairline rules. */
+#content-area .field + .field,
+#content-area [data-component-part="field-children"] {
+  border-left: 1px solid var(--nous-border);
+}
 
 code, pre, kbd, samp { font-family: var(--nous-mono) !important; }
 
-/* Mono uppercase eyebrows: page section label + sidebar group headers. */
+/* The site's label voice: mono, uppercase, tracked wide, muted. */
 #content-area .eyebrow,
 #sidebar-group > h5,
-#sidebar h5 {
-  font-family: var(--nous-mono);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.13em;
+#sidebar h5,
+.sidebar-title,
+#table-of-contents h2,
+.nav-tabs-item,
+#navbar nav a,
+#navbar li > a,
+#footer h4,
+#content-area table thead th,
+.method-pill,
+[data-component-part="field-type"],
+[data-component-part="field-required-pill"] {
+  font-family: var(--nous-mono) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--nous-track) !important;
   text-transform: uppercase;
-  color: var(--nous-fg-mute);
+}
+#content-area .eyebrow,
+#sidebar-group > h5,
+#sidebar h5,
+.sidebar-title,
+#table-of-contents h2,
+#content-area table thead th {
+  color: var(--nous-fg-mute) !important;
 }
 
-/* Code blocks: soft ground, 1px hairline, 0.7rem radius. */
+/* Tabs: the active tab gets the accent underline, the rest stay quiet. */
+.nav-tabs-item { color: var(--nous-fg-mute); }
+.nav-tabs-item:hover { color: var(--nous-fg); }
+.nav-tabs-item[data-active="true"],
+.nav-tabs-item.font-semibold { color: var(--nous-fg) !important; }
+
+/* ── Links ────────────────────────────────────────────────────────────── */
+#content-area a:not(.card):not([class*="button"]) {
+  color: var(--nous-accent-ink);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--nous-accent) 35%, transparent);
+}
+#content-area a:not(.card):not([class*="button"]):hover {
+  border-bottom-color: var(--nous-accent);
+}
+
+/* ── Navbar CTA: the site's square orange button ─────────────────────── */
+#topbar-cta-button a,
+#topbar-cta-button > a > span,
+#topbar-cta-button span {
+  border-radius: 0 !important;
+}
+#topbar-cta-button a {
+  background: var(--nous-accent) !important;
+  color: var(--nous-on-accent) !important;
+  font-family: var(--nous-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--nous-track);
+  text-transform: uppercase;
+}
+#topbar-cta-button a:hover { background: #d64c2f !important; }
+#topbar-cta-button svg { display: none; }
+
+/* "Try it": the same square orange button, not Mintlify's green pill. */
+.tryit-button {
+  background: var(--nous-accent) !important;
+  color: var(--nous-on-accent) !important;
+  border-radius: 0 !important;
+  font-family: var(--nous-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--nous-track);
+  text-transform: uppercase;
+}
+
+/* ── Square corners, hairline borders ────────────────────────────────── */
+/* Mintlify rounds its panels with Tailwind classes; the site has no rounded corners at all.
+   rounded-full is left alone (theme toggle, dots). */
+[class*="rounded-sm"], [class*="rounded-md"], [class*="rounded-lg"],
+[class*="rounded-xl"], [class*="rounded-2xl"], [class*="rounded-3xl"],
+[class*="rounded-l-"], [class*="rounded-r-"], [class*="rounded-t-"], [class*="rounded-b-"],
+[class~="rounded"] {
+  border-radius: 0 !important;
+}
 .code-block,
+.code-group,
+pre,
+.card,
+.callout,
+[data-callout-type],
+#content-area table,
+#content-area img,
+#search-bar-entry,
+#search-bar-entry-mobile,
+.api-section,
+.request-example,
+.response-example,
+[data-component-part="field-type"],
+.method-pill {
+  border-radius: 0 !important;
+}
+.code-block,
+.code-group,
 pre {
   border: 1px solid var(--nous-border) !important;
-  border-radius: 0.7rem !important;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.86rem;
+  line-height: 1.65;
 }
 :not(pre) > code {
-  border-radius: 0.35rem;
+  border-radius: 0 !important;
+  border: 1px solid var(--nous-border);
+  background: var(--nous-bg-soft) !important;
+  padding: 0.1em 0.35em;
+  font-size: 0.86em;
 }
+
+/* Code block header: the filename / language reads as a mono label. */
+.code-block [data-component-part="code-block-header"],
+.code-group [role="tablist"] {
+  font-family: var(--nous-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--nous-border);
+}
+
+/* Cards: flat, hairline, accent rule on hover — like the site's spec rows. */
+.card {
+  border: 1px solid var(--nous-border) !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.card:hover { border-color: var(--nous-accent) !important; }
+
+/* Tables read like the site's spec lists: no zebra, hairline rows. */
+#content-area table { border: 1px solid var(--nous-border); border-collapse: collapse; }
+#content-area table th,
+#content-area table td { border-bottom: 1px solid var(--nous-border); }
+#content-area table tbody tr:nth-child(even) { background: transparent; }
+
+/* Callouts: a left accent rule instead of a tinted rounded box. */
+.callout,
+[data-callout-type] {
+  border-left-width: 2px !important;
+}
+
+/* Sidebar: active page marked by the accent, square highlight. */
+#sidebar a[aria-current="page"],
+#sidebar li[data-active="true"] > a {
+  border-radius: 0 !important;
+  color: var(--nous-fg) !important;
+  box-shadow: inset 2px 0 0 var(--nous-accent);
+}
+#sidebar a { border-radius: 0 !important; }
+
+/* API pages: method pills square and mono. */
+.method-pill { padding: 0.15em 0.5em; }
+button.tryit-button.tryit-button svg { color: currentColor !important; fill: currentColor !important; }
+
+/* Plain-text blocks (no highlighting) carry their colour on <pre>, not on spans. */
+pre.shiki[style*="--shiki-dark"] { color: var(--shiki-dark) !important; }
+/* The scroll fade and the copy button's backing were white; make them part of the black panel. */
+.code-block-fade-overlay {
+  --fade-color-light: #0b0b0c !important;
+  --fade-color-dark: #0b0b0c !important;
+}
+.code-block [data-floating-buttons],
+.code-block-copy-button,
+.code-block-copy-button button,
+.code-group [data-floating-buttons] {
+  background: transparent !important;
+}
+.code-block-copy-button svg { color: #8f8a7e !important; }
+.code-block-copy-button button:hover svg { color: #e6e3da !important; }

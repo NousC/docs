@@ -1,11 +1,11 @@
 ---
 title: "How it works"
-description: "The Nous architecture. Ingestion, identity resolution, and how every signal becomes part of the context graph."
+description: "The OpenNous architecture. Ingestion, identity resolution, and how every signal becomes part of the context graph."
 ---
 
 ## Architecture
 
-Nous is one stack. Connectors push signals from your GTM tools into Nous, identity resolution matches every signal to one person and one company, and the context graph holds the result. Your agent reads it back over MCP or REST.
+OpenNous is one stack. Connectors push signals from your GTM tools into OpenNous, identity resolution matches every signal to one person and one company, and the context graph holds the result. Your agent reads it back over MCP or REST.
 
 ```mermaid theme={null}
 flowchart LR
@@ -67,7 +67,7 @@ Agents themselves are signal sources too. Any [`POST /v2/notes`](/public-api/not
 
 ### Identity Resolution
 
-Identity resolution is what makes Nous a graph rather than another data store. Every inbound signal is resolved to one person and one company using.
+Identity resolution is what makes OpenNous a graph rather than another data store. Every inbound signal is resolved to one person and one company using.
 
 * Entity UUID (if you have one)
 * Email address

@@ -1,9 +1,9 @@
 ---
 title: "Docker Compose"
-description: "Deploy Nous on your own server with Docker Compose"
+description: "Deploy OpenNous on your own server with Docker Compose"
 ---
 
-The recommended way to self-host Nous. Tested on Ubuntu 24.04 with 2GB RAM and 2 vCPUs.
+The recommended way to self-host OpenNous. Tested on Ubuntu 24.04 with 2GB RAM and 2 vCPUs.
 
 <Note>
   You will need a [Supabase](https://supabase.com) project before starting. The free tier is enough to get going.
@@ -112,11 +112,11 @@ If you want Google sign-in, enable the **Google** provider in the same panel and
 
 ## Step 7: Create your first user
 
-Open `https://app.yourdomain.com` and click **Sign up**. The first account becomes the **owner**. You'll land on the **Connect** screen — Nous is operated by your agent, so this screen stays up until your agent has onboarded the workspace.
+Open `https://app.yourdomain.com` and click **Sign up**. The first account becomes the **owner**. You'll land on the **Connect** screen — OpenNous is operated by your agent, so this screen stays up until your agent has onboarded the workspace.
 
 ## Step 8: Connect your agent
 
-Nous is set up *by your agent*, not by clicking through the app. Point your agent at this instance.
+OpenNous is set up *by your agent*, not by clicking through the app. Point your agent at this instance.
 
 **Claude Code**
 
@@ -146,7 +146,7 @@ npx @opennous/cli login --url https://api.yourdomain.com
 ```
 
 <Note>
-The `--url` is what points your agent at **your own instance** instead of Nous Cloud — it's the one self-host-specific bit. Prefer to paste a key instead of signing in? Create one at **Settings → API Keys** and set it directly in the MCP config:
+The `--url` is what points your agent at **your own instance** instead of OpenNous Cloud — it's the one self-host-specific bit. Prefer to paste a key instead of signing in? Create one at **Settings → API Keys** and set it directly in the MCP config:
 
 ```json
 { "mcpServers": { "nous": { "command": "npx", "args": ["-y", "@opennous/mcp"],
@@ -165,7 +165,7 @@ Your agent reads `get_workspace_status` and walks you through setup **in order**
 Because it's self-hosted, your agent knows that **LinkedIn (Unipile), email (Resend), and Gmail (Google OAuth) are configured in `nous.env`** (Step 2) — it'll tell you which env vars to set and to restart. **Enrichment** (Prospeo / Apollo) is bring-your-own-key, and your agent connects it directly.
 
 <Note>
-Self-hosters don't have **Lead Lists**, **CRM Sync**, **Triggers**, or **Reports** — those are Nous Cloud only. Everything else (the context graph, the MCP server + all agent tools, the ICP scoring model, enrichment, integrations) is fully open.
+Self-hosters don't have **Lead Lists**, **CRM Sync**, **Triggers**, or **Reports** — those are OpenNous Cloud only. Everything else (the context graph, the MCP server + all agent tools, the ICP scoring model, enrichment, integrations) is fully open.
 </Note>
 
 ---

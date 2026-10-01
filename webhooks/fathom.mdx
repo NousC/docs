@@ -22,7 +22,7 @@ Fathom uses svix-based HMAC signing. Set your Fathom webhook secret in `nous.env
 FATHOM_WEBHOOK_SECRET=whsec_your-signing-secret
 ```
 
-Nous verifies the `webhook-signature`, `webhook-id`, and `webhook-timestamp` headers automatically. Timestamps older than 5 minutes are rejected.
+OpenNous verifies the `webhook-signature`, `webhook-id`, and `webhook-timestamp` headers automatically. Timestamps older than 5 minutes are rejected.
 
 ## Setup in Fathom
 
