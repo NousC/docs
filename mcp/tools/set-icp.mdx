@@ -3,13 +3,13 @@ title: "set_icp"
 description: "Set or replace the workspace ICP."
 ---
 
-Pass the full ICP as markdown. Who the buyer is, who is not a fit, and the scoring rules.
+Pass the full ICP as markdown. Who the buyer is and who is not a fit. Rules or weights you write are hints for the LLM that builds the scoring model.
 
 | Name | Type | Required | Description |
 |---|---|---|---|
 | `body_md` | string | yes | The ICP as markdown |
 
-The ICP text is replaced and versioned. The scoring model is built from it only when the workspace has none yet. An existing model is kept, so weights trained on closed deals survive a text edit. The result says which happened.
+The ICP text is replaced and versioned. The scoring model is built from it only when the workspace has none yet. An existing model is kept, so weights trained on closed deals survive a text edit. The result says which happened. On a workspace that uses its own scorer, no model is built and the status is `external_scorer`.
 
 Read the current ICP first with [`query`](/mcp/tools/query) `{ scope: { foundation: "icp" } }` and keep what is still true.
 

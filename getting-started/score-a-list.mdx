@@ -8,17 +8,12 @@ You already keep lists somewhere. A Google Sheet, a Clay table, a CRM export. Yo
 The list stays yours. OpenNous owns the score. And because the score lands in the graph, every agent you run reads the same number through [`get_context`](/mcp/tools/get-context) and [`query`](/public-api/query), and the model sharpens from your own won and lost deals as you record outcomes.
 
 <Note>
-Scoring needs a model. Create one first with [`set_icp`](/mcp/tools/set-icp), or train it on real deals with [`POST /v2/workspace/closed-deals`](/public-api/icp/train).
+Scoring needs a model. Create one first with [`set_icp`](/mcp/tools/set-icp), or train it on real deals with [`POST /v2/icp/closed-deals`](/public-api/icp/train). Already score accounts your own way? See [Bring your own scorer](/getting-started/bring-your-own-scorer).
 </Note>
 
-## Two verbs
+## One verb
 
-| Verb | Use it for |
-|---|---|
-| [`score`](/public-api/score) | One row at a time. A spreadsheet cell, a Clay column, a per-record workflow step |
-| `attach_list` | A whole list in one call. OpenNous creates the list, resolves every row, and scores it |
-
-Both accept an email, a domain, a LinkedIn URL, or an entity UUID, and both write the result into the graph.
+[`score`](/public-api/score) scores one row at a time, or up to 100 graph leads with `identifiers`. It accepts an email, a domain, a LinkedIn URL, or an entity UUID, and writes the result into the graph.
 
 ## Google Sheets
 
@@ -54,27 +49,20 @@ Map `icp.score`, `icp.tier`, and `intent.score` from the response into columns. 
 
 ## A whole list, or a weekly job
 
-To score a list in one pass, send the rows to `attach_list`.
+Send up to 100 rows per call with `identifiers`, and loop for a larger sheet. Run it on a cadence from n8n, Make, or a cron job to keep every score current.
 
 ```bash
-curl -X POST https://api.opennous.cloud/v2/lead-lists/attach \
+curl -X POST https://api.opennous.cloud/v2/score \
   -H 'Authorization: Bearer YOUR_API_KEY' \
   -H 'Content-Type: application/json' \
-  -d '{
-    "name": "Q3 sheet",
-    "source": "google_sheet",
-    "rows": [
-      { "email": "sarah@acme.com" },
-      { "email": "tom@globex.io" }
-    ]
-  }'
+  -d '{ "identifiers": ["sarah@acme.com", "tom@globex.io"] }'
 ```
 
-Run that on a cadence from n8n, Make, or a cron job, passing the same `lead_list_id` each time, and both the roster and every score stay current. Send up to 200 rows per call and loop for a larger sheet.
+For rows OpenNous does not have yet, send their attributes in `leads` instead. Up to 1000 are scored inline and nothing is written.
 
 ## Rows OpenNous does not know yet
 
-A row only scores if OpenNous has facts to score on. A brand-new email with nothing behind it comes back as `awaiting_enrichment` for `attach_list`, or `unknown_identifier` for `score`. Enrich those accounts first, then score them again. OpenNous never invents a score for an account it has no signal on.
+A row only scores if OpenNous has facts to score on. A brand-new email with nothing behind it comes back as `unknown_identifier`, or `awaiting_enrichment` when OpenNous has the account but no facts to score on yet. Enrich those accounts first, then score them again. OpenNous never invents a score for an account it has no signal on.
 
 ## What you get back
 

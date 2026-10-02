@@ -51,7 +51,8 @@
               "getting-started/introduction",
               "getting-started/how-it-works",
               "getting-started/quickstart",
-              "getting-started/score-a-list"
+              "getting-started/score-a-list",
+              "getting-started/bring-your-own-scorer"
             ]
           },
           {
@@ -192,7 +193,8 @@
             "group": "Enrich & score",
             "pages": [
               "public-api/people/enrich",
-              "public-api/score"
+              "public-api/score",
+              "public-api/scores"
             ]
           },
           {
@@ -208,7 +210,9 @@
               "public-api/brain/write",
               "public-api/icp/get",
               "public-api/icp/update",
-              "public-api/icp/train"
+              "public-api/icp/train",
+              "public-api/icp/scorer",
+              "public-api/icp/tiers"
             ]
           },
           {

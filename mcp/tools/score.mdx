@@ -11,7 +11,9 @@ Pass one of `identifier`, `identifiers`, `attributes`, or `leads`. Leads in the 
 | `identifiers` | string[] | Up to 100 graph leads |
 | `attributes` | object | One lead not in OpenNous. `job_title`, `seniority`, `industry`, `employee_count`, `company_type`, `location`, `keywords` or `headline`. |
 | `leads` | object[] | Up to 1000 leads not in OpenNous, each an `attributes` object. Add `ref` to match rows. |
-| `intent` | string | Why you are scoring. Recorded, does not change the score. |
+| `intent` | string | Reserved. Accepted and ignored today. |
+| `scorer` | string | Your model's name, such as `acme-v3`. Use it with `scores` to send your own scores |
+| `scores` | object[] | Up to 500 of `{ identifier, score, tier?, reason? }` from your own scorer |
 
 ```
 sarah@acme.com — ICP 82/100 (tier 1) ✓fit · intent 64/100 Warm
@@ -22,4 +24,8 @@ sarah@acme.com — ICP 82/100 (tier 1) ✓fit · intent 64/100 Warm
 
 A layer listed as unknown has no evidence yet. It is not zero.
 
-REST: [`POST /v2/score`](/public-api/score)
+## Send your own scores
+
+Pass `scorer` and `scores` to write scores you computed yourself instead of reading OpenNous's. The workspace must [use its own scorer](/public-api/icp/scorer). Each row reports `staked`, `updated`, or `unchanged`. An account OpenNous has not seen returns `unknown_identifier`, so record it first. Leave out `tier` and it is derived from your [tier bands](/public-api/icp/tiers).
+
+REST: [`POST /v2/score`](/public-api/score). Your own scores go to [`POST /v2/scores`](/public-api/scores).

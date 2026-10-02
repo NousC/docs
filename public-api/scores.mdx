@@ -1,0 +1,19 @@
+---
+title: "Send your own scores"
+openapi: "POST /v2/scores"
+---
+
+Writes scores you computed with your own system onto accounts. Each score becomes the account's ICP fit, so [`get_context`](/public-api/context), the accounts list, and tiers all read it. Every score is checked against the deals you win and lose, so you can see whether your model predicts revenue.
+
+The workspace must use its own scorer first. See [Choose the scorer](/public-api/icp/scorer).
+
+| Send | Writes |
+|---|---|
+| `identifier`, `score` | One account |
+| `scores` | Up to 500 accounts |
+
+`scorer` names your model, for example `acme-v3`. Change the name when you change the model, and the score history shows the switch.
+
+Leave out `tier` and OpenNous derives it from the score and your [tier bands](/public-api/icp/tiers). Sending the same score again changes nothing. A new score keeps the old one in the account's history.
+
+Accounts OpenNous has not seen come back as `unknown_identifier`. Record the account first, then send its score. The step-by-step guide is [Bring your own scorer](/getting-started/bring-your-own-scorer).

@@ -1,0 +1,15 @@
+---
+title: "Set the tier bands"
+openapi: "PUT /v2/icp/tiers"
+---
+
+Sets the score where each tier starts. The defaults are 85, 70, and 50.
+
+| Tier | Default band | The play |
+|---|---|---|
+| `tier_1` | 85 to 100 | Work by hand |
+| `tier_2` | 70 to 84 | Queue to automation |
+| `tier_3` | 50 to 69 | Nurture |
+| `not_icp` | Below 50 | Suppress |
+
+The bands apply to tiers OpenNous derives and to external scores you send without a `tier`. Send `{ "reset": true }` to go back to the defaults. An account counts as a fit from the Tier 2 band up. Read the current bands with `GET /v2/icp/tiers`.

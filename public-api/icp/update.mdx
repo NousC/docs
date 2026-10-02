@@ -3,6 +3,8 @@ title: "Set the ICP"
 openapi: "PUT /v2/icp"
 ---
 
-Sets the ICP from markdown. Write who the buyer is, who is not a fit, and the scoring rules. The first time, OpenNous builds the scoring model from it so [score](/public-api/score) works right away.
+Sets the ICP from markdown. Write who the buyer is and who is not a fit. The first time, OpenNous translates the text into a scoring model with an LLM, so [score](/public-api/score) works right away. Weights or rules you write are hints for that translation. The model itself is what scores.
 
 Sending again replaces the text. An existing model is kept, and `model.status` is `exists`. To sharpen the model, [train it on closed deals](/public-api/icp/train).
+
+If the workspace [uses its own scorer](/public-api/icp/scorer), the text is saved for agents to read and no model is built. `model.status` is `external_scorer`.

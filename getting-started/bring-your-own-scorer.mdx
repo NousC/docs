@@ -1,0 +1,89 @@
+---
+title: "Bring your own scorer"
+description: "Score accounts with your own ICP rules or model, send the scores to OpenNous, and every agent reads them on the account record."
+---
+
+You may already score accounts your own way. A spreadsheet model, your own rules, or a decision model. Keep that logic. OpenNous gives it the account record to score from, stores the result on the account, and checks it against the deals you win and lose.
+
+## 1. Use your own scorer
+
+```bash
+curl -X PUT https://api.opennous.cloud/v2/icp/scorer \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "scorer": "external" }'
+```
+
+On self-serve plans, including the API plan, this is already the default. OpenNous now leaves scoring to you.
+
+## 2. Read the account
+
+Pull the account record with [`POST /v2/context`](/public-api/context), or [`get_context`](/mcp/tools/get-context) from an agent. It carries the firmographics, buying signals, people, and timeline your scorer needs.
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/context \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "focus": "acme.com" }'
+```
+
+## 3. Score it with your own logic
+
+This part is your code. Any model or rule set works.
+
+Here is one example that asks a decision model typed questions about the account. It uses Jev through OpenRouter's decisions endpoint. That endpoint is in alpha and belongs to OpenRouter, so check their docs before you depend on it.
+
+```javascript
+// Your code. Runs in your stack with your OpenRouter key.
+const res = await fetch("https://openrouter.ai/api/alpha/decisions", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "typesafe/jev-1.13",
+    state: JSON.stringify(account), // the record from step 2
+    questions: {
+      sells_outbound: {
+        type: "noul",
+        instructions: "Does this company run outbound sales to SMBs?",
+        criteria: { true: "They prospect SMBs by email or phone", false: "No outbound motion, or enterprise only" },
+      },
+      pain: {
+        type: "score",
+        instructions: "How much pipeline pain do they show?",
+        criteria: ["None", "Some", "Clear", "Urgent"], // worst first
+      },
+    },
+  }),
+});
+const { answers } = await res.json();
+
+const score = Math.round(
+  60 * answers.sells_outbound.noul +   // probability 0 to 1
+  40 * (answers.pain.score / 3)        // rung 0 to 3
+);
+```
+
+## 4. Send the score
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/scores \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "scorer": "acme-v1",
+    "scores": [
+      { "identifier": "acme.com", "score": 84, "reason": "Outbound to SMBs, urgent pipeline pain" }
+    ]
+  }'
+```
+
+Send up to 500 scores per call. Leave out `tier` and OpenNous derives it from your [tier bands](/public-api/icp/tiers). Agents send scores with the [`score`](/mcp/tools/score) tool and its `scorer` and `scores` fields.
+
+## 5. Read it back
+
+The score is now the account's ICP fit. [`get_context`](/mcp/tools/get-context), the accounts list, and tiers all show it, with your `reason` and the history of past scores.
+
+As deals close, each score is checked against what happened. Rename `scorer` when you change your model, for example `acme-v2`, and the history shows which version scored each account.
