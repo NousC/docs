@@ -1,0 +1,16 @@
+---
+title: "Choose the scorer"
+openapi: "PUT /v2/icp/scorer"
+---
+
+Pick who scores this workspace's accounts.
+
+| `scorer` | What happens |
+|---|---|
+| `nous` | OpenNous scores accounts with the ICP model and trains it on your closed deals |
+| `external` | You score accounts with your own system and send the results to [`POST /v2/scores`](/public-api/scores). OpenNous stops scoring the workspace |
+| `null` | Follow the plan default. Self-serve plans, including the API plan, use `external`. Custom plans use `nous` |
+
+Switching back to `nous` keeps the external scores you already sent until those deals close. New accounts are scored by the ICP model again.
+
+Read the current setting with `GET /v2/icp/scorer`. `source` is `plan` when the workspace follows its plan default.

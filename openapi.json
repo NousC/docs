@@ -3139,7 +3139,7 @@
                   },
                   "intent": {
                     "type": "string",
-                    "description": "Why you are scoring. Recorded, does not change the score."
+                    "description": "Reserved. Accepted and ignored today. It does not change the score."
                   }
                 }
               },
@@ -3276,6 +3276,378 @@
           },
           "402": {
             "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/scores": {
+      "post": {
+        "tags": [
+          "Enrich & score"
+        ],
+        "operationId": "postScores",
+        "summary": "Send your own scores",
+        "description": "Write scores you computed yourself onto accounts. Each one becomes the account's ICP fit, so `get_context`, the accounts list, and tiers read it. It is checked against the deals you win and lose. The workspace must use its own scorer, see [Choose the scorer](/public-api/icp/scorer). Read-only keys cannot call this.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "scorer"
+                ],
+                "properties": {
+                  "scorer": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._\\-/]{0,63}$",
+                    "description": "A name for your model, such as `acme-v3`. Stored on each score as `ext:acme-v3`, so a new version shows in the score history."
+                  },
+                  "identifier": {
+                    "type": "string",
+                    "description": "Email, domain, LinkedIn URL, or entity UUID."
+                  },
+                  "score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Your score. Rounded to a whole number."
+                  },
+                  "tier": {
+                    "type": "string",
+                    "enum": [
+                      "tier_1",
+                      "tier_2",
+                      "tier_3",
+                      "not_icp"
+                    ],
+                    "description": "Optional. Derived from the score and the workspace tier bands when left out."
+                  },
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Optional. Why it scored this way. Shown on the record and to agents."
+                  },
+                  "scores": {
+                    "type": "array",
+                    "maxItems": 500,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "identifier",
+                        "score"
+                      ],
+                      "properties": {
+                        "identifier": {
+                          "type": "string",
+                          "description": "Email, domain, LinkedIn URL, or entity UUID."
+                        },
+                        "score": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100,
+                          "description": "Your score. Rounded to a whole number."
+                        },
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "tier_1",
+                            "tier_2",
+                            "tier_3",
+                            "not_icp"
+                          ],
+                          "description": "Optional. Derived from the score and the workspace tier bands when left out."
+                        },
+                        "reason": {
+                          "type": "string",
+                          "maxLength": 500,
+                          "description": "Optional. Why it scored this way. Shown on the record and to agents."
+                        }
+                      }
+                    },
+                    "description": "Up to 500 scores in one call. Use this or the single fields."
+                  }
+                }
+              },
+              "examples": {
+                "one": {
+                  "summary": "One account",
+                  "value": {
+                    "scorer": "acme-v3",
+                    "identifier": "sarah@acme.com",
+                    "score": 82,
+                    "reason": "Fintech, 40 staff, hiring SDRs"
+                  }
+                },
+                "batch": {
+                  "summary": "A batch",
+                  "value": {
+                    "scorer": "acme-v3",
+                    "scores": [
+                      {
+                        "identifier": "acme.com",
+                        "score": 91,
+                        "tier": "tier_1"
+                      },
+                      {
+                        "identifier": "tom@globex.io",
+                        "score": 34
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A single result, or `{ scorer, results }` for a batch. Each row reports its own outcome, so one bad row does not fail the batch.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "identifier": {
+                          "type": "string"
+                        },
+                        "resolved": {
+                          "type": "boolean"
+                        },
+                        "entity_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "staked",
+                            "updated",
+                            "unchanged"
+                          ],
+                          "description": "`staked` is a first score. `updated` moved an open score and kept the old one in the history. `unchanged` sent the same score again."
+                        },
+                        "prediction_id": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "integer"
+                        },
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "tier_1",
+                            "tier_2",
+                            "tier_3",
+                            "not_icp"
+                          ]
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "The previous score, on `updated` and `unchanged`."
+                        },
+                        "reason": {
+                          "type": "string",
+                          "enum": [
+                            "unknown_identifier",
+                            "ambiguous"
+                          ],
+                          "description": "Why a row did not resolve. Record an unknown account first, then score it."
+                        },
+                        "candidates": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          },
+                          "description": "On `ambiguous`. Send one of their entity ids."
+                        },
+                        "error": {
+                          "type": "string",
+                          "enum": [
+                            "identifier_required",
+                            "invalid_score",
+                            "invalid_tier",
+                            "invalid_reason"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "scorer": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "identifier": {
+                                "type": "string"
+                              },
+                              "resolved": {
+                                "type": "boolean"
+                              },
+                              "entity_id": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "staked",
+                                  "updated",
+                                  "unchanged"
+                                ],
+                                "description": "`staked` is a first score. `updated` moved an open score and kept the old one in the history. `unchanged` sent the same score again."
+                              },
+                              "prediction_id": {
+                                "type": "string"
+                              },
+                              "score": {
+                                "type": "integer"
+                              },
+                              "tier": {
+                                "type": "string",
+                                "enum": [
+                                  "tier_1",
+                                  "tier_2",
+                                  "tier_3",
+                                  "not_icp"
+                                ]
+                              },
+                              "from": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "description": "The previous score, on `updated` and `unchanged`."
+                              },
+                              "reason": {
+                                "type": "string",
+                                "enum": [
+                                  "unknown_identifier",
+                                  "ambiguous"
+                                ],
+                                "description": "Why a row did not resolve. Record an unknown account first, then score it."
+                              },
+                              "candidates": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object"
+                                },
+                                "description": "On `ambiguous`. Send one of their entity ids."
+                              },
+                              "error": {
+                                "type": "string",
+                                "enum": [
+                                  "identifier_required",
+                                  "invalid_score",
+                                  "invalid_tier",
+                                  "invalid_reason"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "scorer": "acme-v3",
+                  "results": [
+                    {
+                      "identifier": "acme.com",
+                      "resolved": true,
+                      "entity_id": "6f1c...",
+                      "status": "updated",
+                      "prediction_id": "a2b9...",
+                      "score": 91,
+                      "tier": "tier_1",
+                      "from": 78
+                    },
+                    {
+                      "identifier": "tom@globex.io",
+                      "resolved": false,
+                      "reason": "unknown_identifier"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request or a single row is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "scorer": {
+                    "summary": "scorer_required",
+                    "value": {
+                      "error": "scorer_required"
+                    }
+                  },
+                  "empty": {
+                    "summary": "scores_empty",
+                    "value": {
+                      "error": "scores_empty"
+                    }
+                  },
+                  "big": {
+                    "summary": "batch_too_large",
+                    "value": {
+                      "error": "batch_too_large",
+                      "max": 500
+                    }
+                  },
+                  "score": {
+                    "summary": "invalid_score",
+                    "value": {
+                      "identifier": "sarah@acme.com",
+                      "error": "invalid_score",
+                      "hint": "a number from 0 to 100"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The workspace is scored by Nous. Switch it to `external` first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "scorer_not_external",
+                  "hint": "this workspace is scored by Nous; PUT /v2/icp/scorer { scorer: 'external' } first"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
@@ -4454,6 +4826,14 @@
                             "object",
                             "null"
                           ]
+                        },
+                        "scorer": {
+                          "type": "string",
+                          "enum": [
+                            "nous",
+                            "external"
+                          ],
+                          "description": "Who scores this workspace's accounts. See [Choose the scorer](/public-api/icp/scorer)."
                         }
                       }
                     }
@@ -4481,7 +4861,8 @@
                         "weight": 20
                       }
                     ],
-                    "calibration": null
+                    "calibration": null,
+                    "scorer": "nous"
                   }
                 }
               }
@@ -4522,7 +4903,7 @@
         ],
         "operationId": "setIcp",
         "summary": "Set the ICP",
-        "description": "Set or replace the ICP from markdown. The first time, Nous builds the scoring model from it. An existing model is kept, and `model.status` is `exists`.",
+        "description": "Set or replace the ICP from markdown. The first time, Nous translates the text into a scoring model with an LLM. Weights and rules you write are read as hints for that translation. An existing model is kept, and `model.status` is `exists`. On a workspace that uses its own scorer, the text is saved for agents to read, no model is built, and `model.status` is `external_scorer`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4619,7 +5000,8 @@
                             "exists",
                             "no_icp_memory",
                             "translation_failed",
-                            "build_failed"
+                            "build_failed",
+                            "external_scorer"
                           ]
                         },
                         "signals": {
@@ -4827,6 +5209,359 @@
                 "example": {
                   "error": "need_more_deals",
                   "message": "Give at least one closed-won or closed-lost domain."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/icp/scorer": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "getIcpScorer",
+        "summary": "Get the scorer",
+        "description": "Who scores this workspace's accounts. `nous` is the ICP model. `external` means you score accounts yourself and send the results to `POST /v2/scores`.",
+        "responses": {
+          "200": {
+            "description": "The scorer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scorer": {
+                      "type": "string",
+                      "enum": [
+                        "nous",
+                        "external"
+                      ]
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "workspace",
+                        "plan"
+                      ],
+                      "description": "`plan` when the workspace follows its plan's default. `workspace` when it was set explicitly."
+                    }
+                  }
+                },
+                "example": {
+                  "scorer": "external",
+                  "source": "plan"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "setIcpScorer",
+        "summary": "Choose the scorer",
+        "description": "Set who scores this workspace's accounts. Send `{ \"scorer\": null }` to follow the plan default. Self-serve plans, including the API plan, default to `external`. Custom plans default to `nous`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "scorer"
+                ],
+                "properties": {
+                  "scorer": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "nous",
+                      "external",
+                      null
+                    ]
+                  }
+                }
+              },
+              "example": {
+                "scorer": "external"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The scorer now in effect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scorer": {
+                      "type": "string",
+                      "enum": [
+                        "nous",
+                        "external"
+                      ]
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "workspace",
+                        "plan"
+                      ],
+                      "description": "`plan` when the workspace follows its plan's default. `workspace` when it was set explicitly."
+                    }
+                  }
+                },
+                "example": {
+                  "scorer": "external",
+                  "source": "workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`scorer` is not `nous`, `external`, or `null`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid_scorer",
+                  "allowed": [
+                    "nous",
+                    "external",
+                    null
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v2/icp/tiers": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "getIcpTiers",
+        "summary": "Get the tier bands",
+        "description": "The score where each tier starts. The defaults are 85, 70, and 50.",
+        "responses": {
+          "200": {
+            "description": "The tier bands.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tier_1": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "description": "Lowest score that is Tier 1."
+                    },
+                    "tier_2": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "description": "Lowest score that is Tier 2."
+                    },
+                    "tier_3": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "description": "Lowest score that is Tier 3. Anything below is `not_icp`."
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "workspace",
+                        "default"
+                      ]
+                    }
+                  }
+                },
+                "example": {
+                  "tier_1": 85,
+                  "tier_2": 70,
+                  "tier_3": 50,
+                  "source": "default"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/UpgradeRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "setIcpTiers",
+        "summary": "Set the tier bands",
+        "description": "Set where each tier starts for this workspace. Values run from 1 to 100 and must descend. Send `{ \"reset\": true }` to go back to the defaults. The bands apply to tiers Nous derives and to external scores sent without a tier. An account counts as a fit from the Tier 2 band up.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tier_1": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "tier_2": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "tier_3": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "reset": {
+                    "type": "boolean",
+                    "description": "`true` clears the workspace bands and goes back to the defaults. Send it alone."
+                  }
+                }
+              },
+              "examples": {
+                "set": {
+                  "summary": "Set the bands",
+                  "value": {
+                    "tier_1": 80,
+                    "tier_2": 60,
+                    "tier_3": 40
+                  }
+                },
+                "reset": {
+                  "summary": "Back to the defaults",
+                  "value": {
+                    "reset": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The bands now in effect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tier_1": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "description": "Lowest score that is Tier 1."
+                    },
+                    "tier_2": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "description": "Lowest score that is Tier 2."
+                    },
+                    "tier_3": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "description": "Lowest score that is Tier 3. Anything below is `not_icp`."
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "workspace",
+                        "default"
+                      ]
+                    }
+                  }
+                },
+                "example": {
+                  "tier_1": 80,
+                  "tier_2": 60,
+                  "tier_3": 40,
+                  "source": "workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A value is missing, outside 1 to 100, or the bands do not descend.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid_tiers"
                 }
               }
             }
