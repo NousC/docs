@@ -1,26 +1,15 @@
 ---
 title: "Claude Code"
-description: "Add OpenNous to Claude Code, with or without the plugin."
+description: "Add OpenNous to Claude Code with one command."
 ---
-
-## Plugin
-
-The plugin bundles the server with the skills that use it: briefs, outreach, pipeline review.
-
-```
-/plugin marketplace add NousC/revenue-plugin
-/plugin install opennous@opennous
-```
-
-Then run `/opennous:login` to sign in.
-
-## Server only
 
 ```bash
 claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp
 ```
 
-Run `/mcp`, pick `opennous` and sign in in the browser.
+Run `/mcp`, pick `opennous` and sign in in the browser. Then ask:
+
+> Which deals need me this week?
 
 To use an API key from **Settings → API keys** instead:
 

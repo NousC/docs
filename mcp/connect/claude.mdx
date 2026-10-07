@@ -1,14 +1,22 @@
 ---
 title: "Claude"
-description: "Add OpenNous to Claude.ai and the Claude desktop app."
+description: "Add the OpenNous revenue plugin to Claude.ai and the Claude desktop app."
 ---
 
+The revenue plugin gives Claude the skills for revenue work: focus your day, brief before a call, write the follow-up, forecast and review the pipeline. The OpenNous connector gives those skills your deals, customers and calls.
+
 <Steps>
-  <Step title="Open connectors">
-    In Claude, go to **Settings → Connectors** and click **Add custom connector**.
+  <Step title="Add the revenue plugin">
+    In Claude, open **Customize → Plugins**, click **Add marketplace** and enter:
+
+    ```
+    NousC/revenue-plugin
+    ```
+
+    Then install **OpenNous**.
   </Step>
-  <Step title="Paste the URL">
-    Name it `OpenNous` and paste:
+  <Step title="Add the OpenNous connector">
+    Open **Customize → Connectors**, click **Add → Add custom connector**. Name it `OpenNous`, paste the URL and click **Continue**:
 
     ```
     https://mcp.opennous.cloud/mcp
@@ -17,12 +25,13 @@ description: "Add OpenNous to Claude.ai and the Claude desktop app."
   <Step title="Sign in">
     Click **Connect**, sign in to OpenNous and click **Allow**.
   </Step>
+  <Step title="Ask your first question">
+    > What should I focus on today?
+
+    Claude picks the right skill and answers from OpenNous.
+  </Step>
 </Steps>
-
-The connector works in Claude.ai and the desktop app. Try:
-
-> Brief me on Acme before my 2pm call.
 
 Claude sees only what your OpenNous user can see. Revoke it in **Settings → API keys** in OpenNous, where it shows as a connected app.
 
-<Note>On Team and Enterprise, an owner may need to allow custom connectors first.</Note>
+<Note>On Team and Enterprise, an owner may need to allow custom connectors and plugins first.</Note>
