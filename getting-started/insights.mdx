@@ -1,0 +1,54 @@
+---
+title: "Insights"
+description: "Read and write what customers said about your product, sales, success and market, over MCP and REST"
+---
+
+An insight is something a customer said about your business rather than about themselves: a bug, a feature request, an objection, a pricing concern, a competitor. Each one is tied to the account that said it, with the quote and speaker when there is one.
+
+Insights are available through MCP and the REST API. There is no Insights page in the open-source app.
+
+## Where insights come from
+
+- **Extraction.** When the worker processes a call transcript, it runs a second pass that pulls out what the call taught you about your own business.
+- **Your agent.** An agent that reads a call or email can write insights directly with `record_insight` or `POST /v2/insights`.
+
+New insights are sorted once a day, around 05:30 UTC. Sorting places each one in a lane and subtype and links it to an account. Until then it does not appear in reads.
+
+## Read insights
+
+Over MCP, call [`get_insights`](/mcp/tools/get-insights). Over REST:
+
+```bash
+curl "https://api.opennous.cloud/v2/insights?lane=sales&subtype=objection&since=2026-09-01" \
+  -H "Authorization: Bearer $NOUS_API_KEY"
+```
+
+Filter by `lane`, `subtype`, one account with `focus`, or a start date with `since`. Lanes and subtypes are listed on [List insights](/public-api/insights/list). The response includes the workspace's `taxonomy`, so you can show labels without hardcoding them.
+
+## Write insights
+
+Over MCP, call `record_insight`. Over REST:
+
+```bash
+curl -X POST https://api.opennous.cloud/v2/insights \
+  -H "Authorization: Bearer $NOUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_label": "Acme discovery call",
+    "occurred_at": "2026-10-01T15:00:00Z",
+    "insights": [
+      {
+        "category": "buyer",
+        "content": "Security review is owned by the CISO, not IT.",
+        "quote": "Anything touching CRM data goes through our CISO.",
+        "speaker": "VP Sales, Acme"
+      }
+    ]
+  }'
+```
+
+`category` is one of `product`, `positioning`, `market` or `buyer`. Send every insight from one source in one call. Near-duplicates are skipped, so `written` can be lower than `submitted`. See [Record insights](/public-api/insights/record).
+
+Facts about the account itself, such as a new title or a budget, are not insights. Write those as a [note](/public-api/notes).
+
+On a self-hosted instance, replace `https://api.opennous.cloud` with your own API URL.

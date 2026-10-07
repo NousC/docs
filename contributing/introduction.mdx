@@ -55,14 +55,14 @@ Supabase (Postgres). Schema is in `supabase/schema.sql`. No ORM — raw Supabase
   <Step title="Clone and install">
     ```bash
     git clone https://github.com/NousC/opennous.git
-    cd nous
+    cd opennous
     pnpm install
     ```
   </Step>
 
   <Step title="Configure environment">
     ```bash
-    cp nous.env.example nous.env
+    cp .env.example .env
     ```
 
     At minimum you need:
@@ -81,20 +81,20 @@ Supabase (Postgres). Schema is in `supabase/schema.sql`. No ORM — raw Supabase
     pnpm dev
     ```
 
-    This starts the API on `:3000`, worker on `:3001`, and frontend on `:5173`.
+    This starts the API on `:3000`, worker on `:3001`, and frontend on `:8080`.
   </Step>
 </Steps>
 
 ## Before submitting a PR
 
 - **Under 3 lines** — submit directly.
-- **Over 3 lines** — open an issue or discuss in [Discord](https://discord.gg/2Ph4ZYXw) first. This avoids wasted effort if the approach doesn't fit the direction.
+- **Over 3 lines** — open an issue or discuss in [Discord](https://discord.gg/HrM5TG5F5) first. This avoids wasted effort if the approach doesn't fit the direction.
 
 ## PR process
 
 1. Fork the repo and create a feature branch from `main`
 2. Make your changes
-3. Run `pnpm typecheck` and `pnpm lint` — fix any errors
+3. Run `pnpm typecheck`, `pnpm lint` and `pnpm test`, and fix any errors
 4. Submit a PR with a clear description of what and why
 5. Link any related issues
 
@@ -118,7 +118,7 @@ Types: `feat` · `fix` · `docs` · `refactor` · `test` · `chore`
 ## Get help
 
 <CardGroup cols={2}>
-  <Card title="Discord" icon="discord" href="https://discord.gg/2Ph4ZYXw">
+  <Card title="Discord" icon="discord" href="https://discord.gg/HrM5TG5F5">
     Fastest way to get help — chat, screenshots, screen sharing.
   </Card>
   <Card title="GitHub Issues" icon="github" href="https://github.com/NousC/opennous/issues/new/choose">

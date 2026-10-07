@@ -1,204 +1,176 @@
 ---
 title: "Docker Compose"
-description: "Deploy OpenNous on your own server with Docker Compose"
+description: "Run OpenNous on your own server with Docker Compose"
 ---
 
-The recommended way to self-host OpenNous. Tested on Ubuntu 24.04 with 2GB RAM and 2 vCPUs.
+Self-hosting runs the same code as [OpenNous Cloud](https://app.opennous.cloud), minus the private Cloud layer. See [Cloud vs self-host](/getting-started/cloud-vs-self-host) for the differences.
 
-<Note>
-  You will need a [Supabase](https://supabase.com) project before starting. The free tier is enough to get going.
-</Note>
+There are two ways to run it:
 
-## What you get
+- **Bundled stack (default).** Everything runs in Docker on one server, including Postgres and auth. No Supabase account needed.
+- **Bring your own Supabase.** The app containers run on your server and use a Supabase project for the database and auth.
 
-Docker Compose brings up 5 containers:
+## Prerequisites
 
-* **api** — Express API server, identity resolution, signal ingestion
-* **worker** — Background jobs: AI synthesis, two-way sync, ICP scoring
-* **frontend** — Nginx serving the React SPA
-* **redis** — Session state and job queue
-* **caddy** — Automatic SSL and subdomain routing
+- A Linux server with Docker and Docker Compose
+- Node.js 18+ on the server, to generate keys
+- An [Anthropic API key](https://console.anthropic.com). Extraction runs on it.
+- Three DNS records pointing at the server: `app`, `api` and `mcp`
 
-## Step 1: Get the files
+## Option 1: Bundled stack
 
-Clone the repo or download just the production files:
+{/* verify against GET-756 */}
+
+The bundled stack runs these containers:
+
+| Container | What it does |
+|---|---|
+| `postgres` | Postgres with pgvector. Holds the graph. |
+| `postgrest` | REST layer over Postgres, used by the API |
+| `gotrue` | Supabase Auth. Signs users in. |
+| `api` | REST API, integrations, webhooks, automations |
+| `worker` | Ingestion, extraction, scoring and scheduled jobs |
+| `mcp` | Hosted MCP server at `https://mcp.yourdomain.com/mcp` |
+| `frontend` | The web app, served by nginx |
+| `caddy` | TLS and subdomain routing |
+
+### 1. Clone
 
 ```bash
-git clone https://github.com/NousC/opennous.git
-cd nous
+git clone https://github.com/NousC/opennous.git && cd opennous
 ```
 
-## Step 2: Configure environment
+### 2. Generate keys
 
 ```bash
+node scripts/selfhost-keys.mjs
+```
+
+This generates the database password, JWT secret, API keys and `ENCRYPTION_KEY`, and writes them to the env file. Open the env file and set:
+
+- `APP_DOMAIN`, `API_DOMAIN`, `MCP_DOMAIN`
+- `ANTHROPIC_API_KEY`
+
+Every variable is listed in the [environment reference](/installation/environment).
+
+### 3. Start
+
+```bash
+docker compose -f docker-compose.selfhost.yaml up -d
+```
+
+Caddy requests TLS certificates once DNS resolves. The app is at `https://app.yourdomain.com` and the API at `https://api.yourdomain.com`.
+
+Prebuilt images are published to GHCR (`ghcr.io/nousc/opennous-api`, `-worker`, `-frontend`, `-mcp`). {/* verify against GET-758 */}
+
+## Option 2: Bring your own Supabase
+
+Use this if you already run Supabase, or want a managed database. It uses `docker-compose.yaml`, which runs `api`, `worker`, `mcp`, `frontend` and `caddy`. The images are built from source on your server.
+
+### 1. Clone and configure
+
+```bash
+git clone https://github.com/NousC/opennous.git && cd opennous
 cp nous.env.example nous.env
 ```
 
-Open `nous.env` and fill in:
+In `nous.env`, set:
 
 ```bash
-# ── Domains ────────────────────────────────────────────────────────────────────
 APP_DOMAIN=app.yourdomain.com
 API_DOMAIN=api.yourdomain.com
+MCP_DOMAIN=mcp.yourdomain.com
 
-# ── Supabase — Settings → API ──────────────────────────────────────────────────
+# Supabase → Settings → API
 SUPABASE_URL=https://yourproject.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
+SUPABASE_JWT_SECRET=          # recommended: verifies sessions locally
 VITE_SUPABASE_URL=https://yourproject.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 
-# ── Anthropic ──────────────────────────────────────────────────────────────────
 ANTHROPIC_API_KEY=sk-ant-...
-
-# ── Generate these — run: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-ENCRYPTION_KEY=
+ENCRYPTION_KEY=               # openssl rand -hex 32
+SELF_HOSTED=true
 ```
 
-**Optional — integrations.** These are instance-level: set the ones you want, then restart. Your agent will tell you which are missing during onboarding (it can't set env vars for you).
-
-```bash
-# LinkedIn — Unipile (a paid third-party account)
-UNIPILE_API_KEY=
-UNIPILE_DSN=api1.unipile.com:13xxx
-
-# Email sending — Resend
-RESEND_API_KEY=
-
-# Gmail connect — a Google Cloud OAuth client
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-# Enrichment (Prospeo / Apollo) is bring-your-own-key — your agent connects it
-# per workspace, no env var needed.
-```
-
-## Step 3: Run the database schema
+### 2. Create the database
 
 <Warning>
-  Required before first boot. Skip this and the app will start but nothing will work.
+  Required before first boot. Without it the app starts, but nothing works.
 </Warning>
 
-Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/NousC/opennous/blob/main/supabase/schema.sql).
+In your Supabase project, open **SQL Editor** and run the full contents of [`supabase/schema.sql`](https://github.com/NousC/opennous/blob/main/supabase/schema.sql) once. It is the complete schema, including the `pgcrypto` and `vector` extensions. A fresh install does not run the files in `supabase/migrations/`. Those are for [upgrading](/installation/upgrading).
 
-This one file is the complete schema — every table, view, function, trigger, RLS policy, and index, plus the `pgcrypto` and `vector` extensions it depends on. A fresh install needs only this file; do **not** also run the files in `supabase/migrations/` (those are the incremental history and are only used when updating an existing install — see Updating below).
+### 3. Turn on email sign-in
 
-## Step 4: Point your DNS
+In Supabase, open **Authentication → Sign In / Providers** and enable **Email**.
 
-Create two A records pointing to your server IP:
-
-| Record | Points to |
-|---|---|
-| `app.yourdomain.com` | Your server IP |
-| `api.yourdomain.com` | Your server IP |
-
-Caddy handles SSL automatically once DNS resolves.
-
-## Step 5: Start
+### 4. Start
 
 ```bash
-docker compose up -d
+docker compose --env-file nous.env up -d --build
 ```
 
-First run builds all images — takes 2–3 minutes. After that:
+`--env-file nous.env` is needed: the frontend build and Caddy read their values from it. The first build takes a few minutes.
 
-* Frontend → `https://app.yourdomain.com`
-* API → `https://api.yourdomain.com`
+## Sign in
 
-## Step 6: Enable email auth in Supabase
+Open `https://app.yourdomain.com` and create an account. The first account becomes the owner.
 
-Open your Supabase project → **Authentication → Providers → Email** and turn it on. Without this, no one can sign up.
+Sign-in uses Supabase Auth. Email and password work without any mail setup. Invites, magic links and password resets need SMTP. {/* verify against GET-756: SMTP variable names for the bundled gotrue container */}
 
-If you want Google sign-in, enable the **Google** provider in the same panel and set your OAuth client ID and secret.
+To close public sign-up after the first account, set `DISABLE_SIGNUPS=true` and restart. On Option 2, also turn off **Allow new users to sign up** in Supabase, since sign-up goes from the browser straight to Supabase.
 
-## Step 7: Create your first user
+## Connect your agent
 
-Open `https://app.yourdomain.com` and click **Sign up**. The first account becomes the **owner**. You'll land on the **Connect** screen — OpenNous is operated by your agent, so this screen stays up until your agent has onboarded the workspace.
-
-## Step 8: Connect your agent
-
-OpenNous is set up *by your agent*, not by clicking through the app. Point your agent at this instance.
-
-**Claude Code**
-
-```
-/plugin marketplace add NousC/opennous
-/plugin install nous@nous-plugins
+```bash
+npx @opennous/cli@latest init --url https://api.yourdomain.com
 ```
 
-**Codex** — add to `~/.codex/config.toml`:
+This signs you in against your instance, saves a key and the URL to `~/.nous/config.json`, and registers the MCP server with your agent. The `--url` is what points it at your instance instead of Cloud.
 
-```toml
-[mcp_servers.nous]
-command = "npx"
-args = ["-y", "@opennous/mcp"]
-```
-
-**Cursor / any MCP host** — add to `mcp.json`:
+To configure the MCP server by hand instead, create a key under **Settings → API keys**:
 
 ```json
-{ "mcpServers": { "nous": { "command": "npx", "args": ["-y", "@opennous/mcp"] } } }
+{
+  "mcpServers": {
+    "opennous": {
+      "command": "npx",
+      "args": ["-y", "@opennous/mcp"],
+      "env": {
+        "NOUS_API_KEY": "YOUR_API_KEY",
+        "NOUS_API_URL": "https://api.yourdomain.com"
+      }
+    }
+  }
+}
 ```
 
-Then **sign in** — this mints a key and saves it (with your API URL) to `~/.nous/config.json`, which the MCP reads automatically:
+Remote MCP clients can use the hosted endpoint on your instance, `https://mcp.yourdomain.com/mcp`, with the key as a Bearer header.
 
-```bash
-npx @opennous/cli login --url https://api.yourdomain.com
-```
+## Integrations
 
-<Note>
-The `--url` is what points your agent at **your own instance** instead of OpenNous Cloud — it's the one self-host-specific bit. Prefer to paste a key instead of signing in? Create one at **Settings → API Keys** and set it directly in the MCP config:
-
-```json
-{ "mcpServers": { "nous": { "command": "npx", "args": ["-y", "@opennous/mcp"],
-  "env": { "NOUS_API_KEY": "sk_live_...", "NOUS_API_URL": "https://api.yourdomain.com" } } } }
-```
-</Note>
-
-## Step 9: Onboard — let your agent set it up
-
-Tell your agent:
-
-> Set me up — onboard my workspace and build my playbook.
-
-Your agent reads `get_workspace_status` and walks you through setup **in order**: profile → connect channels (Gmail / LinkedIn / a meeting note-taker) → enrichment → webhooks → import your CRM contacts (CSV) → build the ICP scoring model. The Connect screen unlocks the moment the workspace is onboarded, and drops you on the live Ops log.
-
-Because it's self-hosted, your agent knows that **LinkedIn (Unipile), email (Resend), and Gmail (Google OAuth) are configured in `nous.env`** (Step 2) — it'll tell you which env vars to set and to restart. **Enrichment** (Prospeo / Apollo) is bring-your-own-key, and your agent connects it directly.
-
-<Note>
-Self-hosters don't have **Lead Lists**, **CRM Sync**, **Triggers**, or **Reports** — those are OpenNous Cloud only. Everything else (the context graph, the MCP server + all agent tools, the ICP scoring model, enrichment, integrations) is fully open.
-</Note>
-
----
-
-## Updating
-
-The images are built locally from source, so pull the latest code and rebuild:
-
-```bash
-git pull
-docker compose up -d --build
-```
-
-`git pull` fetches the new code, `--build` recompiles the images from it, and `-d`
-restarts only the containers that changed (Redis and Caddy are left untouched). The
-frontend is rebuilt too — Vite bakes the UI into a static bundle at build time, so a
-plain restart won't pick up frontend changes.
-
-<Warning>
-  Some updates ship new database migrations under [`supabase/migrations/`](https://github.com/NousC/opennous/tree/main/supabase/migrations). These are **not** applied automatically. After pulling, check that folder for files newer than your last update and run any new ones in your Supabase **SQL Editor** before (or right after) rebuilding. Skipping a migration will make the new code error against an outdated schema.
-</Warning>
+Integrations are connected per workspace in **Settings → Integrations**, mostly with the provider's own API key. A few need instance-level settings in the env file, for example LinkedIn (`UNIPILE_API_KEY`, `UNIPILE_DSN`) and Salesforce (`SALESFORCE_CLIENT_ID`, `SALESFORCE_CLIENT_SECRET`). See the [environment reference](/installation/environment).
 
 ## Logs
 
 ```bash
-docker compose logs -f api       # API server
-docker compose logs -f worker    # Background worker
-docker compose logs -f frontend  # Nginx / frontend
+docker compose logs -f api
+docker compose logs -f worker
+docker compose logs -f frontend
 ```
+
+On the bundled stack, add `-f docker-compose.selfhost.yaml` before `logs`.
 
 ## Stopping
 
 ```bash
-docker compose down              # stop containers, keep data
-docker compose down -v           # stop and wipe volumes (destructive)
+docker compose down        # stop containers, keep data
+docker compose down -v     # stop and delete volumes. On the bundled stack this deletes the database.
 ```
+
+## Next
+
+- [Upgrading](/installation/upgrading)
+- [Environment reference](/installation/environment)
+- [Bring your own scorer](/getting-started/bring-your-own-scorer)

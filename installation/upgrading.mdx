@@ -1,0 +1,62 @@
+---
+title: "Upgrading"
+description: "Move a self-hosted instance to a new release and apply database migrations"
+---
+
+An upgrade has two parts: new code, and any new database migrations. Migrations are not applied by the app containers, so check for them every time.
+
+## Bundled stack
+
+{/* verify against GET-756 and GET-758: release tags, image pull, and how the bundled stack applies migrations */}
+
+Check out the release tag, pull its images and restart:
+
+```bash
+cd opennous
+git fetch --tags
+git checkout vX.Y.Z
+docker compose -f docker-compose.selfhost.yaml pull
+docker compose -f docker-compose.selfhost.yaml up -d
+```
+
+Then apply the migrations added since your last version (see below).
+
+## Bring your own Supabase
+
+From the repo root on your server:
+
+```bash
+./update.sh
+```
+
+`update.sh` pulls the latest code on your current branch, writes the commit to `APP_COMMIT` in `nous.env`, then rebuilds and restarts the containers with `docker compose --env-file nous.env up -d --build`. The frontend is rebuilt too, because Vite bakes the env into the bundle at build time.
+
+## Database migrations
+
+New migrations land in [`supabase/migrations/`](https://github.com/NousC/opennous/tree/main/supabase/migrations). To list the ones added between your old and new version:
+
+```bash
+git diff --name-only --diff-filter=A OLD_COMMIT HEAD -- supabase/migrations
+```
+
+Run each new file against your database. On Supabase, paste it into **SQL Editor**. On the bundled stack, run it with `psql` inside the `postgres` container. {/* verify against GET-756 */}
+
+Migrations are written to be idempotent, so running one that is already applied is safe.
+
+<Warning>
+  Skipping a migration makes the new code fail against the old schema. Apply migrations before or right after the new containers start.
+</Warning>
+
+A fresh install never runs migrations. It runs `supabase/schema.sql` once, which already contains them.
+
+## Check the upgrade
+
+```bash
+curl https://api.yourdomain.com/readyz
+```
+
+`/readyz` returns `503` when the API cannot reach the database. Then look at the logs:
+
+```bash
+docker compose logs -f api worker
+```
