@@ -271,7 +271,6 @@
               "mcp/connect/grok",
               "mcp/connect/claude-code",
               "mcp/connect/codex",
-              "mcp/connect/cursor",
               "mcp/connect/other"
             ]
           },
@@ -587,6 +586,10 @@
     {
       "source": "/mcp/tools/get-account",
       "destination": "/mcp/tools/get-context"
+    },
+    {
+      "source": "/mcp/connect/cursor",
+      "destination": "/mcp/connect/other"
     }
   ]
 }
