@@ -1,28 +1,28 @@
 ---
 title: "Claude"
-description: "Add OpenNous to Claude.ai and the Claude desktop app."
+description: "Install the OpenNous plugin in Claude.ai and the Claude desktop app."
 ---
 
-<Steps>
-  <Step title="Open connectors">
-    In Claude, go to **Settings → Connectors** and click **Add custom connector**.
-  </Step>
-  <Step title="Paste the URL">
-    Name it `OpenNous` and paste:
+The OpenNous plugin gives Claude the skills for revenue work: focus your day, brief before a call, write the follow-up, forecast and review the pipeline. It also connects Claude to your OpenNous workspace, so every answer comes from your deals, customers and calls.
 
-    ```
-    https://mcp.opennous.cloud/mcp
-    ```
+<Steps>
+  <Step title="Upload the plugin">
+    [Download the OpenNous plugin](https://www.opennous.cloud/downloads/opennous-plugin.zip). In Claude, open **Customize → Plugins**, click **Add → Upload plugin** and choose the file.
   </Step>
-  <Step title="Sign in">
-    Click **Connect**, sign in to OpenNous and click **Allow**.
+  <Step title="Type /login in a chat">
+    Open a new chat and type `/login`. Click **Connect**, sign in to OpenNous and click **Allow**.
+  </Step>
+  <Step title="Get started">
+    On a new workspace, Claude sets it up from your history. Otherwise it shows what needs you today. Then ask anything:
+
+    > Brief me before my call with Acme.
   </Step>
 </Steps>
 
-The connector works in Claude.ai and the desktop app. Try:
-
-> Brief me on Acme before my 2pm call.
-
 Claude sees only what your OpenNous user can see. Revoke it in **Settings → API keys** in OpenNous, where it shows as a connected app.
 
-<Note>On Team and Enterprise, an owner may need to allow custom connectors first.</Note>
+<Note>On Team and Enterprise, an owner can install the plugin once for the whole organization.</Note>
+
+## Only the connector
+
+To give Claude the OpenNous tools without the skills, go to **Customize → Connectors → Add → Add custom connector**, name it `OpenNous` and paste `https://mcp.opennous.cloud/mcp`.
