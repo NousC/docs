@@ -1,0 +1,38 @@
+---
+title: "Any MCP client"
+description: "Connect any client that speaks MCP: n8n, Windsurf, VS Code, your own agent."
+---
+
+| | |
+|---|---|
+| URL | `https://mcp.opennous.cloud/mcp` |
+| Transport | Streamable HTTP |
+| Auth | OAuth 2.1 with PKCE, or a Bearer API key |
+
+**Clients that sign in** find everything from the URL. They register themselves, open the OpenNous sign-in and get a token.
+
+**Clients that take a header** send a key from **Settings → API keys**:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+A client that can only take a URL can use `https://mcp.opennous.cloud/mcp?key=YOUR_API_KEY`. The key can end up in logs, so prefer the header.
+
+## Local (stdio)
+
+```json
+{
+  "mcpServers": {
+    "opennous": { "command": "npx", "args": ["-y", "@opennous/mcp"] }
+  }
+}
+```
+
+The server reads the key from `NOUS_API_KEY`, or from `~/.nous/config.json`, which `npx @opennous/cli login` writes.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `NOUS_API_KEY` | none | Workspace API key. Overrides the config file. |
+| `NOUS_CONFIG_DIR` | `~/.nous` | Where to look for `config.json`. |
+| `NOUS_API_URL` | `https://api.opennous.cloud` | API base URL. Set it for a self-hosted instance. |

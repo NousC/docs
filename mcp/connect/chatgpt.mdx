@@ -1,0 +1,28 @@
+---
+title: "ChatGPT"
+description: "Add OpenNous to ChatGPT as a custom connector."
+---
+
+<Steps>
+  <Step title="Turn on developer mode">
+    In ChatGPT, go to **Settings → Apps & Connectors → Advanced settings** and turn on **Developer mode**.
+  </Step>
+  <Step title="Create the connector">
+    Back in **Apps & Connectors**, click **Create**. Name it `OpenNous`, paste the URL and set authentication to **OAuth**.
+
+    ```
+    https://mcp.opennous.cloud/mcp
+    ```
+  </Step>
+  <Step title="Sign in">
+    Click **Create**, sign in to OpenNous and click **Allow**.
+  </Step>
+</Steps>
+
+In a new chat, turn on OpenNous from the tools menu and ask:
+
+> Which deals went quiet this week?
+
+ChatGPT sees only what your OpenNous user can see. Revoke it in **Settings → API keys** in OpenNous.
+
+<Note>On Business and Enterprise, an admin may need to allow custom connectors.</Note>

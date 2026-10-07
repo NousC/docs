@@ -1,73 +1,25 @@
 ---
 title: "MCP server"
 sidebarTitle: "Introduction"
-description: "The context graph as tools for any MCP client."
+description: "The revenue context graph as tools for any AI."
 ---
 
 The OpenNous MCP server gives an agent the same graph as the [REST API](/public-api/introduction), as thirteen tools.
 
 ## Connect
 
-### Hosted
+Paste `https://mcp.opennous.cloud/mcp` into your AI and sign in. Pick yours:
 
-Streamable HTTP at `https://mcp.opennous.cloud/mcp`. Send a workspace API key from **Settings → API keys** as a Bearer header.
+<CardGroup cols={3}>
+  <Card title="Claude" href="/mcp/connect/claude">Claude.ai and desktop</Card>
+  <Card title="ChatGPT" href="/mcp/connect/chatgpt">Custom connector</Card>
+  <Card title="Grok" href="/mcp/connect/grok">Custom connector</Card>
+  <Card title="Claude Code" href="/mcp/connect/claude-code">Plugin or server</Card>
+  <Card title="Codex" href="/mcp/connect/codex">CLI and IDE</Card>
+  <Card title="Cursor" href="/mcp/connect/cursor">mcp.json</Card>
+</CardGroup>
 
-```json
-{
-  "mcpServers": {
-    "opennous": {
-      "url": "https://mcp.opennous.cloud/mcp",
-      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
-    }
-  }
-}
-```
-
-A client that can only take a URL can pass the key as `https://mcp.opennous.cloud/mcp?key=YOUR_API_KEY`. The key can end up in logs, so prefer the header.
-
-### Local (stdio)
-
-Run the `@opennous/mcp` package.
-
-```json
-{
-  "mcpServers": {
-    "opennous": { "command": "npx", "args": ["-y", "@opennous/mcp"] }
-  }
-}
-```
-
-The server reads the key from `NOUS_API_KEY`, or from `~/.nous/config.json`, which `npx @opennous/cli login` writes.
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `NOUS_API_KEY` | none | Workspace API key. Overrides the config file. |
-| `NOUS_CONFIG_DIR` | `~/.nous` | Where to look for `config.json`. |
-| `NOUS_API_URL` | `https://api.opennous.cloud` | API base URL. Set it for a self-hosted instance. |
-
-### Claude Code
-
-The OpenNous plugin bundles this server with the skills that use it.
-
-```
-/plugin marketplace add NousC/revenue-plugin
-/plugin install opennous@opennous
-```
-
-Or add the server alone.
-
-<CodeGroup>
-
-```bash Hosted
-claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp \
-  --header "Authorization: Bearer YOUR_API_KEY"
-```
-
-```bash Local
-claude mcp add opennous -- npx -y @opennous/mcp
-```
-
-</CodeGroup>
+Anything else, including n8n and local stdio: [any MCP client](/mcp/connect/other).
 
 ## First call
 

@@ -1,0 +1,28 @@
+---
+title: "Claude"
+description: "Add OpenNous to Claude.ai and the Claude desktop app."
+---
+
+<Steps>
+  <Step title="Open connectors">
+    In Claude, go to **Settings → Connectors** and click **Add custom connector**.
+  </Step>
+  <Step title="Paste the URL">
+    Name it `OpenNous` and paste:
+
+    ```
+    https://mcp.opennous.cloud/mcp
+    ```
+  </Step>
+  <Step title="Sign in">
+    Click **Connect**, sign in to OpenNous and click **Allow**.
+  </Step>
+</Steps>
+
+The connector works in Claude.ai and the desktop app. Try:
+
+> Brief me on Acme before my 2pm call.
+
+Claude sees only what your OpenNous user can see. Revoke it in **Settings → API keys** in OpenNous, where it shows as a connected app.
+
+<Note>On Team and Enterprise, an owner may need to allow custom connectors first.</Note>
