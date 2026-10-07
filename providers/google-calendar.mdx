@@ -1,57 +1,41 @@
 ---
 title: Google Calendar
-description: Log meetings from Google Calendar as activity signals on your contacts.
+description: Log meetings from Google Calendar as activity on the people in them.
 ---
 
 <Note>
-  Google Calendar is connected via the same OAuth flow as Gmail. If you've already connected Gmail, calendar sync is enabled automatically if you granted calendar scope during setup.
+  Google Calendar uses the same Google OAuth app as Gmail, but it is a separate connection with its own consent. Set up the server once with [Gmail & Google Calendar](/providers/gmail), then connect **Google Calendar** from **Integrations**.
 </Note>
 
 ## How it works
 
-OpenNous polls your Google Calendar every 10 minutes, looking at a rolling window of **7 days back → 30 days forward**. For each event, it resolves attendees to contacts using a 6-step identity waterfall — email match, LinkedIn URL, phone, name+company — then logs a `meeting` activity on the matched contact's timeline.
+Every 30 minutes OpenNous reads each connected calendar from **1 day back to 30 days ahead**, plus a longer look back when you first connect. Each event with someone from outside your team becomes a meeting on that person's timeline:
 
-Events are deduplicated by Google event ID so replays are safe.
+- `meeting_scheduled` for an upcoming meeting, and `meeting_held` once it has happened.
+- A moved meeting adds a "Rescheduled" marker on the old slot and logs the new time.
+- A cancelled upcoming meeting adds a "Cancelled" marker.
+
+Each event is recorded once per person (keyed on the Google event id), so re-reading a calendar never duplicates anything.
+
+## Who gets a record
+
+- Anyone already in OpenNous is matched by email.
+- A new attendee is created only when their email domain belongs to a company you already track. Personal addresses (gmail.com and similar) are never created.
+- Your own team is never treated as a lead.
+- Scheduler and no-reply addresses (Calendly, Zoom Scheduler, resource calendars) are ignored.
+- All-day events are skipped.
 
 ## Setup
 
-### 1. Connect Gmail / Google OAuth
-
-In your OpenNous dashboard, go to **Settings → Integrations** and connect your Google account. Make sure to grant both Gmail and Calendar permissions when prompted.
-
-<Warning>
-  If you connected Gmail but only granted email scope (not calendar), you'll need to disconnect and reconnect, accepting the calendar permission.
-</Warning>
-
-### 2. Done
-
-No further configuration needed. OpenNous starts polling immediately after the OAuth connection is verified.
-
-## What gets logged
-
-| Event type | Activity logged | Notes |
-|---|---|---|
-| Calendar event with external attendees | `meeting` | Only events matching a meeting keyword (call, sync, zoom, etc.) or with ≥2 external attendees |
-| Cancelled event | Skipped | `status: cancelled` events are ignored |
-| Internal-only event | Skipped | Events where all attendees share your email domain |
+1. As the server admin, configure the Google OAuth app ([steps](/providers/gmail#server-setup)). Calendar uses the `calendar.readonly` scope.
+2. In OpenNous, go to **Integrations**, click **Add → Google Calendar → Connect with Google**, and approve read-only calendar access.
 
 ## Environment variables
 
-These are set at the server level — you do not configure them per-workspace.
+These are set for the whole server, not per workspace.
 
 | Variable | Description |
 |---|---|
-| `GOOGLE_CLIENT_ID` | OAuth app client ID |
-| `GOOGLE_CLIENT_SECRET` | OAuth app client secret |
-| `GOOGLE_OAUTH_REDIRECT_URI` | Must be `https://api.yourdomain.com/api/oauth/google/callback` |
-
-## Identity resolution
-
-OpenNous resolves each external attendee email against your contacts in this order:
-
-1. Exact email match
-2. LinkedIn URL match
-3. Phone match
-4. Name + company match (with activity-signal tiebreaker for ambiguous results)
-
-If no match is found, the attendee is skipped — Google Calendar does **not** create new contacts.
+| `GOOGLE_CLIENT_ID` | OAuth client ID (Web application) |
+| `GOOGLE_CLIENT_SECRET` | OAuth client secret |
+| `GOOGLE_OAUTH_REDIRECT_URI` | `https://<API_DOMAIN>/api/oauth/google/callback`, exactly as registered on the client |

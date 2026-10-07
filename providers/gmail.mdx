@@ -1,20 +1,20 @@
 ---
 title: "Gmail & Google Calendar"
-description: "Sync emails and calendar events automatically via Google OAuth."
+description: "Connect Gmail and Google Calendar on a self-hosted install with your own Google OAuth app."
 ---
 
 <Note>
-  This requires registering a Google OAuth app. You do this once as the server admin — your users then connect their own Google accounts via the UI.
+  On a self-hosted install you register one Google OAuth app as the server admin. Each member then connects their own Gmail and Google Calendar from **Integrations**. No Composio account is needed. OpenNous Cloud connects Google for you, so none of this applies there.
 </Note>
 
-## Server Setup
+## Server setup
 
 <Steps>
   <Step title="Create a Google Cloud project">
-    Go to [console.cloud.google.com](https://console.cloud.google.com) and create a new project (or use an existing one).
+    Go to [console.cloud.google.com](https://console.cloud.google.com) and create a project, or pick an existing one.
   </Step>
-  <Step title="Enable Gmail API and Google Calendar API">
-    In the sidebar go to **APIs & Services → Library**. Search for and enable both:
+  <Step title="Enable the Gmail API and the Google Calendar API">
+    In **APIs & Services → Library**, search for each one and click **Enable**:
 
     - **Gmail API**
     - **Google Calendar API**
@@ -29,55 +29,89 @@ description: "Sync emails and calendar events automatically via Google OAuth."
     </Frame>
   </Step>
   <Step title="Configure the OAuth consent screen">
-    Go to **APIs & Services → OAuth consent screen**. Choose **External**, fill in the app name and your email, then add these scopes:
+    Go to **APIs & Services → OAuth consent screen** (in newer consoles: **Google Auth Platform → Branding / Audience / Data access**).
+
+    - **User type.** Choose **Internal** if everyone who will connect is in your own Google Workspace organization. Internal apps need no Google verification. Otherwise choose **External**.
+    - **App information.** Enter an app name, a support email and a developer contact email.
+    - **Scopes.** Add exactly these. OpenNous asks for nothing else:
 
     ```text
+    openid
+    https://www.googleapis.com/auth/userinfo.email
     https://www.googleapis.com/auth/gmail.readonly
     https://www.googleapis.com/auth/calendar.readonly
     ```
 
-    Add your own email as a test user while in development.
+    `gmail.readonly` is a restricted scope. With an **External** app in **Testing** status, only the test users you add can connect, and Google expires their refresh tokens after 7 days, so they have to reconnect every week. For lasting connections, use an Internal app or publish the External app and complete Google's verification.
   </Step>
-  <Step title="Create OAuth credentials">
-    Go to **APIs & Services → Credentials → Create Credentials → OAuth client ID**. Choose **Web application** and add your redirect URI:
+  <Step title="Create the OAuth client">
+    Go to **APIs & Services → Credentials → Create credentials → OAuth client ID**.
+
+    - **Application type:** **Web application**
+    - **Authorized redirect URIs:** add your API domain followed by the callback path, exactly as written:
 
     <Frame>
       ![Screenshot 2026 05 18 At 11 10 20 AM](/images/Screenshot-2026-05-18-at-11.10.20-AM.png)
     </Frame>
 
     ```text
-    https://api.yourdomain.com/api/oauth/google/callback
+    https://<API_DOMAIN>/api/oauth/google/callback
     ```
+
+    For example, `https://api.yourdomain.com/api/oauth/google/callback`. You don't need Authorized JavaScript origins.
 
     <Frame>
       ![Screenshot 2026 05 18 At 11 11 57 AM](/images/Screenshot-2026-05-18-at-11.11.57-AM.png)
     </Frame>
   </Step>
-  <Step title="Copy your Client ID and Secret">
-    After creating, copy the **Client ID** and **Client Secret**.
+  <Step title="Copy the Client ID and Client secret">
+    Google shows both once the client is created. You can also find them later under **Credentials**.
   </Step>
-  <Step title="Add to nous.env">
+  <Step title="Add them to nous.env and restart">
     ```bash
-    GOOGLE_CLIENT_ID=your-client-id
+    GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
     GOOGLE_CLIENT_SECRET=your-client-secret
     GOOGLE_OAUTH_REDIRECT_URI=https://api.yourdomain.com/api/oauth/google/callback
     ```
 
-    Restart your containers after saving.
+    `GOOGLE_OAUTH_REDIRECT_URI` must match the redirect URI on the OAuth client exactly. Restart so the API and the worker read the new values:
+
+    ```bash
+    docker compose -f docker-compose.selfhost.yaml up -d
+    ```
+
+    Tokens are stored encrypted with `ENCRYPTION_KEY`, so that must be set as well. It already is on a standard install.
   </Step>
 </Steps>
 
+<Tip>
+  Composio is optional. If you set `COMPOSIO_API_KEY`, or a workspace admin pastes a Composio key in the app, that workspace connects Google through Composio instead. When all three `GOOGLE_*` variables are set and no Composio key is present, OpenNous uses your Google app.
+</Tip>
+
 ## Connecting in OpenNous
 
-Once the server is configured, each workspace connects their own Google account:
+Every member connects their own account. Gmail and Calendar are two separate connections:
 
-1. Go to **Integrations**
-2. Click **\+ Add Integration → Google Calendar / Gmail**
-3. Complete the OAuth flow in the popup
+1. Open **Integrations** (Personal).
+2. Click **Add**, choose **Gmail** or **Google Calendar**, then click **Connect with Google**.
+3. Sign in and approve the read-only access in the popup.
+
+Connecting a second Google account adds a second row. Connecting the same account again updates the existing row. Disconnecting removes the row and revokes the grant at Google, unless your other Google connection on that same account still uses it.
 
 ## What gets synced
 
-| Data | How | Frequency |
+| Data | How | When |
 | --- | --- | --- |
-| Sent & received emails | Gmail API | Every 30 min |
-| Calendar events \+ attendees | Calendar API | Every 10 min |
+| Received and sent email | Gmail API, read only | Every 30 minutes (the last day), plus a history backfill when you connect |
+| Calendar events and attendees | Calendar API, read only | Every 30 minutes, from 1 day back to 30 days ahead |
+
+Email is filed only against people who are already in OpenNous. It never creates contacts. Each email is one record, and its content is visible only to its participants and to the members whose mailboxes hold it. For calendar rules, see [Google Calendar](/providers/google-calendar).
+
+## Troubleshooting
+
+| Symptom | Cause |
+| --- | --- |
+| `redirect_uri_mismatch` from Google | The URI on the OAuth client differs from `GOOGLE_OAUTH_REDIRECT_URI` (check `https`, the domain and the path). |
+| `access_denied` / "app not verified" | External app in Testing: add the account as a test user, or verify the app. |
+| Connection shows it needs reconnecting after a week | External app in Testing mode, where refresh tokens expire after 7 days. |
+| No **Connect with Google** button, only the Composio setup card | One of the three `GOOGLE_*` variables is missing, or a Composio key is configured for the workspace. |

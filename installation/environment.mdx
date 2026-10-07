@@ -67,9 +67,10 @@ Most integrations are connected per workspace with the provider's own key, in **
 | `SALESFORCE_LOGIN_URL` | Optional | `https://login.salesforce.com`, or `https://test.salesforce.com` for a sandbox. |
 | `UNIPILE_API_KEY` | Optional | Unipile account key. Needed for LinkedIn. |
 | `UNIPILE_DSN` | Optional | Your Unipile DSN, such as `api1.unipile.com:13xxx`. |
-| `GOOGLE_CLIENT_ID` | Optional | Google OAuth client. {/* verify against GET-756: Gmail and Google Calendar now connect through Composio (apps/api/src/providers/composio.mjs); these three are still read by the worker's history enrichment. Confirm whether a self-hoster needs them. */} |
+| `GOOGLE_CLIENT_ID` | Optional | Your Google OAuth client (Web application). With all three `GOOGLE_*` set, members connect Gmail and Google Calendar with your own app. See [Gmail & Google Calendar](/providers/gmail). |
 | `GOOGLE_CLIENT_SECRET` | Optional | Its secret. |
-| `GOOGLE_OAUTH_REDIRECT_URI` | Optional | `https://api.yourdomain.com/api/oauth/google/callback` |
+| `GOOGLE_OAUTH_REDIRECT_URI` | Optional | `https://api.yourdomain.com/api/oauth/google/callback`, exactly as registered on the OAuth client. |
+| `COMPOSIO_API_KEY` | Optional | Not needed for self-hosting. Set it only if you want Gmail and Calendar to connect through Composio instead of your own Google app; it takes precedence when set. |
 | `SLACK_CLIENT_ID` | Cloud only | The Slack connector is Cloud only. |
 | `SLACK_CLIENT_SECRET` | Cloud only | |
 | `SLACK_REDIRECT_URI` | Cloud only | |
