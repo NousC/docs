@@ -1,0 +1,30 @@
+---
+title: "Claude Code"
+description: "Add OpenNous to Claude Code, with or without the plugin."
+---
+
+## Plugin
+
+The plugin bundles the server with the skills that use it: briefs, outreach, pipeline review.
+
+```
+/plugin marketplace add NousC/revenue-plugin
+/plugin install opennous@opennous
+```
+
+Then run `/opennous:login` to sign in.
+
+## Server only
+
+```bash
+claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp
+```
+
+Run `/mcp`, pick `opennous` and sign in in the browser.
+
+To use an API key from **Settings → API keys** instead:
+
+```bash
+claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```

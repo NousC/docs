@@ -264,6 +264,18 @@
             ]
           },
           {
+            "group": "Connect",
+            "pages": [
+              "mcp/connect/claude",
+              "mcp/connect/chatgpt",
+              "mcp/connect/grok",
+              "mcp/connect/claude-code",
+              "mcp/connect/codex",
+              "mcp/connect/cursor",
+              "mcp/connect/other"
+            ]
+          },
+          {
             "group": "Find",
             "pages": [
               "mcp/tools/find"

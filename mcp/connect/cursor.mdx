@@ -1,0 +1,29 @@
+---
+title: "Cursor"
+description: "Add OpenNous to Cursor."
+---
+
+Add this to `~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project:
+
+```json
+{
+  "mcpServers": {
+    "opennous": { "url": "https://mcp.opennous.cloud/mcp" }
+  }
+}
+```
+
+Open **Settings → MCP**, click **Login** next to `opennous` and sign in.
+
+To use an API key instead, add a header:
+
+```json
+{
+  "mcpServers": {
+    "opennous": {
+      "url": "https://mcp.opennous.cloud/mcp",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}
+```

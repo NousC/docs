@@ -3,7 +3,7 @@
   "info": {
     "title": "OpenNous REST API",
     "version": "2.0.0",
-    "description": "Read and write the OpenNous context graph over HTTP. Authenticate with a workspace API key."
+    "description": "Read and write the OpenNous revenue context graph over HTTP. Authenticate with a workspace API key."
   },
   "servers": [
     {
