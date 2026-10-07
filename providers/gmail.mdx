@@ -96,7 +96,11 @@ Every member connects their own account. Gmail and Calendar are two separate con
 2. Click **Add**, choose **Gmail** or **Google Calendar**, then click **Connect with Google**.
 3. Sign in and approve the read-only access in the popup. Leave the Gmail or Calendar permission ticked: a connection without it is refused.
 
-The popup finishes in the tab that opened it, under your own login. A consent link forwarded to someone else connects nothing.
+The popup finishes in the tab that opened it, under your own login. A consent link forwarded to someone else connects nothing; if the popup can't reach the OpenNous tab that opened it, it cancels the sign-in.
+
+<Note>
+  Sign-ins in progress are held in the API process for up to 10 minutes. The bundled stack runs one API container, which is what this expects. If you run several API instances behind a load balancer, use sticky sessions.
+</Note>
 
 Connecting a second Google account adds a second row. Connecting the same account again updates the existing row. Disconnecting removes the row. The grant at Google is revoked only when no other connection on this server uses the same Google account (Google keeps one grant per account), so disconnecting Gmail while Google Calendar stays connected keeps it. A Google account already connected by another member of the workspace can't be connected again by someone else.
 
