@@ -74,7 +74,7 @@ description: "Connect Gmail and Google Calendar on a self-hosted install with yo
     GOOGLE_OAUTH_REDIRECT_URI=https://api.yourdomain.com/api/oauth/google/callback
     ```
 
-    `GOOGLE_OAUTH_REDIRECT_URI` must match the redirect URI on the OAuth client exactly. Restart so the API and the worker read the new values:
+    `GOOGLE_OAUTH_REDIRECT_URI` is optional. Leave it out and OpenNous uses `https://<API_DOMAIN>/api/oauth/google/callback`. If you set it, it must match the redirect URI on the OAuth client exactly. Restart so the API and the worker read the new values:
 
     ```bash
     docker compose -f docker-compose.selfhost.yaml up -d
@@ -94,9 +94,11 @@ Every member connects their own account. Gmail and Calendar are two separate con
 
 1. Open **Integrations** (Personal).
 2. Click **Add**, choose **Gmail** or **Google Calendar**, then click **Connect with Google**.
-3. Sign in and approve the read-only access in the popup.
+3. Sign in and approve the read-only access in the popup. Leave the Gmail or Calendar permission ticked: a connection without it is refused.
 
-Connecting a second Google account adds a second row. Connecting the same account again updates the existing row. Disconnecting removes the row and revokes the grant at Google, unless your other Google connection on that same account still uses it.
+The popup finishes in the tab that opened it, under your own login. A consent link forwarded to someone else connects nothing.
+
+Connecting a second Google account adds a second row. Connecting the same account again updates the existing row. Disconnecting removes the row. The grant at Google is revoked only when no other connection on this server uses the same Google account (Google keeps one grant per account), so disconnecting Gmail while Google Calendar stays connected keeps it. A Google account already connected by another member of the workspace can't be connected again by someone else.
 
 ## What gets synced
 
@@ -111,7 +113,8 @@ Email is filed only against people who are already in OpenNous. It never creates
 
 | Symptom | Cause |
 | --- | --- |
-| `redirect_uri_mismatch` from Google | The URI on the OAuth client differs from `GOOGLE_OAUTH_REDIRECT_URI` (check `https`, the domain and the path). |
+| `redirect_uri_mismatch` from Google | The URI on the OAuth client differs from `GOOGLE_OAUTH_REDIRECT_URI`, or from `https://<API_DOMAIN>/api/oauth/google/callback` when that variable is unset (check `https`, the domain and the path). |
+| "Google did not grant the access OpenNous needs" | The Gmail or Calendar permission was unticked on the consent screen. Connect again and leave it ticked. |
 | `access_denied` / "app not verified" | External app in Testing: add the account as a test user, or verify the app. |
 | Connection shows it needs reconnecting after a week | External app in Testing mode, where refresh tokens expire after 7 days. |
-| No **Connect with Google** button, only the Composio setup card | One of the three `GOOGLE_*` variables is missing, or a Composio key is configured for the workspace. |
+| No **Connect with Google** button, only the Composio setup card | `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` is missing, `API_DOMAIN` is unset with no `GOOGLE_OAUTH_REDIRECT_URI`, or a Composio key is configured for the workspace. |
