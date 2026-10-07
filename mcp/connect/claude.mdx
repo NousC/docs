@@ -1,26 +1,15 @@
 ---
 title: "Claude"
-description: "Add the OpenNous revenue plugin to Claude.ai and the Claude desktop app."
+description: "Install the OpenNous plugin in Claude.ai and the Claude desktop app."
 ---
 
-The revenue plugin gives Claude the skills for revenue work: focus your day, brief before a call, write the follow-up, forecast and review the pipeline. The OpenNous connector gives those skills your deals, customers and calls.
+The OpenNous plugin gives Claude the skills for revenue work: focus your day, brief before a call, write the follow-up, forecast and review the pipeline. It also connects Claude to your OpenNous workspace, so every answer comes from your deals, customers and calls.
 
 <Steps>
-  <Step title="Add the revenue plugin">
-    In Claude, open **Customize → Plugins**, click **Add marketplace** and enter:
+  <Step title="Install the plugin">
+    In Claude, open **Customize → Plugins**, find **OpenNous** and click **Install**.
 
-    ```
-    NousC/revenue-plugin
-    ```
-
-    Then install **OpenNous**.
-  </Step>
-  <Step title="Add the OpenNous connector">
-    Open **Customize → Connectors**, click **Add → Add custom connector**. Name it `OpenNous`, paste the URL and click **Continue**:
-
-    ```
-    https://mcp.opennous.cloud/mcp
-    ```
+    Not listed yet? [Download the plugin](https://www.opennous.cloud/downloads/opennous-plugin.zip), then in **Customize → Plugins** click **Add** and upload the file.
   </Step>
   <Step title="Sign in">
     Click **Connect**, sign in to OpenNous and click **Allow**.
@@ -34,4 +23,8 @@ The revenue plugin gives Claude the skills for revenue work: focus your day, bri
 
 Claude sees only what your OpenNous user can see. Revoke it in **Settings → API keys** in OpenNous, where it shows as a connected app.
 
-<Note>On Team and Enterprise, an owner may need to allow custom connectors and plugins first.</Note>
+<Note>On Team and Enterprise, an owner can install the plugin once for the whole organization.</Note>
+
+## Only the connector
+
+To give Claude the OpenNous tools without the skills, go to **Customize → Connectors → Add → Add custom connector**, name it `OpenNous` and paste `https://mcp.opennous.cloud/mcp`.
