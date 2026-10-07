@@ -1,0 +1,141 @@
+---
+title: "Environment reference"
+description: "Every variable in nous.env, whether you need it, and what it turns on"
+---
+
+This page covers every variable in [`nous.env.example`](https://github.com/NousC/opennous/blob/main/nous.env.example). A variable is **Required** for any instance to work, **Optional** when it turns on one feature, or **Cloud only** when it serves OpenNous Cloud and a self-hosted instance leaves it empty.
+
+{/* verify against GET-756: the bundled stack adds its own database, JWT and GoTrue variables, written by scripts/selfhost-keys.mjs. Add them here once the env file is final. */}
+
+Variables starting with `VITE_` are baked into the frontend at build time. Changing one needs a rebuild, not just a restart.
+
+## Domains
+
+| Variable | Required | What it does |
+|---|---|---|
+| `APP_DOMAIN` | Required | Domain of the web app. Caddy issues its certificate. `APP_URL` is derived as `https://$APP_DOMAIN`. |
+| `API_DOMAIN` | Required | Domain of the API. Used for OAuth callbacks and webhook URLs. `API_URL` is derived as `https://$API_DOMAIN`. |
+| `MCP_DOMAIN` | Required | Domain of the hosted MCP server. Remote clients connect to `https://$MCP_DOMAIN/mcp`. |
+
+Set `APP_URL` or `API_URL` yourself only when the app or API is not served on those domains.
+
+## Database and auth
+
+| Variable | Required | What it does |
+|---|---|---|
+| `SUPABASE_URL` | Required | URL of the Supabase (or bundled) database API. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required | Service role key the API and worker use. Keep it secret. |
+| `SUPABASE_JWT_SECRET` | Optional, recommended | Lets the API verify session tokens locally. Without it, each request asks Supabase Auth. |
+| `VITE_SUPABASE_URL` | Required | Same URL, for the browser. |
+| `VITE_SUPABASE_ANON_KEY` | Required | Public anon key, for browser sign-in. |
+| `AUTH_PROVIDER` | Optional | `supabase` or `clerk`. Leave unset: with `SELF_HOSTED=true` it is `supabase`. |
+| `VITE_AUTH_PROVIDER` | Optional | Frontend side of the same switch. Leave unset. |
+| `CLERK_SECRET_KEY` | Cloud only | Cloud signs in with Clerk. Leave unset. |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Cloud only | Leave unset. If set, the frontend build switches to Clerk. |
+
+## Core
+
+| Variable | Required | What it does |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Required | Extraction runs on this key. |
+| `ENCRYPTION_KEY` | Required | 32-byte hex key that encrypts integration tokens at rest. Generate with `openssl rand -hex 32`. Do not change it after setup, or stored tokens cannot be read. |
+| `SELF_HOSTED` | Required | Set to `true`. Turns off billing, plan limits and metering, and blocks Cloud-only features. Never set it on Cloud. |
+| `DISABLE_SIGNUPS` | Optional | `true` closes public sign-up. The first account becomes the owner; add others with invites. |
+| `CORS_ORIGINS` | Optional | Comma-separated allowed origins. Unset allows all. |
+| `NOUS_DEFAULT_TIMEZONE` | Optional | IANA zone, such as `Europe/Berlin`, used to resolve spoken deadlines like "by Friday". Default `UTC`. |
+| `PORT` | Optional | Frontend port when running without Caddy. Default `80`. |
+| `VITE_API_URL` | Optional | API URL for the browser. Set to `https://api.yourdomain.com` with Caddy. Leave empty when nginx proxies the API on the same domain. |
+| `VITE_DOCS_URL` | Optional | Where in-app docs links point. Default `https://docs.opennous.cloud`. |
+
+## Email
+
+| Variable | Required | What it does |
+|---|---|---|
+| `RESEND_API_KEY` | Optional | Sends workspace invitation emails through Resend. Without it, invites still create the account but send no email. |
+| `RESEND_FROM_EMAIL` | Optional | Sender address. Must be on a domain you verified in Resend. |
+| `RESEND_REPLY_TO` | Optional | Reply-to address. Defaults to the sender. |
+
+## Integrations
+
+Most integrations are connected per workspace with the provider's own key, in **Settings → Integrations**. These are the ones that need instance settings.
+
+| Variable | Required | What it does |
+|---|---|---|
+| `SALESFORCE_CLIENT_ID` | Optional | Your Salesforce connected app. Needed to connect Salesforce. |
+| `SALESFORCE_CLIENT_SECRET` | Optional | Its secret. |
+| `SALESFORCE_REDIRECT_URI` | Optional | `https://api.yourdomain.com/api/workflow-providers/salesforce/oauth/callback` |
+| `SALESFORCE_LOGIN_URL` | Optional | `https://login.salesforce.com`, or `https://test.salesforce.com` for a sandbox. |
+| `UNIPILE_API_KEY` | Optional | Unipile account key. Needed for LinkedIn. |
+| `UNIPILE_DSN` | Optional | Your Unipile DSN, such as `api1.unipile.com:13xxx`. |
+| `GOOGLE_CLIENT_ID` | Optional | Google OAuth client. {/* verify against GET-756: Gmail and Google Calendar now connect through Composio (apps/api/src/providers/composio.mjs); these three are still read by the worker's history enrichment. Confirm whether a self-hoster needs them. */} |
+| `GOOGLE_CLIENT_SECRET` | Optional | Its secret. |
+| `GOOGLE_OAUTH_REDIRECT_URI` | Optional | `https://api.yourdomain.com/api/oauth/google/callback` |
+| `SLACK_CLIENT_ID` | Cloud only | The Slack connector is Cloud only. |
+| `SLACK_CLIENT_SECRET` | Cloud only | |
+| `SLACK_REDIRECT_URI` | Cloud only | |
+| `SIGNAL_HMAC_SECRET` | Optional | Signs the per-workspace ingest tokens for RB2B. Needed only if you use RB2B. |
+| `PROSPERO_API_KEY` | Optional | An instance-wide Prospeo key. Workspaces normally use their own. |
+| `ENRICHMENT_BUILTIN_FALLBACK` | Optional | `true` lets workspaces without their own Prospeo key enrich on the instance key. Off unless set to exactly `true`. Every new contact can trigger enrichment, so this can cost a lot. |
+| `OPENAI_API_KEY` | Optional | Embeddings for semantic search. Without it, search falls back to structured retrieval. |
+| `EMBEDDINGS_ENABLED` | Optional | `true` turns on the background embedding sweep. Apply `supabase/migrations/2026_09_21_embedding_queue_indexes.sql` first. |
+
+## Inbound webhook secrets
+
+Set the ones you use to a random string, and enter the same value in that tool's webhook settings. Leave the rest empty.
+
+| Variable | Tool |
+|---|---|
+| `LINKEDIN_WEBHOOK_SECRET` | LinkedIn (Unipile) |
+| `INSTANTLY_WEBHOOK_SECRET` | Instantly |
+| `CALENDLY_WEBHOOK_SECRET` | Calendly |
+| `FIREFLIES_WEBHOOK_SECRET` | Fireflies |
+| `FATHOM_WEBHOOK_SECRET` | Fathom |
+| `RB2B_WEBHOOK_SECRET` | RB2B |
+| `HEYREACH_WEBHOOK_SECRET` | HeyReach |
+| `LEMLIST_WEBHOOK_SECRET` | lemlist |
+| `SMARTLEAD_WEBHOOK_SECRET` | Smartlead |
+| `EMAILBISON_WEBHOOK_SECRET` | EmailBison |
+| `STRIPE_INBOUND_WEBHOOK_SECRET` | Stripe events sent to the worker as signals |
+
+## LinkedIn engagement run
+
+| Variable | Required | What it does |
+|---|---|---|
+| `APIFY_TOKEN` | Optional | Turns on the weekly run that collects people who engaged with each workspace's recent LinkedIn posts. Unset, the feature is off. |
+| `LINKEDIN_ENGAGEMENT_WORKSPACES` | Optional | Comma-separated workspace IDs to include. On a self-hosted instance every workspace is included. |
+| `ENGAGEMENT_WINDOW_DAYS` | Optional | Days of posts to look at. Default `7`. |
+| `ENGAGEMENT_MAX_POSTS` | Optional | Posts per run. Default `5`. |
+| `ENGAGEMENT_PROFILE_MODE` | Optional | `main` or `short` profile depth. Default `main`. |
+
+## Monitoring
+
+| Variable | Required | What it does |
+|---|---|---|
+| `OPS_ALERT_SLACK_WEBHOOK` | Optional | Slack incoming webhook for crash, database and dead-letter alerts. Unset, alerts only go to logs. |
+| `SENTRY_DSN` | Optional | Sends API and worker errors to Sentry. |
+| `VITE_POSTHOG_KEY` | Optional | PostHog product analytics in the frontend. |
+| `VITE_GOOGLE_ANALYTICS_ID` | Optional | Google Analytics in the frontend. |
+
+Point an uptime monitor at `https://api.yourdomain.com/readyz`. It returns `503` when the database is down.
+
+## Forms
+
+| Variable | Required | What it does |
+|---|---|---|
+| `FEEDBACK_WEBHOOK_URL` | Optional | Forwards in-app feedback to an endpoint such as n8n or Zapier. |
+| `VITE_WAITLIST_WEBHOOK_URL` | Cloud only | Waitlist form on the Cloud landing page. |
+
+## Cloud only
+
+Leave these empty on a self-hosted instance.
+
+| Variable | What it does on Cloud |
+|---|---|
+| `ADMIN_EMAILS` | Accounts allowed into the platform admin pages. Empty means no account can reach them. |
+| `VIP_EMAILS` | Accounts with VIP plan access. |
+| `STRIPE_SECRET_KEY` | Billing. |
+| `STRIPE_WEBHOOK_SECRET` | Billing webhooks. |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Checkout in the frontend. |
+| `STRIPE_API_PRICE_ID` | Price for the API plan. |
+| `STRIPE_STARTER_PRICE_ID` | Retired plan, kept for existing subscriptions. |
+| `STRIPE_PRO_PRICE_ID` | Retired plan, kept for existing subscriptions. |

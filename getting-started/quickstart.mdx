@@ -1,139 +1,69 @@
 ---
 title: "Quickstart"
-description: "Get OpenNous running locally and connect your first integration in under 15 minutes"
+description: "Get an OpenNous instance and connect your agent"
 ---
 
-<Note>
-  This guide is for **local development**. To deploy on a server, see [Docker Compose](/installation/docker-compose).
-</Note>
+## 1. Get an instance
 
-## Prerequisites
+<Tabs>
+  <Tab title="Cloud">
+    Sign up at [app.opennous.cloud](https://app.opennous.cloud). Nothing to install.
+  </Tab>
+  <Tab title="Self-host">
+    {/* verify against GET-756 */}
 
-* [Node.js 20+](https://nodejs.org) and [pnpm](https://pnpm.io) — `npm install -g pnpm`
-* [Docker](https://docs.docker.com/get-docker/) — used for Redis only
-* A [Supabase](https://supabase.com) project — free tier works
-* An [Anthropic API key](https://console.anthropic.com)
+    On a Linux server with Docker:
 
----
+    ```bash
+    git clone https://github.com/NousC/opennous.git && cd opennous
+    node scripts/selfhost-keys.mjs
+    docker compose -f docker-compose.selfhost.yaml up -d
+    ```
 
-## Step 1: Clone and install
+    Set your domains and `ANTHROPIC_API_KEY` in the env file before you start. The full guide is [Docker Compose](/installation/docker-compose).
+  </Tab>
+</Tabs>
 
-```bash
-git clone https://github.com/NousC/opennous.git
-cd nous
-pnpm install
-```
-
-## Step 2: Configure environment
-
-```bash
-cp .env.example .env
-```
-
-Open `.env` and fill in:
+## 2. Connect your agent
 
 ```bash
-# Supabase — Settings → API
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-
-# Anthropic
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-ENCRYPTION_KEY=
-API_SECRET=
+npx @opennous/cli@latest init
 ```
 
-## Step 3: Run the database schema
+This signs you in, saves a key to `~/.nous/config.json` and registers the MCP server with your agent. On self-host, add `--url https://api.yourdomain.com`.
 
-<Warning>
-  Required on first setup. Skip this and the app will start but nothing will work.
-</Warning>
+To configure an MCP host by hand, see the [MCP server](/mcp/introduction) page.
 
-Open your Supabase project → **SQL Editor** → paste and run the full contents of [`supabase/schema.sql`](https://github.com/NousC/opennous/blob/main/supabase/schema.sql).
+## 3. Connect a source
 
-## Step 4: Start Redis
+Open **Settings → Integrations** and connect a CRM, mailbox, call recorder or outbound tool. Each provider has a setup page under [Providers](/providers/overview).
+
+## 4. Ask for an account
+
+Ask your agent about an account, or call the API:
 
 ```bash
-docker compose -f docker-compose.dev.yaml up -d
+curl -X POST https://api.opennous.cloud/v2/context \
+  -H "Authorization: Bearer $NOUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "focus": "acme.com" }'
 ```
 
-This starts Redis on `localhost:6379`. The API and worker need it to run.
-
-## Step 5: Start the app
-
-```bash
-pnpm dev
-```
-
-Starts all four services in parallel:
-
-| Service | URL | What it does |
-|---|---|---|
-| API | `http://localhost:3000` | REST API, identity resolution, signal ingestion |
-| Frontend | `http://localhost:5173` | Web UI |
-| MCP server | `http://localhost:3001` | Agent tool interface |
-| Worker | background | AI synthesis, two-way sync, ICP scoring |
-
-## Step 6: Connect your first integration
-
-Open `http://localhost:5173` → **Settings → Integrations** and connect at least one source:
-
-<CardGroup cols={2}>
-  <Card title="HubSpot" icon="database" href="/providers/overview">
-    One-time import of existing contacts and deal history.
-  </Card>
-  <Card title="Gmail" icon="envelope" href="/providers/overview">
-    Ingest email signals in real time via OAuth.
-  </Card>
-  <Card title="LinkedIn" icon="linkedin" href="/providers/linkedin">
-    Pull connection requests and messages via Unipile.
-  </Card>
-  <Card title="Webhooks" icon="bolt" href="/providers/overview">
-    Connect any custom signal source with HMAC auth.
-  </Card>
-</CardGroup>
-
-## Step 7: Connect your AI agent via MCP
-
-Add OpenNous to your `mcp.json` (Claude Desktop, Cursor, or any MCP host):
-
-```json
-{
-  "mcpServers": {
-    "nous": {
-      "command": "npx",
-      "args": ["-y", "@opennous/mcp"],
-      "env": {
-        "NOUS_API_KEY": "your-api-key",
-        "NOUS_API_URL": "http://localhost:3000"
-      }
-    }
-  }
-}
-```
-
-Generate your API key under **Settings → API Keys**.
-
----
-
-## What's next
+## Next
 
 <CardGroup cols={2}>
   <Card title="How it works" icon="diagram-project" href="/getting-started/how-it-works">
-    Identity resolution, signal ingestion, and the unified record architecture.
+    Observations, entities and claims.
   </Card>
-  <Card title="MCP tools reference" icon="robot" href="/mcp/introduction">
-    Full reference for all MCP tools your agents can call.
+  <Card title="Cloud vs self-host" icon="server" href="/getting-started/cloud-vs-self-host">
+    What differs between the two.
   </Card>
-  <Card title="Production deploy" icon="server" href="/installation/docker-compose">
-    Deploy on your own server with Docker Compose.
+  <Card title="MCP server" icon="robot" href="/mcp/introduction">
+    Every tool your agent can call.
   </Card>
   <Card title="REST API" icon="code" href="/public-api/introduction">
-    Integrate via REST API from any language or platform.
+    The same graph over HTTP.
   </Card>
 </CardGroup>
+
+To work on OpenNous itself, see [Development environment](/installation/development-environment).

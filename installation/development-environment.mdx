@@ -3,13 +3,12 @@ title: "Development Environment"
 description: "Run OpenNous locally for development"
 ---
 
-For local development, you run the app code directly with pnpm. Redis is the only service that runs in Docker.
+For local development, you run the app code directly with pnpm against a Supabase project. Nothing else runs in Docker.
 
 ## Prerequisites
 
 * [Node.js 20+](https://nodejs.org)
 * [pnpm](https://pnpm.io) — `npm install -g pnpm`
-* [Docker](https://docs.docker.com/get-docker/) for Redis
 * A [Supabase](https://supabase.com) project
 * An [Anthropic API key](https://console.anthropic.com)
 
@@ -17,7 +16,7 @@ For local development, you run the app code directly with pnpm. Redis is the onl
 
 ```bash
 git clone https://github.com/NousC/opennous.git
-cd nous
+cd opennous
 pnpm install
 ```
 
@@ -42,7 +41,6 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 # Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ENCRYPTION_KEY=
-API_SECRET=
 ```
 
 ## Step 3: Run the database schema
@@ -51,15 +49,7 @@ API_SECRET=
   Required on first setup. Open your Supabase project → **SQL Editor** → paste and run [`supabase/schema.sql`](https://github.com/NousC/opennous/blob/main/supabase/schema.sql).
 </Warning>
 
-## Step 4: Start Redis
-
-```bash
-docker compose -f docker-compose.dev.yaml up -d
-```
-
-This starts only Redis on `localhost:6379`.
-
-## Step 5: Start the app
+## Step 4: Start the app
 
 ```bash
 pnpm dev
@@ -70,9 +60,9 @@ Starts all services in parallel:
 | Service | URL |
 |---|---|
 | API | `http://localhost:3000` |
-| Frontend | `http://localhost:5173` |
-| MCP server | `http://localhost:3001` |
-| Worker | background, no HTTP port |
+| Frontend | `http://localhost:8080` |
+| Worker | `http://localhost:3001` (inbound webhooks) |
+| MCP server | stdio, no HTTP port. `pnpm --filter ./apps/mcp run dev:http` serves it over HTTP on port 3002. |
 
 ## Hot reload
 
@@ -91,5 +81,4 @@ pnpm dev:mcp        # MCP server only
 
 ```bash
 # Ctrl+C to stop pnpm dev
-docker compose -f docker-compose.dev.yaml down   # stop Redis
 ```

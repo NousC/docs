@@ -51,14 +51,18 @@
               "getting-started/introduction",
               "getting-started/how-it-works",
               "getting-started/quickstart",
+              "getting-started/cloud-vs-self-host",
               "getting-started/score-a-list",
-              "getting-started/bring-your-own-scorer"
+              "getting-started/bring-your-own-scorer",
+              "getting-started/insights"
             ]
           },
           {
             "group": "Installation",
             "pages": [
               "installation/docker-compose",
+              "installation/environment",
+              "installation/upgrading",
               "installation/development-environment"
             ]
           },
@@ -354,7 +358,7 @@
         },
         {
           "anchor": "Discord",
-          "href": "https://discord.gg/2Ph4ZYXw",
+          "href": "https://discord.gg/HrM5TG5F5",
           "icon": "discord"
         }
       ]
@@ -373,7 +377,7 @@
       },
       {
         "label": "Discord",
-        "href": "https://discord.gg/2Ph4ZYXw"
+        "href": "https://discord.gg/HrM5TG5F5"
       }
     ],
     "primary": {
