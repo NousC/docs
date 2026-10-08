@@ -12,56 +12,81 @@ There are two ways to run it:
 
 ## Prerequisites
 
-- A Linux server with Docker and Docker Compose
+- A Linux server with Docker and Docker Compose v2.24 or newer
 - Node.js 18+ on the server, to generate keys
 - An [Anthropic API key](https://console.anthropic.com). Extraction runs on it.
 - Three DNS records pointing at the server: `app`, `api` and `mcp`
 
 ## Option 1: Bundled stack
 
-{/* verify against GET-756 */}
+`docker-compose.selfhost.yaml` sits on top of `docker-compose.yaml` and adds the database and auth. The bundled stack runs these services:
 
-The bundled stack runs these containers:
-
-| Container | What it does |
+| Service | What it does |
 |---|---|
-| `postgres` | Postgres with pgvector. Holds the graph. |
-| `postgrest` | REST layer over Postgres, used by the API |
-| `gotrue` | Supabase Auth. Signs users in. |
+| `db` | Postgres 17 with pgvector (`pgvector/pgvector:pg17`). Data lives in the `nous_pgdata` volume. |
+| `auth` | Supabase Auth (GoTrue). Sign-up, sign-in, password reset, magic links. |
+| `db-schema` | Runs on every start, then exits. Applies `supabase/schema.sql` to a fresh database, then any new files in `supabase/migrations/`. |
+| `postgrest` | REST layer over Postgres, used by the API. Never published outside the compose network. |
 | `api` | REST API, integrations, webhooks, automations |
 | `worker` | Ingestion, extraction, scoring and scheduled jobs |
 | `mcp` | Hosted MCP server at `https://mcp.yourdomain.com/mcp` |
-| `frontend` | The web app, served by nginx |
-| `caddy` | TLS and subdomain routing |
+| `frontend` | The web app |
+| `caddy` | TLS and routing. `https://app.yourdomain.com/auth/v1/*` goes to auth, the rest of that domain to the frontend. |
 
-### 1. Clone
+The app images are built from source on your server.
+
+### 1. Clone and configure
 
 ```bash
 git clone https://github.com/NousC/opennous.git && cd opennous
+cp nous.env.example nous.env
 ```
+
+In `nous.env`, set `APP_DOMAIN`, `API_DOMAIN`, `MCP_DOMAIN` and `ANTHROPIC_API_KEY`. Leave the Supabase values as they are; the next step replaces them.
 
 ### 2. Generate keys
 
 ```bash
-node scripts/selfhost-keys.mjs
+node scripts/selfhost-keys.mjs nous.env
 ```
 
-This generates the database password, JWT secret, API keys and `ENCRYPTION_KEY`, and writes them to the env file. Open the env file and set:
+This writes the database password, JWT secret, Supabase anon and service-role keys, `ENCRYPTION_KEY` and a one-time `SELFHOST_SETUP_TOKEN` into `nous.env`. It also sets `COMPOSE_FILE` so every `docker compose --env-file nous.env` command uses both compose files, and closes sign-up (`DISABLE_SIGNUPS=true`). It keeps values that are already set, so running it again is safe. `--force` regenerates everything; never use it on an install that has data. The file is left readable by its owner only.
 
-- `APP_DOMAIN`, `API_DOMAIN`, `MCP_DOMAIN`
-- `ANTHROPIC_API_KEY`
+The script refuses an env file that points at an external Supabase project or has Clerk keys set. Give the bundled stack its own file.
 
 Every variable is listed in the [environment reference](/installation/environment).
 
 ### 3. Start
 
 ```bash
-docker compose -f docker-compose.selfhost.yaml up -d
+docker compose --env-file nous.env up -d --build
 ```
 
-Caddy requests TLS certificates once DNS resolves. The app is at `https://app.yourdomain.com` and the API at `https://api.yourdomain.com`.
+The first build takes a few minutes. Caddy requests TLS certificates once DNS resolves. The app is at `https://app.yourdomain.com` and the API at `https://api.yourdomain.com`.
 
-Prebuilt images are published to GHCR (`ghcr.io/nousc/opennous-api`, `-worker`, `-frontend`, `-mcp`). {/* verify against GET-758 */}
+### 4. Create the owner account
+
+The key script ends by printing the setup link:
+
+```
+then create the owner account at https://app.yourdomain.com/signup?setup=<token>
+```
+
+Open it and create the first account. It becomes the owner. A sign-up without the token is refused, even on an empty instance, so whoever reaches the page first cannot take it over. Lost the link? The token is `SELFHOST_SETUP_TOKEN` in `nous.env`, and `docker compose --env-file nous.env logs db-schema` prints the link until an owner exists.
+
+### Try it on a laptop
+
+Set `APP_DOMAIN=localhost`, `API_DOMAIN=api.localhost` and `MCP_DOMAIN=mcp.localhost`. Caddy serves them with its own local certificate authority, so the browser warns and `curl` needs `-k`.
+
+### Demo data
+
+To look around before connecting anything, load the fictional demo workspace, "Fernpoint (demo)": 40 invented companies on `.example` domains, with people, deals, activity and claims.
+
+```bash
+docker compose --env-file nous.env exec -T db psql -U postgres -v ON_ERROR_STOP=1 -1 < supabase/seed/demo.sql
+```
+
+Every existing user is added to it as an admin; switch to it from the workspace menu. It refuses to load on a database with more than 5 users or 3 workspaces. Remove it with `supabase/seed/demo-reset.sql`.
 
 ## Option 2: Bring your own Supabase
 
@@ -113,13 +138,15 @@ docker compose --env-file nous.env up -d --build
 
 `--env-file nous.env` is needed: the frontend build and Caddy read their values from it. The first build takes a few minutes.
 
-## Sign in
+## Sign in and invite your team
 
-Open `https://app.yourdomain.com` and create an account. The first account becomes the owner.
+Sign-in uses Supabase Auth with email and password.
 
-Sign-in uses Supabase Auth. Email and password work without any mail setup. Invites, magic links and password resets need SMTP. {/* verify against GET-756: SMTP variable names for the bundled gotrue container */}
+**Bundled stack.** The owner signs up through the setup link (step 4). After that the instance is closed: a login without an invitation gets no account, no workspace and nothing that spends your Anthropic key. To add a teammate, open **Settings → Members → Create invite**. It gives a `npx @opennous/cli join <token> --url https://api.yourdomain.com` command; the teammate runs it, creates a login on the page that opens, approves, and lands in your workspace. The token is the proof. Email invites are a Cloud feature.
 
-To close public sign-up after the first account, set `DISABLE_SIGNUPS=true` and restart. On Option 2, also turn off **Allow new users to sign up** in Supabase, since sign-up goes from the browser straight to Supabase.
+Without SMTP, accounts are confirmed at sign-up and no mail is sent: email and password work, password reset and magic links do not. To send mail, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` and `SMTP_ADMIN_EMAIL` in `nous.env`, set `GOTRUE_MAILER_AUTOCONFIRM=false`, and run `docker compose --env-file nous.env up -d`. Without SMTP an email address proves nothing, so the API never hands anything over because an address matches; only invite tokens count.
+
+**Bring your own Supabase.** The first account becomes the owner. To close public sign-up after that, set `DISABLE_SIGNUPS=true` and restart, and also turn off **Allow new users to sign up** in Supabase, since sign-up goes from the browser straight to Supabase.
 
 ## Connect your agent
 
@@ -152,21 +179,27 @@ Remote MCP clients can use the hosted endpoint on your instance, `https://mcp.yo
 
 Integrations are connected per workspace in **Settings → Integrations**, mostly with the provider's own API key. A few need instance-level settings in the env file, for example LinkedIn (`UNIPILE_API_KEY`, `UNIPILE_DSN`) and Salesforce (`SALESFORCE_CLIENT_ID`, `SALESFORCE_CLIENT_SECRET`). See the [environment reference](/installation/environment).
 
+Gmail and Google Calendar connect through your own Google OAuth app: set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, and register `https://api.yourdomain.com/api/oauth/google/callback` on the client. The redirect is derived from `API_DOMAIN`. Composio is optional. See [Gmail](/providers/gmail).
+
 ## Logs
 
 ```bash
-docker compose logs -f api
-docker compose logs -f worker
-docker compose logs -f frontend
+docker compose --env-file nous.env logs -f api
+docker compose --env-file nous.env logs -f worker
+docker compose --env-file nous.env logs db-schema    # bundled stack: schema and migrations
 ```
-
-On the bundled stack, add `-f docker-compose.selfhost.yaml` before `logs`.
 
 ## Stopping
 
 ```bash
-docker compose down        # stop containers, keep data
-docker compose down -v     # stop and delete volumes. On the bundled stack this deletes the database.
+docker compose --env-file nous.env down        # stop containers, keep data
+docker compose --env-file nous.env down -v     # stop and delete volumes. On the bundled stack this deletes the database.
+```
+
+Back up the bundled database with:
+
+```bash
+docker compose --env-file nous.env exec -T db pg_dump -U postgres postgres > backup.sql
 ```
 
 ## Next

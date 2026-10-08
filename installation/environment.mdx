@@ -5,8 +5,6 @@ description: "Every variable in nous.env, whether you need it, and what it turns
 
 This page covers every variable in [`nous.env.example`](https://github.com/NousC/opennous/blob/main/nous.env.example). A variable is **Required** for any instance to work, **Optional** when it turns on one feature, or **Cloud only** when it serves OpenNous Cloud and a self-hosted instance leaves it empty.
 
-{/* verify against GET-756: the bundled stack adds its own database, JWT and GoTrue variables, written by scripts/selfhost-keys.mjs. Add them here once the env file is final. */}
-
 Variables starting with `VITE_` are baked into the frontend at build time. Changing one needs a rebuild, not just a restart.
 
 ## Domains
@@ -33,6 +31,33 @@ Set `APP_URL` or `API_URL` yourself only when the app or API is not served on th
 | `CLERK_SECRET_KEY` | Cloud only | Cloud signs in with Clerk. Leave unset. |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Cloud only | Leave unset. If set, the frontend build switches to Clerk. |
 
+## Bundled stack
+
+On the bundled stack, `node scripts/selfhost-keys.mjs nous.env` writes these. It keeps values that are already set.
+
+| Variable | What it is |
+|---|---|
+| `POSTGRES_PASSWORD` | Password for `postgres` and for the PostgREST and GoTrue database roles. Fixed at first boot. |
+| `SUPABASE_JWT_SECRET` | HS256 secret. GoTrue signs sessions with it; the API and PostgREST verify with it. |
+| `SUPABASE_ANON_KEY`, `VITE_SUPABASE_ANON_KEY` | JWT with `role: anon`. Public; built into the frontend. |
+| `SUPABASE_SERVICE_ROLE_KEY` | JWT with `role: service_role`. Server side only. |
+| `ENCRYPTION_KEY` | 32-byte hex. Encrypts integration tokens at rest. |
+| `SELFHOST_SETUP_TOKEN` | One-time secret. Only the sign-up that presents it becomes the owner. |
+| `SUPABASE_URL` | `http://supabase:8000`, the gateway inside the compose network. |
+| `VITE_SUPABASE_URL` | `https://$APP_DOMAIN`. |
+| `SELF_HOSTED`, `AUTH_PROVIDER`, `VITE_AUTH_PROVIDER` | `true`, `supabase`, `supabase`. |
+| `COMPOSE_FILE` | `docker-compose.yaml:docker-compose.selfhost.yaml` (`;` instead of `:` on Windows). |
+| `DISABLE_SIGNUPS` | `true`. Only the setup-token sign-up and invitees get an account. |
+| `GOTRUE_MAILER_AUTOCONFIRM` | `false` when `SMTP_HOST` is set, else `true`. |
+
+Optional on the bundled stack:
+
+| Variable | Default | What it does |
+|---|---|---|
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | unset, `587` | Mail server the auth service sends through. Needed for password reset and magic links. |
+| `SMTP_ADMIN_EMAIL`, `SMTP_SENDER_NAME` | unset, `Nous` | From address and name. |
+| `GOTRUE_DISABLE_SIGNUP` | `false` | Leave it `false`: the owner and invitees create their login there. `DISABLE_SIGNUPS` is the gate. |
+
 ## Core
 
 | Variable | Required | What it does |
@@ -40,7 +65,7 @@ Set `APP_URL` or `API_URL` yourself only when the app or API is not served on th
 | `ANTHROPIC_API_KEY` | Required | Extraction runs on this key. |
 | `ENCRYPTION_KEY` | Required | 32-byte hex key that encrypts integration tokens at rest. Generate with `openssl rand -hex 32`. Do not change it after setup, or stored tokens cannot be read. |
 | `SELF_HOSTED` | Required | Set to `true`. Turns off billing, plan limits and metering, and blocks Cloud-only features. Never set it on Cloud. |
-| `DISABLE_SIGNUPS` | Optional | `true` closes public sign-up. The first account becomes the owner; add others with invites. |
+| `DISABLE_SIGNUPS` | Optional | `true` closes public sign-up; add others with invite links. On the bundled stack the key script sets it, and only the setup-link sign-up becomes the owner. With your own Supabase, the first account becomes the owner. |
 | `CORS_ORIGINS` | Optional | Comma-separated allowed origins. Unset allows all. |
 | `NOUS_DEFAULT_TIMEZONE` | Optional | IANA zone, such as `Europe/Berlin`, used to resolve spoken deadlines like "by Friday". Default `UTC`. |
 | `PORT` | Optional | Frontend port when running without Caddy. Default `80`. |

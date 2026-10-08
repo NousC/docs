@@ -10,17 +10,17 @@ description: "Get an OpenNous instance and connect your agent"
     Sign up at [app.opennous.cloud](https://app.opennous.cloud). Nothing to install.
   </Tab>
   <Tab title="Self-host">
-    {/* verify against GET-756 */}
-
-    On a Linux server with Docker:
+    On a Linux server with Docker and Node 18+:
 
     ```bash
     git clone https://github.com/NousC/opennous.git && cd opennous
-    node scripts/selfhost-keys.mjs
-    docker compose -f docker-compose.selfhost.yaml up -d
+    cp nous.env.example nous.env
+    # in nous.env, set APP_DOMAIN, API_DOMAIN, MCP_DOMAIN and ANTHROPIC_API_KEY
+    node scripts/selfhost-keys.mjs nous.env
+    docker compose --env-file nous.env up -d --build
     ```
 
-    Set your domains and `ANTHROPIC_API_KEY` in the env file before you start. The full guide is [Docker Compose](/installation/docker-compose).
+    The key script prints the owner's setup link, `https://app.yourdomain.com/signup?setup=<token>`. Open it and create the first account. The full guide is [Docker Compose](/installation/docker-compose).
   </Tab>
 </Tabs>
 

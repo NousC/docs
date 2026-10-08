@@ -11,15 +11,15 @@ OpenNous Cloud and a self-hosted instance run the same open-source code. Cloud a
 | Price | Paid plan | Free. No metering and no plan limits. |
 | Code | The open-source repo plus a private layer | The open-source repo |
 | Database | Managed | Bundled Postgres, or your own Supabase project |
-| Sign-in | Managed | Supabase Auth. Passwords work without SMTP. Invites, magic links and password resets need SMTP. |
+| Sign-in | Managed (Clerk) | Supabase Auth, bundled or your own. Passwords work without SMTP. Magic links and password resets need SMTP. Teammates join with an invite link. |
 | Extraction | Managed | Runs on your `ANTHROPIC_API_KEY` |
 | ICP scoring | The learned scorer, or [your own](/getting-started/bring-your-own-scorer) | [Your own scorer](/getting-started/bring-your-own-scorer) |
-| Upgrades | Automatic | You [upgrade](/installation/upgrading) and apply migrations |
+| Upgrades | Automatic | `./update.sh` ([upgrading](/installation/upgrading)); the bundled stack applies migrations itself |
 
 ## The same on both
 
 - The graph: identity resolution, observations, entities and claims
-- Accounts, Graph, Activity and the Home page
+- Accounts, People, Graph and Activity
 - Integrations, webhooks and automations
 - API keys, usage and settings
 - The full [REST API](/public-api/introduction) and [MCP server](/mcp/introduction)
@@ -27,11 +27,21 @@ OpenNous Cloud and a self-hosted instance run the same open-source code. Cloud a
 
 ## Cloud only
 
+Cloud runs a private layer on top of the open-source code. In the Cloud codebase it lives in `src/cloud/` folders in the API and the frontend; the open-source repository is that codebase without them. The layer contains:
+
+- The in-app agent: chat, routines, skills and the sandbox
+- Tasks
+- Reports
+- The Insights page. Insights themselves are read and written over [MCP and REST](/getting-started/insights) on both.
+- The Slack connector and agent
+- Managed LinkedIn
+- Billing
+- The learned ICP scorer
+- Clerk sign-in
+
 On a self-hosted instance, endpoints for Cloud-only features return `403 cloud_only_feature`. The list lives in `CLOUD_ONLY_FEATURES` in `apps/api/src/lib/access.mjs`.
 
-{/* verify against GET-754: confirm the Cloud-only list once the cloud carve lands */}
-
-The learned ICP scorer, which trains on your won and lost deals, is Cloud only. A self-hosted workspace scores accounts with its own system and posts the results to [`POST /v2/scores`](/public-api/scores). This is the default on self-host, so there is nothing to switch on.
+The learned ICP scorer trains on your won and lost deals. A self-hosted workspace scores accounts with its own system and posts the results to [`POST /v2/scores`](/public-api/scores). This is the default on self-host, so there is nothing to switch on.
 
 ## Moving between them
 
