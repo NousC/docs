@@ -204,10 +204,6 @@
               "public-api/members/list",
               "public-api/members/invite",
               "public-api/members/remove",
-              "public-api/brain/read",
-              "public-api/brain/search",
-              "public-api/brain/page",
-              "public-api/brain/write",
               "public-api/icp/get",
               "public-api/icp/update",
               "public-api/icp/train",
@@ -310,13 +306,6 @@
             "pages": [
               "mcp/tools/enrich",
               "mcp/tools/score"
-            ]
-          },
-          {
-            "group": "Brain",
-            "pages": [
-              "mcp/tools/read-brain",
-              "mcp/tools/write-brain"
             ]
           },
           {
@@ -590,6 +579,18 @@
     {
       "source": "/mcp/connect/cursor",
       "destination": "/mcp/connect/other"
+    },
+    {
+      "source": "/public-api/brain/:slug*",
+      "destination": "/public-api/introduction"
+    },
+    {
+      "source": "/mcp/tools/read-brain",
+      "destination": "/mcp/introduction"
+    },
+    {
+      "source": "/mcp/tools/write-brain",
+      "destination": "/mcp/introduction"
     }
   ]
 }
