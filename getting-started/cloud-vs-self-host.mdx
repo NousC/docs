@@ -12,7 +12,7 @@ OpenNous Cloud and a self-hosted instance run the same open-source code. Cloud a
 | Code | The open-source repo plus a private layer | The open-source repo |
 | Database | Managed | Bundled Postgres, or your own Supabase project |
 | Sign-in | Managed (Clerk) | Supabase Auth, bundled or your own. Passwords work without SMTP. Magic links and password resets need SMTP. Teammates join with an invite link. |
-| Extraction | Managed | Runs on your `ANTHROPIC_API_KEY` |
+| AI models | Managed | Your own keys: one OpenRouter key runs everything, or Anthropic, or any OpenAI-compatible endpoint ([AI models](/installation/docker-compose#ai-models)) |
 | ICP scoring | The learned scorer, or [your own](/getting-started/bring-your-own-scorer) | [Your own scorer](/getting-started/bring-your-own-scorer) |
 | Upgrades | Automatic | `./update.sh` ([upgrading](/installation/upgrading)); the bundled stack applies migrations itself |
 
@@ -24,6 +24,7 @@ OpenNous Cloud and a self-hosted instance run the same open-source code. Cloud a
 - API keys, usage and settings
 - The full [REST API](/public-api/introduction) and [MCP server](/mcp/introduction)
 - [Insights](/getting-started/insights), over MCP and REST
+- RevBoxes and the Job Builder, which turns a chat into a RevBox job. On self-host it runs on your own model keys.
 
 ## Cloud only
 
@@ -32,6 +33,7 @@ Cloud runs a private layer on top of the open-source code. In the Cloud codebase
 - The in-app agent: chat, routines, skills and the sandbox
 - Tasks
 - Reports
+- Forecasting
 - The Insights page. Insights themselves are read and written over [MCP and REST](/getting-started/insights) on both.
 - The Slack connector and agent
 - Managed LinkedIn

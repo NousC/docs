@@ -15,7 +15,7 @@ description: "Get an OpenNous instance and connect your agent"
     ```bash
     git clone https://github.com/NousC/opennous.git && cd opennous
     cp nous.env.example nous.env
-    # in nous.env, set APP_DOMAIN, API_DOMAIN, MCP_DOMAIN and ANTHROPIC_API_KEY
+    # in nous.env, set APP_DOMAIN, API_DOMAIN, MCP_DOMAIN and OPENROUTER_API_KEY (or ANTHROPIC_API_KEY)
     node scripts/selfhost-keys.mjs nous.env
     docker compose --env-file nous.env up -d --build
     ```

@@ -62,7 +62,13 @@ Optional on the bundled stack:
 
 | Variable | Required | What it does |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Required | Extraction runs on this key. |
+| `OPENROUTER_API_KEY` | One AI key is required | Recommended. Runs every model below, Claude included. |
+| `ANTHROPIC_API_KEY` | Optional | Runs `claude-…` model ids when no OpenRouter key is set. |
+| `LLM_BASE_URL`, `LLM_API_KEY` | Optional | An OpenAI-compatible endpoint (OpenAI, Groq, Together, LiteLLM, a local Ollama) for every model id that is not `claude-…`, instead of OpenRouter. |
+| `EXTRACTION_MODEL` | Optional | Reading calls and email. Default `claude-haiku-4-5-20251001`. |
+| `WRITING_MODEL` | Optional | Summaries and reports. Default `z-ai/glm-5.2`, falling back to the reading model. |
+| `INSIGHT_BOARD_MODEL` | Optional | The Insights board. Default `anthropic/claude-haiku-4.5`. |
+| `JOB_BUILDER_MODEL` | Optional | The RevBox Job Builder. A Claude model; default `claude-sonnet-5`. |
 | `ENCRYPTION_KEY` | Required | 32-byte hex key that encrypts integration tokens at rest. Generate with `openssl rand -hex 32`. Do not change it after setup, or stored tokens cannot be read. |
 | `SELF_HOSTED` | Required | Set to `true`. Turns off billing, plan limits and metering, and blocks Cloud-only features. Never set it on Cloud. |
 | `DISABLE_SIGNUPS` | Optional | `true` closes public sign-up; add others with invite links. On the bundled stack the key script sets it, and only the setup-link sign-up becomes the owner. With your own Supabase, the first account becomes the owner. |

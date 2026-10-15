@@ -14,7 +14,7 @@ There are two ways to run it:
 
 - A Linux server with Docker and Docker Compose v2.24 or newer
 - Node.js 18+ on the server, to generate keys
-- An [Anthropic API key](https://console.anthropic.com). Extraction runs on it.
+- An AI provider key: one [OpenRouter](https://openrouter.ai) key runs every model (recommended), or an [Anthropic](https://console.anthropic.com) key, or any OpenAI-compatible endpoint. See [AI models](#ai-models).
 - Three DNS records pointing at the server: `app`, `api` and `mcp`
 
 ## Option 1: Bundled stack
@@ -42,7 +42,7 @@ git clone https://github.com/NousC/opennous.git && cd opennous
 cp nous.env.example nous.env
 ```
 
-In `nous.env`, set `APP_DOMAIN`, `API_DOMAIN`, `MCP_DOMAIN` and `ANTHROPIC_API_KEY`. Leave the Supabase values as they are; the next step replaces them.
+In `nous.env`, set `APP_DOMAIN`, `API_DOMAIN`, `MCP_DOMAIN` and `OPENROUTER_API_KEY` (or `ANTHROPIC_API_KEY`). Leave the Supabase values as they are; the next step replaces them.
 
 ### 2. Generate keys
 
@@ -113,7 +113,7 @@ SUPABASE_JWT_SECRET=          # recommended: verifies sessions locally
 VITE_SUPABASE_URL=https://yourproject.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 
-ANTHROPIC_API_KEY=sk-ant-...
+OPENROUTER_API_KEY=sk-or-...    # or ANTHROPIC_API_KEY
 ENCRYPTION_KEY=               # openssl rand -hex 32
 SELF_HOSTED=true
 ```
@@ -138,11 +138,29 @@ docker compose --env-file nous.env up -d --build
 
 `--env-file nous.env` is needed: the frontend build and Caddy read their values from it. The first build takes a few minutes.
 
+## AI models
+
+OpenNous runs its AI work on your own keys. Each job has its own model:
+
+| Job | Setting | Default |
+|---|---|---|
+| Reading calls and email | `EXTRACTION_MODEL` | `claude-haiku-4-5-20251001` |
+| Writing summaries and reports | `WRITING_MODEL` | `z-ai/glm-5.2` (falls back to the reading model) |
+| Insights board | `INSIGHT_BOARD_MODEL` | `anthropic/claude-haiku-4.5` |
+| Building RevBox jobs (the Job Builder) | `JOB_BUILDER_MODEL` | `claude-sonnet-5` (a Claude model only) |
+
+- An id that starts with `claude-` runs on OpenRouter when `OPENROUTER_API_KEY` is set, else on `ANTHROPIC_API_KEY`.
+- Any other id runs on OpenRouter, or on the OpenAI-compatible endpoint `LLM_BASE_URL` names, keyed by `LLM_API_KEY`: OpenAI, Groq, Together, Fireworks, LiteLLM, or a local Ollama (`LLM_BASE_URL=http://host.docker.internal:11434/v1`, no key).
+
+So one OpenRouter key runs everything with the defaults as they are. **Settings → Instance setup** shows which model runs each job, whether its key is set, and recommended setups to copy. Change the settings in `nous.env`, then run `docker compose --env-file nous.env up -d`.
+
+A Claude Pro or Max subscription cannot run these jobs: Anthropic allows it only inside its own apps. Your agent in Claude Code does use it, since it talks to OpenNous over MCP.
+
 ## Sign in and invite your team
 
 Sign-in uses Supabase Auth with email and password.
 
-**Bundled stack.** The owner signs up through the setup link (step 4). After that the instance is closed: a login without an invitation gets no account, no workspace and nothing that spends your Anthropic key. To add a teammate, open **Settings → Members → Create invite**. It gives a `npx @opennous/cli join <token> --url https://api.yourdomain.com` command; the teammate runs it, creates a login on the page that opens, approves, and lands in your workspace. The token is the proof. Email invites are a Cloud feature.
+**Bundled stack.** The owner signs up through the setup link (step 4). After that the instance is closed: a login without an invitation gets no account, no workspace and nothing that spends your AI keys. To add a teammate, open **Settings → Members → Create invite**. It gives a `npx @opennous/cli join <token> --url https://api.yourdomain.com` command; the teammate runs it, creates a login on the page that opens, approves, and lands in your workspace. The token is the proof. Email invites are a Cloud feature.
 
 Without SMTP, accounts are confirmed at sign-up and no mail is sent: email and password work, password reset and magic links do not. To send mail, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` and `SMTP_ADMIN_EMAIL` in `nous.env`, set `GOTRUE_MAILER_AUTOCONFIRM=false`, and run `docker compose --env-file nous.env up -d`. Without SMTP an email address proves nothing, so the API never hands anything over because an address matches; only invite tokens count.
 
