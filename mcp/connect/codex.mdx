@@ -1,0 +1,25 @@
+---
+title: "Codex"
+description: "Add OpenNous to the Codex CLI and IDE extension."
+---
+
+```bash
+codex mcp add opennous --url https://mcp.opennous.cloud/mcp
+codex mcp login opennous
+```
+
+The login opens your browser. Sign in to OpenNous and click **Allow**. Run `/mcp` in a session to check it's connected.
+
+## With an API key
+
+Create a key in **Settings → API keys**, export it, and point Codex at it in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.opennous]
+url = "https://mcp.opennous.cloud/mcp"
+bearer_token_env_var = "NOUS_API_KEY"
+```
+
+```bash
+export NOUS_API_KEY=pk_...
+```

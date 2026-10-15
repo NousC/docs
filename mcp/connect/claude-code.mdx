@@ -1,0 +1,19 @@
+---
+title: "Claude Code"
+description: "Add OpenNous to Claude Code with one command."
+---
+
+```bash
+claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp
+```
+
+Run `/mcp`, pick `opennous` and sign in in the browser. Then ask:
+
+> Which deals need me this week?
+
+To use an API key from **Settings → API keys** instead:
+
+```bash
+claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```

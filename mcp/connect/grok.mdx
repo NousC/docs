@@ -1,0 +1,28 @@
+---
+title: "Grok"
+description: "Add OpenNous to Grok as a custom connector."
+---
+
+<Steps>
+  <Step title="Open connectors">
+    Go to [grok.com/connectors](https://grok.com/connectors), click **New connector**, then **Custom**.
+  </Step>
+  <Step title="Paste the URL">
+    Name it `OpenNous` and paste:
+
+    ```
+    https://mcp.opennous.cloud/mcp
+    ```
+  </Step>
+  <Step title="Sign in">
+    Sign in to OpenNous and click **Allow**.
+  </Step>
+</Steps>
+
+Then ask Grok:
+
+> Prep me for the next call with Acme.
+
+Grok sees only what your OpenNous user can see. Revoke it in **Settings → API keys** in OpenNous.
+
+<Note>On Grok Business and Enterprise, a team admin adds the connector first.</Note>

@@ -1,73 +1,41 @@
 ---
 title: "MCP server"
 sidebarTitle: "Introduction"
-description: "The context graph as tools for any MCP client."
+description: "The revenue context graph as tools for any AI."
 ---
 
 The OpenNous MCP server gives an agent the same graph as the [REST API](/public-api/introduction), as thirteen tools.
 
 ## Connect
 
-### Hosted
+Paste `https://mcp.opennous.cloud/mcp` into your AI and sign in. Pick yours:
 
-Streamable HTTP at `https://mcp.opennous.cloud/mcp`. Send a workspace API key from **Settings → API keys** as a Bearer header.
-
-```json
-{
-  "mcpServers": {
-    "opennous": {
-      "url": "https://mcp.opennous.cloud/mcp",
-      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
-    }
-  }
-}
-```
-
-A client that can only take a URL can pass the key as `https://mcp.opennous.cloud/mcp?key=YOUR_API_KEY`. The key can end up in logs, so prefer the header.
-
-### Local (stdio)
-
-Run the `@opennous/mcp` package.
-
-```json
-{
-  "mcpServers": {
-    "opennous": { "command": "npx", "args": ["-y", "@opennous/mcp"] }
-  }
-}
-```
-
-The server reads the key from `NOUS_API_KEY`, or from `~/.nous/config.json`, which `npx @opennous/cli login` writes.
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `NOUS_API_KEY` | none | Workspace API key. Overrides the config file. |
-| `NOUS_CONFIG_DIR` | `~/.nous` | Where to look for `config.json`. |
-| `NOUS_API_URL` | `https://api.opennous.cloud` | API base URL. Set it for a self-hosted instance. |
-
-### Claude Code
-
-The OpenNous plugin bundles this server with the skills that use it.
-
-```
-/plugin marketplace add NousC/revenue-plugin
-/plugin install opennous@opennous
-```
-
-Or add the server alone.
-
-<CodeGroup>
-
-```bash Hosted
-claude mcp add --transport http opennous https://mcp.opennous.cloud/mcp \
-  --header "Authorization: Bearer YOUR_API_KEY"
-```
-
-```bash Local
-claude mcp add opennous -- npx -y @opennous/mcp
-```
-
-</CodeGroup>
+<CardGroup cols={3}>
+  <Card href="/mcp/connect/claude">
+    <img src="/images/logos/claude.svg" alt="" className="h-7 w-7 m-0" noZoom />
+    **Claude**<br />Claude.ai and desktop
+  </Card>
+  <Card href="/mcp/connect/chatgpt">
+    <img src="/images/logos/openai.svg" alt="" className="h-7 w-7 m-0 dark:invert" noZoom />
+    **ChatGPT**<br />Custom connector
+  </Card>
+  <Card href="/mcp/connect/grok">
+    <img src="/images/logos/grok.svg" alt="" className="h-7 w-7 m-0 dark:invert" noZoom />
+    **Grok**<br />Custom connector
+  </Card>
+  <Card href="/mcp/connect/claude-code">
+    <img src="/images/logos/claude-code.svg" alt="" className="h-7 w-7 m-0" noZoom />
+    **Claude Code**<br />Plugin or server
+  </Card>
+  <Card href="/mcp/connect/codex">
+    <img src="/images/logos/codex.svg" alt="" className="h-7 w-7 m-0" noZoom />
+    **Codex**<br />CLI and IDE
+  </Card>
+  <Card href="/mcp/connect/other">
+    <img src="/images/logos/mcp.svg" alt="" className="h-7 w-7 m-0 dark:invert" noZoom />
+    **Any MCP client**<br />n8n, local stdio, your own agent
+  </Card>
+</CardGroup>
 
 ## First call
 
