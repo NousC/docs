@@ -1,0 +1,56 @@
+---
+title: "Cloud vs self-host"
+description: "What runs where, and what differs between OpenNous Cloud and a self-hosted instance"
+---
+
+OpenNous Cloud and a self-hosted instance run the same open-source code. Cloud adds a private layer on top.
+
+|  | Cloud | Self-host |
+|---|---|---|
+| Where it runs | [app.opennous.cloud](https://app.opennous.cloud), run by us | Your server, with [Docker Compose](/installation/docker-compose) |
+| Price | Paid plan | Free. No metering and no plan limits. |
+| Code | The open-source repo plus a private layer | The open-source repo |
+| Database | Managed | Bundled Postgres, or your own Supabase project |
+| Sign-in | Managed (Clerk) | Supabase Auth, bundled or your own. Passwords work without SMTP. Magic links and password resets need SMTP. Teammates join with an invite link. |
+| AI models | Managed | Your own keys: one OpenRouter key runs everything, or Anthropic, or any OpenAI-compatible endpoint ([AI models](/installation/docker-compose#ai-models)) |
+| ICP scoring | The learned scorer, or [your own](/getting-started/bring-your-own-scorer) | [Your own scorer](/getting-started/bring-your-own-scorer) |
+| Upgrades | Automatic | `./update.sh` ([upgrading](/installation/upgrading)); the bundled stack applies migrations itself |
+
+## The same on both
+
+- The graph: identity resolution, observations, entities and claims
+- Accounts, People, Graph and Activity
+- Integrations, webhooks and automations
+- API keys, usage and settings
+- The full [REST API](/public-api/introduction) and [MCP server](/mcp/introduction)
+- [Insights](/getting-started/insights), over MCP and REST
+- RevBoxes and the Job Builder, which turns a chat into a RevBox job. On self-host it runs on your own model keys.
+
+## Cloud only
+
+Cloud runs a private layer on top of the open-source code. In the Cloud codebase it lives in `src/cloud/` folders in the API and the frontend; the open-source repository is that codebase without them. The layer contains:
+
+- The in-app agent: chat, routines, skills and the sandbox
+- Tasks
+- Reports
+- Forecasting
+- The Insights page. Insights themselves are read and written over [MCP and REST](/getting-started/insights) on both.
+- The Slack connector and agent
+- Managed LinkedIn
+- Billing
+- The learned ICP scorer
+- Clerk sign-in
+
+On a self-hosted instance, endpoints for Cloud-only features return `403 cloud_only_feature`. The list lives in `CLOUD_ONLY_FEATURES` in `apps/api/src/lib/access.mjs`.
+
+The learned ICP scorer trains on your won and lost deals. A self-hosted workspace scores accounts with its own system and posts the results to [`POST /v2/scores`](/public-api/scores). This is the default on self-host, so there is nothing to switch on.
+
+## Moving between them
+
+Both use the same API and the same MCP server. To point an agent at a different instance, pass its API URL:
+
+```bash
+npx @opennous/cli@latest login --url https://api.yourdomain.com
+```
+
+Without `--url`, the CLI and MCP server use Cloud at `https://api.opennous.cloud`.
