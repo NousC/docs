@@ -24,14 +24,14 @@ OpenNous Cloud and a self-hosted instance run the same open-source code. Cloud a
 - API keys, usage and settings
 - The full [REST API](/public-api/introduction) and [MCP server](/mcp/introduction)
 - [Insights](/getting-started/insights), over MCP and REST
-- RevBoxes and the Job Builder, which turns a chat into a RevBox job. On self-host it runs on your own model keys.
 
 ## Cloud only
 
 Cloud runs a private layer on top of the open-source code. In the Cloud codebase it lives in `src/cloud/` folders in the API and the frontend; the open-source repository is that codebase without them. The layer contains:
 
 - The in-app agent: chat, routines, skills and the sandbox
-- Tasks
+- Tasks and the Inbox
+- RevBoxes and the Job Builder, which turns a chat into a RevBox job
 - Reports
 - Forecasting
 - The Insights page. Insights themselves are read and written over [MCP and REST](/getting-started/insights) on both.
