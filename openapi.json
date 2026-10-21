@@ -2699,7 +2699,7 @@
         ],
         "operationId": "recordInsights",
         "summary": "Record insights",
-        "description": "Record what a call or email taught you about your own business. Workspace-level, with no account. Near-duplicates of existing insights are skipped.",
+        "description": "Record what a call or email taught you about your own business, tied to the account it was heard from. Near-duplicates of existing insights are skipped.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2707,7 +2707,8 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "insights"
+                  "insights",
+                  "focus"
                 ],
                 "properties": {
                   "insights": {
@@ -2742,9 +2743,21 @@
                         "speaker": {
                           "type": "string",
                           "description": "Who said it."
+                        },
+                        "focus": {
+                          "type": "string",
+                          "description": "This insight's person or account, when it differs from the top-level `focus`."
                         }
                       }
                     }
+                  },
+                  "focus": {
+                    "type": "string",
+                    "description": "Who said it or their account: an email, domain, LinkedIn URL or entity id, never a bare name. A person needs one company on record."
+                  },
+                  "source_ref": {
+                    "type": "string",
+                    "description": "Where it was said, for example the `source_ref` of the call or email."
                   },
                   "source_label": {
                     "type": "string",
@@ -2757,6 +2770,7 @@
                 }
               },
               "example": {
+                "focus": "sarah@acme.com",
                 "insights": [
                   {
                     "category": "product",
@@ -2786,18 +2800,29 @@
                     "submitted": {
                       "type": "integer",
                       "description": "Insights that passed validation."
+                    },
+                    "accounts": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "description": "The company entity ids the insights are tied to."
                     }
                   }
                 },
                 "example": {
                   "written": 1,
-                  "submitted": 1
+                  "submitted": 1,
+                  "accounts": [
+                    "3f6c1a2e-8b1d-4c3e-9f2a-6d5b7e8c9a10"
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "No insights, or none with content of 8 characters or more.",
+            "description": "No insights, none with content of 8 characters or more, no focus, a bare name as focus, or a focus on your own team or company.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2816,6 +2841,29 @@
                       "error": "no_valid_insights",
                       "detail": "each insight needs a category and content (≥8 chars)"
                     }
+                  },
+                  "focus_required": {
+                    "summary": "focus_required",
+                    "value": {
+                      "error": "focus_required",
+                      "detail": "name who said it or the account it is about: an email, domain, LinkedIn URL or entity id, on the request or on each insight"
+                    }
+                  },
+                  "invalid_focus": {
+                    "summary": "invalid_focus",
+                    "value": {
+                      "error": "invalid_focus",
+                      "focus": "Sarah Chen",
+                      "detail": "provide an entity id, email, LinkedIn URL or domain, not a bare name"
+                    }
+                  },
+                  "focus_is_internal": {
+                    "summary": "focus_is_internal",
+                    "value": {
+                      "error": "focus_is_internal",
+                      "focus": "you@yourcompany.com",
+                      "detail": "that is one of our own people or our own company; name the customer or prospect who said it"
+                    }
                   }
                 }
               }
@@ -2829,6 +2877,36 @@
           },
           "403": {
             "$ref": "#/components/responses/ReadOnlyKey"
+          },
+          "404": {
+            "description": "No person or company you can see has that identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "focus_not_found",
+                  "focus": "sarah@acme.com",
+                  "detail": "no person or company in this workspace has that identifier"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The person has no company on record, or more than one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "focus_has_no_account",
+                  "focus": "sarah@gmail.com",
+                  "detail": "that person has no company on record; focus their company (its domain) instead"
+                }
+              }
+            }
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"

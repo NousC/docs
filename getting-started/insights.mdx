@@ -34,6 +34,7 @@ curl -X POST https://api.opennous.cloud/v2/insights \
   -H "Authorization: Bearer $NOUS_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
+    "focus": "dana@acme.com",
     "source_label": "Acme discovery call",
     "occurred_at": "2026-10-01T15:00:00Z",
     "insights": [
@@ -46,6 +47,8 @@ curl -X POST https://api.opennous.cloud/v2/insights \
     ]
   }'
 ```
+
+`focus` is who said it or their account: an email, domain, LinkedIn URL or entity id, never a bare name. It ties the insight to that account, so it counts there and reads return it. A person needs one company on record. Put a `focus` on a single insight when someone else said it. Without a focus, nothing is written.
 
 `category` is one of `product`, `positioning`, `market` or `buyer`. Send every insight from one source in one call. Near-duplicates are skipped, so `written` can be lower than `submitted`. See [Record insights](/public-api/insights/record).
 

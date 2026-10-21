@@ -5,4 +5,6 @@ openapi: "POST /v2/insights"
 
 Records what a call or email taught you about your own business. Send every insight from one source in one call. Facts about the account itself belong in a [note](/public-api/notes).
 
+Every insight needs a `focus`: who said it or their account, as an email, domain, LinkedIn URL or entity id. It ties the insight to that account, so `GET /v2/insights` returns it once the daily sort places it. A person needs one company on record; otherwise focus the company's domain. A per-insight `focus` overrides the top-level one. If any insight can't be tied to an account, nothing is written.
+
 `category` is one of `product`, `positioning`, `market`, or `buyer`. Near-duplicates of existing insights are skipped, so `written` can be lower than `submitted`.
