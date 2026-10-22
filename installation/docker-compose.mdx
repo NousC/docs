@@ -147,7 +147,6 @@ OpenNous runs its AI work on your own keys. Each job has its own model:
 | Reading calls and email | `EXTRACTION_MODEL` | `claude-haiku-4-5-20251001` |
 | Writing summaries and reports | `WRITING_MODEL` | `z-ai/glm-5.2` (falls back to the reading model) |
 | Insights board | `INSIGHT_BOARD_MODEL` | `anthropic/claude-haiku-4.5` |
-| Building RevBox jobs (the Job Builder) | `JOB_BUILDER_MODEL` | `claude-sonnet-5` (a Claude model only) |
 
 - An id that starts with `claude-` runs on OpenRouter when `OPENROUTER_API_KEY` is set, else on `ANTHROPIC_API_KEY`.
 - Any other id runs on OpenRouter, or on the OpenAI-compatible endpoint `LLM_BASE_URL` names, keyed by `LLM_API_KEY`: OpenAI, Groq, Together, Fireworks, LiteLLM, or a local Ollama (`LLM_BASE_URL=http://host.docker.internal:11434/v1`, no key).
